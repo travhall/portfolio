@@ -1,0 +1,81 @@
+html {
+  box-sizing: border-box;
+  background-color: var(--color--bg);
+  color: var(--color--txt);
+  font-family: var(--fontFamily);
+  font-weight: var(--fontWeight--base);
+  line-height: var(--lineHeight--base);
+  scroll-behavior: smooth;
+
+  @media screen and (prefers-color-scheme: light) {
+    background-color: white;
+    color: var(--color--black);
+  }
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+hr {
+  clear: both;
+  display: block;
+  margin: var(--spacer--lg) auto;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+li {
+  padding: var(--spacer--sm) 0;
+  span {
+    color: var(--color--tertiary);
+    font-size: 75%;
+    font-style: italic;
+    font-weight: 100;
+  }
+}
+
+section {
+  margin: 0;
+  padding: var(--spacer--base);
+  position: relative;
+}
+
+svg {
+  transition: all 0.25s ease-in-out;
+}
+
+::selection {
+  background: white;
+  color: var(--color--black);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: white;
+  color: var(--color--black);
+  text-shadow: none;
+}
+
+::-webkit-selection {
+  background: white;
+  color: var(--color--black);
+  text-shadow: none;
+}
