@@ -1,0 +1,25 @@
+.main {
+  // border: var(--spacer--base) solid var(--color--black);
+  box-shadow: 0 0 2rem inset rgba(0, 0, 0, 0.35);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  perspective: 1px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+  z-index: 1000;
+}
+section,
+article {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-behavior: smooth;
+}

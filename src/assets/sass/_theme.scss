@@ -1,5 +1,13 @@
-@import "./theme/utilities";
+// Base Styles
+@import "./theme/grid";
 @import "./theme/typography";
 @import "./theme/icons";
 @import "./theme/buttons";
 @import "./theme/forms";
+
+// Components
+@import "./theme/components/header";
+@import "./theme/components/nav";
+@import "./theme/components/project";
+@import "./theme/components/footer";
+@import "./theme/home";

@@ -1,0 +1,7 @@
+.footer {
+  font-family: var(--fontHeading);
+  font-size: var(--fontSize--sm);
+  padding: var(--spacer--base);
+  scroll-snap-align: end;
+  @include z-index(footer);
+}

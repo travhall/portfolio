@@ -1,7 +1,9 @@
 html {
   box-sizing: border-box;
-  background-color: var(--color--bg);
-  color: var(--color--txt);
+  // background-color: var(--color--bg);
+  // color: var(--color--txt);
+  background-color: white;
+  color: var(--color--black);
   font-family: var(--fontFamily);
   font-weight: var(--fontWeight--base);
   line-height: var(--lineHeight--base);
@@ -52,10 +54,8 @@ li {
   }
 }
 
-section {
-  margin: 0;
-  padding: var(--spacer--base);
-  position: relative;
+img {
+  max-width: 100%;
 }
 
 svg {

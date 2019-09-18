@@ -1,0 +1,142 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: var(--fontHeading);
+  font-weight: var(--fontWeight--base);
+  margin: 0 0 calc(var(--spacer--base));
+}
+
+h1,
+.h1 {
+  font-size: var(--fontSize--h1);
+  line-height: var(--lineHeight--xs);
+}
+
+h2,
+.h2 {
+  font-size: var(--fontSize--h2);
+  line-height: var(--lineHeight--xs);
+}
+
+h3,
+.h3 {
+  font-size: var(--fontSize--h3);
+  line-height: var(--lineHeight--sm);
+}
+
+h4,
+.h4 {
+  font-size: var(--fontSize--h4);
+  line-height: var(--lineHeight--sm);
+}
+
+h5,
+.h5 {
+  font-size: var(--fontSize--h5);
+  line-height: var(--lineHeight--base);
+}
+
+h6,
+.h6 {
+  font-size: var(--fontSize--h6);
+  line-height: var(--lineHeight--base);
+}
+
+.lead {
+  font-size: calc(var(--fontSize--p) * 1.25); // 22px
+  font-weight: var(--fontWeight--light);
+  position: relative;
+  // text-indent: var(--spacer--lg);
+  &::before {
+    background-color: var(--color--secondary);
+    content: "";
+    display: block;
+    position: absolute;
+    height: 2px;
+    left: -1.5rem;
+    width: var(--spacer--base);
+    top: var(--spacer--base);
+  }
+  + p {
+    margin-top: -0.5rem;
+  }
+}
+
+p {
+  font-size: var(--fontSize--p);
+  font-weight: var(--fontWeight--light);
+  line-height: var(--lineHeight--lg);
+  margin: 0 0 calc(var(--spacer--base));
+
+  + button,
+  + input[type="button"],
+  + .btn {
+    margin-top: var(--spacer--sm);
+  }
+}
+
+a {
+  color: var(--color--secondary);
+  font-weight: var(--fontWeight--medium);
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+  transition: all 0.25s ease-in-out;
+
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
+
+blockquote {
+  font-family: var(--fontHeading);
+  font-size: var(--fontSize--lg);
+  line-height: var(--lineHeight--lg);
+  margin: var(--spacer--lg);
+  padding: var(--spacer--lg);
+  position: relative;
+}
+
+cite {
+  display: block;
+  font-family: var(--fontFamily);
+  font-size: var(--fontSize--p);
+  font-style: normal;
+  font-weight: var(--fontWeight--normal);
+  line-height: var(--lineHeight--base);
+  margin: var(--spacer--lg) auto 0;
+  small {
+    color: var(--color--greyLt);
+    display: block;
+    font-weight: var(--fontWeight--medium);
+    margin: calc(var(--spacer--base) * 0.5) auto 0;
+  }
+}
+
+strong {
+  font-weight: var(--fontWeight--heavy);
+}
+
+b,
+.bold {
+  font-weight: var(--fontWeight--bold);
+}
+
+em {
+  color: var(--color--secondary);
+  font-weight: var(--fontWeight--medium);
+}
+
+small {
+  font-size: var(--fontSize--sm);
+}

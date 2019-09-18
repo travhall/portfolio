@@ -1,0 +1,31 @@
+.icon {
+  background-size: contain;
+  display: inline-block;
+  width: var(--spacer--base);
+  height: var(--spacer--base);
+  margin: 2px;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+  vertical-align: text-bottom;
+
+  &.-sm {
+    height: calc(var(--spacer--sm) * 1.25);
+    width: calc(var(--spacer--sm) * 1.25);
+  }
+
+  &.-md {
+    width: calc(var(--spacer--base) * 1.25);
+    height: calc(var(--spacer--base) * 1.25);
+  }
+
+  &.-lg {
+    height: var(--spacer--lg);
+    width: var(--spacer--lg);
+  }
+
+  &.-xl {
+    height: var(--spacer--xl);
+    width: var(--spacer--xl);
+  }
+}

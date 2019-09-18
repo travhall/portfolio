@@ -1,0 +1,46 @@
+%center {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+@mixin center-block($width) {
+  @extend %center;
+  width: $width;
+}
+
+@mixin full-height {
+  max-width: 100%;
+  min-height: 100vh;
+}
+
+@mixin hide {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
+
+$z-index: (
+  modal: 2000,
+  header: 1500,
+  navigation: 500,
+  logo: 300,
+  content: 250,
+  project: 200,
+  footer: 100,
+  hero: 0,
+  background: -1
+);
+
+@function z-index($key) {
+  @return map-get($z-index, $key);
+}
+
+@mixin z-index($key) {
+  z-index: z-index($key);
+}
