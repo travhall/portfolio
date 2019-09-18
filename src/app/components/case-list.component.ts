@@ -5,7 +5,6 @@ import { PortfolioService } from '../portfolio.service';
   selector: 'app-case-list',
   template: `
     <section *ngFor="let case of cases; let i = index" class="project">
-      <div>{{i}}</div>
       <div>{{case.title}}</div>
       <div>{{case.role}}</div>
       <div>{{case.client}}</div>

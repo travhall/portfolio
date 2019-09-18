@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 // import { HomeComponent } from './views/home.component';
 import { CaseListComponent } from './components/case-list.component';
-import { CaseComponent } from './components/case.component';
+import { CaseDetailComponent } from './components/case-detail.component';
 import { NotFoundComponent } from './components/not-found.component';
 
 const routes: Routes = [
@@ -16,7 +16,7 @@ const routes: Routes = [
   },
   {
     path: 'case/:id',
-    component: CaseComponent,
+    component: CaseDetailComponent,
     data: {
       state: 'Case'
     }
@@ -44,6 +44,6 @@ export class AppRoutingModule { }
 
 export const RoutingComponents = [
   CaseListComponent,
-  CaseComponent,
+  CaseDetailComponent,
   NotFoundComponent
 ];

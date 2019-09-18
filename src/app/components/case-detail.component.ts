@@ -14,7 +14,7 @@ import { ActivatedRoute } from '@angular/router';
   `,
   styles: []
 })
-export class CaseComponent implements OnInit {
+export class CaseDetailComponent implements OnInit {
 
   public cases = [];
   case: any;
