@@ -55,7 +55,6 @@ h6,
   font-size: calc(var(--fontSize--p) * 1.25); // 22px
   font-weight: var(--fontWeight--light);
   position: relative;
-  // text-indent: var(--spacer--lg);
   &::before {
     background-color: var(--color--secondary);
     content: "";

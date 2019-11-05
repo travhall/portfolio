@@ -1,7 +1,21 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { AfterViewInit, Component, HostBinding, ViewChild, ElementRef } from '@angular/core';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger
+} from '@angular/animations';
+import { AfterViewInit, Component, HostBinding } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { distinctUntilChanged, filter, map, pairwise, share, throttleTime } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  pairwise,
+  share,
+  throttleTime
+} from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 enum VisibilityState {
   Visible = 'visible',
@@ -16,20 +30,19 @@ enum Direction {
 @Component({
   selector: 'app-header',
   template: `
-  <header class="header">
-    <a class="logo"title="iamtravishall.com - Travis Hall UX, UI &amp; Visual Design Professional - Denver | Minneapolis">
-      <svg #toTarget>
-        <use xlink:href="assets/icons/def.svg#icon-Logo-Crest"></use>
-      </svg>
-    </a>
-  </header>
+    <header class="header">
+      <a (click)="goHome()" class="logo" [ngClass]="isVisible ? '' : 'shrink'">
+        <svg>
+          <use xlink:href="assets/icons/def.svg#icon-Logo-Crest"></use>
+        </svg>
+      </a>
+    </header>
   `,
   styles: [
     `
       :host {
         height: 0;
         position: fixed;
-        pointer-events: none;
         top: 0;
         width: 100%;
         z-index: 5000;
@@ -51,8 +64,7 @@ enum Direction {
   ]
 })
 export class HeaderComponent implements AfterViewInit {
-  private isVisible = true;
-  // @ViewChild('toTarget', { static: false }) toTarget: ElementRef;
+  public isVisible = true;
 
   @HostBinding('@toggle')
   get toggle(): VisibilityState {
@@ -81,4 +93,9 @@ export class HeaderComponent implements AfterViewInit {
     goingDown$.subscribe(() => (this.isVisible = false));
   }
 
+  constructor(private router: Router) { }
+
+  goHome() {
+    this.router.navigate(['/']);
+  }
 }

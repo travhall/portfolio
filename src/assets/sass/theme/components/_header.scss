@@ -9,6 +9,9 @@
     margin: var(--spacer--xl) auto 0;
     height: 83px;
     width: 100px;
+    &.shrink {
+      height: 60px;
+    }
     @include breakpoint("small") {
       display: inline-block;
       margin: var(--spacer--lg);
@@ -16,11 +19,12 @@
     svg {
       filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.25));
       fill: white;
-      height: 83px;
-      width: 100px;
+      height: 100%;
+      width: 100%;
       &:hover {
-        transform-style: preserve-3d;
-        transform: perspective(15em) rotateX(-4deg) translateZ(3em);
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+        fill: #cacaca;
+        transform: scale(1.05);
       }
     }
   }

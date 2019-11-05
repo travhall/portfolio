@@ -1,17 +1,14 @@
 html {
   box-sizing: border-box;
-  // background-color: var(--color--bg);
-  // color: var(--color--txt);
-  background-color: white;
-  color: var(--color--black);
+  background-color: var(--color--bg);
+  color: var(--color--txt);
   font-family: var(--fontFamily);
   font-weight: var(--fontWeight--base);
   line-height: var(--lineHeight--base);
-  scroll-behavior: smooth;
 
   @media screen and (prefers-color-scheme: light) {
-    background-color: white;
-    color: var(--color--black);
+    background-color: var(--color--bg--alt);
+    color: var(--color--txt--alt);
   }
 }
 
@@ -26,6 +23,9 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+  position: relative;
+  scroll-behavior: smooth;
+  transform: translateZ(0);
 }
 
 hr {
@@ -36,12 +36,16 @@ hr {
 
 ul,
 ol {
-  margin: 0;
+  margin: 0 0 var(--spacer--base);
   padding: 0;
 }
 
 ul {
   list-style: none;
+}
+
+ol {
+  padding: 0 0 0 var(--spacer--base);
 }
 
 li {
@@ -54,12 +58,74 @@ li {
   }
 }
 
+table {
+  border-collapse: collapse;
+  margin: 0 0 var(--spacer--base);
+  overflow-x: auto;
+  text-align: left;
+  width: 100%;
+  thead {
+    border-bottom: 3px solid var(--color--primary);
+    font-weight: var(--fontWeight--light);
+  }
+  tbody {
+    border-bottom: 1px solid var(--color--tertiary);
+  }
+  tfoot {
+    border-top: 1px solid var(--color--tertiary);
+  }
+  th {
+    font-weight: var(--fontWeight--medium);
+    padding: var(--spacer--base) var(--spacer--base) var(--spacer--base)
+      var(--spacer--sm);
+  }
+  td {
+    font-weight: var(--fontWeight--light);
+    padding: var(--spacer--base) var(--spacer--base) var(--spacer--base)
+      var(--spacer--sm);
+  }
+  &.striped {
+    tr:nth-child(even) {
+      background-color: var(--color--grey);
+    }
+  }
+  &.clickable {
+    tr:hover {
+      background-color: var(--color--greyLt);
+      color: var(--color--black);
+      cursor: pointer;
+    }
+    thead tr:hover,
+    tfoot tr:hover {
+      background: none;
+      color: inherit;
+      cursor: default;
+    }
+  }
+}
+
 img {
   max-width: 100%;
 }
 
 svg {
-  transition: all 0.25s ease-in-out;
+  transition: all 0.3s ease-in-out 0s;
+}
+
+.main {
+  z-index: 1000;
+}
+
+section,
+article {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  width: 100%;
+}
+
+:focus {
+  outline-color: var(--color--primary);
 }
 
 ::selection {

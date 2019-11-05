@@ -5,7 +5,7 @@ $breakpoints: (
 'medium': (min-width: 48.75rem),          // 780px - Small tablets  < 768px
 'large': (min-width: 65rem),              // 1040px - Tablets and small desktops  < 1024px
 'xlarge': (min-width: 74.75rem),          // 1196px - Large tablets and desktops  < 1200px
-'whoa': (min-width: 99.75rem),            // 1596px - Whoa dude that's a pretty big screen  < 1600px
+'whoa': (min-width: 95rem),               // 1520px - Whoa dude that's a pretty big screen  < 1520px
 'landscape': (orientation: landscape),    // Landscape mode
 'portrait': (orientation: portrait),      // Portrait mode
 'tootall': (min-height: 64.25rem),        // Too Tall 100vh

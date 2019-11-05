@@ -8,7 +8,7 @@
   --color--tertiary: #999779;
 
   --color--black: #111;
-  --color--greyDk: #252525;
+  --color--greyDk: #1b1b1b;
   --color--grey: #5a5d60;
   --color--greyLt: #f0f0f0;
 
@@ -16,8 +16,11 @@
   --color--warning: #efe705;
   --color--error: #c84242;
 
-  --color--bg: var(--color--black);
+  --color--bg: var(--color--greyDk);
   --color--txt: white;
+
+  --color--bg--alt: white;
+  --color--txt--alt: var(--color--black);
 
   // Typography
   --fontFamily: "Inter", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",

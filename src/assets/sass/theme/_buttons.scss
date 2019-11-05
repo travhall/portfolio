@@ -1,0 +1,63 @@
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+.btn {
+  @include button(var(--color--primary));
+  @include text-shadow;
+  &.-secondary {
+    --color--primary: var(--color--secondary);
+  }
+  &.-tertiary {
+    --color--primary: var(--color--tertiary);
+  }
+  &.-white {
+    --color--primary: white;
+  }
+  &.-ghost {
+    --color--primary: white;
+    border-color: white;
+    padding: var(--spacer--base);
+    &::after {
+      height: 100%;
+    }
+    &:hover {
+      color: var(--color--black);
+    }
+  }
+  &.-success {
+    --color--primary: var(--color--success);
+    .icon {
+      fill: var(--color--success);
+    }
+  }
+  &.-warning {
+    --color--primary: var(--color--warning);
+    .icon {
+      fill: var(--color--warning);
+    }
+  }
+  &.-error {
+    --color--primary: var(--color--error);
+    .icon {
+      fill: var(--color--error);
+    }
+  }
+  &.-block {
+    display: block;
+    margin: var(--spacer--sm) auto;
+    width: 100%;
+    @include breakpoint("medium") {
+      display: inline-block;
+      margin: var(--spacer--sm) var(--spacer--sm) var(--spacer--sm) 0;
+      width: auto;
+    }
+  }
+  &:disabled,
+  &.isDisabled {
+    cursor: default;
+    opacity: 0.5;
+    pointer-events: none;
+    transform: none;
+  }
+}

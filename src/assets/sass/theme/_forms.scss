@@ -1,0 +1,158 @@
+label {
+  font-size: var(--fontSize--sm);
+  padding: 0;
+  position: absolute;
+  top: calc(50% - calc(var(--fontSize--sm) * 0.5));
+  left: 0;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+select,
+input,
+textarea {
+  appearance: none;
+  background: transparent;
+  border: transparent;
+  border-bottom: 1px solid var(--color--grey);
+  color: white;
+  font-family: var(--fontFamily);
+  font-size: var(--fontSize--base);
+  font-weight: var(--fontWeight--light);
+  line-height: 1;
+  padding: var(--spacer--base) 0;
+  position: relative;
+  transition: all 0.3s linear;
+  vertical-align: middle;
+  white-space: normal;
+  width: 100%;
+}
+
+select[multiple] {
+  vertical-align: top;
+}
+
+textarea {
+  vertical-align: top;
+  overflow: auto;
+}
+
+/* Text Inputs
+-----------------------------------------------*/
+// input[type="date"],
+// input[type="datetime"],
+// input[type="datetime-local"],
+// input[type="email"],
+// input[type="month"],
+// input[type="number"],
+// input[type="password"],
+// input[type="range"],
+// input[type="search"],
+// input[type="tel"],
+// input[type="text"],
+// input[type="time"],
+// input[type="url"],
+// input[type="week"] {
+// }
+
+/* File Uploads
+-----------------------------------------------*/
+// input[type="file"] {
+// }
+
+/* Search Input
+-----------------------------------------------*/
+input[type="search"] {
+  -webkit-appearance: textfield;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+/* Turn off the recent search for webkit. It adds about 15px padding on the left */
+::-webkit-search-decoration {
+  display: none;
+}
+
+/* IE8 and FF freak out if this rule is within another selector */
+::-webkit-file-upload-button {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+// Theme
+.form {
+  .row {
+    margin: 0 0 var(--spacer--xl);
+    position: relative;
+    &:last-child {
+      display: grid;
+      margin: 0;
+    }
+  }
+  .field,
+  .textarea {
+    &:focus {
+      background: transparent;
+      border-bottom: solid 1px white;
+      color: white;
+      outline: 0;
+      box-shadow: 0 2px 6px -8px rgba(white, 0.45);
+    }
+    &::placeholder {
+      color: white;
+      color: rgba(white, 0.8);
+      font-style: italic;
+    }
+  }
+  .field {
+    &:not(:placeholder-shown) + label {
+      transform: translateY(-30px);
+      opacity: 0.7;
+    }
+  }
+  .textarea {
+    height: calc(var(--spacer--base) * 5.5);
+    resize: none;
+    &:not(:placeholder-shown) + label {
+      transform: translateY(-60px);
+      opacity: 0.7;
+    }
+  }
+  .help {
+    color: var(--color--error);
+    font-size: var(--fontSize--sm);
+    margin: var(--base--sm) 0;
+    padding: 4px 0 0;
+    position: absolute;
+  }
+  .btn {
+    margin: 0;
+    @include breakpoint("medium") {
+      justify-self: end;
+      min-width: 200px;
+    }
+  }
+}
+
+@keyframes autofill {
+  to {
+    color: #fff;
+    background: transparent;
+  }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  animation-name: autofill;
+  animation-fill-mode: both;
+  font-size: var(--fontSize--base);
+}

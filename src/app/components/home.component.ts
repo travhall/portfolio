@@ -13,17 +13,16 @@ import { Component, OnInit } from '@angular/core';
           guessing you're not here to read a bunch of industry jargon, are you?
         </p>
       </div>
-      <a href="mailto:hello@iamtravishall.com" class="link" title="Email me at hello@iamtravishall.com">hello@iamtravishall.com</a>
-      <a href="" class="link scroll" title="">
+      <button (click)="scroll('case-studies')" class="btn">
         Case Studies
-        <svg class="icon -lg">
+        <svg class="icon -down">
           <use xlink:href="assets/icons/def.svg#icon-arrow-down"></use>
         </svg>
-      </a>
+      </button>
       <div class="hero__image"></div>
     </section>
-    <app-case-list></app-case-list>
-    <section class="about">
+    <app-case-list id="case-studies"></app-case-list>
+    <!--<section id="about" class="about">
       <div class="about__content">
         <h2 class="title">Hello again!</h2>
         <p class="lead">
@@ -42,14 +41,21 @@ import { Component, OnInit } from '@angular/core';
         </p>
       </div>
       <div class="about__image"></div>
-    </section>
-  `
+    </section>-->
+  `,
+  styles: []
 })
 export class HomeComponent implements OnInit {
 
   constructor() { }
 
   ngOnInit() {
+  }
+
+  scroll(id) {
+    console.log(`scrolling to ${id}`);
+    const el = document.getElementById(id);
+    el.scrollIntoView();
   }
 
 }

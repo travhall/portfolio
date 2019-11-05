@@ -1,17 +1,41 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { PortfolioService } from '../portfolio.service';
 
 @Component({
   selector: 'app-case-list',
   template: `
-    <section *ngFor="let case of cases; let i = index" class="project">
-      <div>{{case.title}}</div>
-      <div>{{case.role}}</div>
-      <div>{{case.client}}</div>
-      <div>{{case.date}}</div>
+    <section
+      *ngFor="let case of cases; let i = index"
+      class="project__card"
+      >
+      <div class="project__details">
+        <h2 class="project__title">{{case.title}}</h2>
+        <ul>
+          <li class="project__role">{{case.role}}</li>
+          <li class="project__type">{{case.type}}</li>
+          <li class="project__client">{{case.client}}</li>
+          <li class="project__date">{{case.date}}</li>
+        </ul>
+      </div>
       <button
-      [routerLink]="['/case', case.id]"
-      >Link</button>
+        class="btn -secondary"
+        [routerLink]="['/case', case.id]"
+        >
+        Read Case Study
+        <svg class="icon -right">
+          <use xlink:href="assets/icons/def.svg#icon-arrow-right"></use>
+        </svg>
+      </button>
+      <div
+        class="project__image"
+        [ngStyle]="{
+          'background-image': 'url(' + case.featureImage + '), linear-gradient(125deg, #164b49, #367067)',
+          'background-blend-mode': 'multiply',
+          'background-size': 'auto 100%',
+          'background-attachment': 'fixed'
+        }"
+        ></div>
     </section>
   `,
   styles: []
@@ -20,10 +44,9 @@ export class CaseListComponent implements OnInit {
 
   public cases = [];
 
-  constructor(private CaseService: PortfolioService) { }
+  constructor(private CaseService: PortfolioService, private router: Router) { }
 
   ngOnInit() {
     this.cases = this.CaseService.getCase();
   }
-
 }

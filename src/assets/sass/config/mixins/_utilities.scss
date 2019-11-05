@@ -1,19 +1,21 @@
+// Center block
 %center {
   margin-left: auto;
   margin-right: auto;
   display: block;
 }
-
 @mixin center-block($width) {
   @extend %center;
   width: $width;
 }
 
+// Full window height
 @mixin full-height {
   max-width: 100%;
   min-height: 100vh;
 }
 
+// Hide text
 @mixin hide {
   position: absolute;
   overflow: hidden;
@@ -25,6 +27,19 @@
   border: 0;
 }
 
+// Box shadow
+@mixin box-shadow {
+  // box-shadow: 0 0 2rem rgba(0, 0, 0, 0.35), 0 0 2rem rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), 0 2px 2px rgba(0, 0, 0, 0.12),
+    0 4px 4px rgba(0, 0, 0, 0.16), 0 8px 8px rgba(0, 0, 0, 0.2);
+}
+
+// Text shadow
+@mixin text-shadow {
+  text-shadow: 4px 3px 0px #111, 9px 8px 0px rgba(0, 0, 0, 0.1);
+}
+
+// z-index
 $z-index: (
   modal: 2000,
   header: 1500,

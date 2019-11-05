@@ -9,16 +9,19 @@ import { environment } from '../environments/environment';
 import { PortfolioService } from './portfolio.service';
 
 // Components
-// import { HeaderComponent } from './components/header.component';
+import { HeaderComponent } from './components/header.component';
 import { NavComponent } from './components/nav.component';
+import { CaseListComponent } from './components/case-list.component';
 import { FooterComponent } from './components/footer.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    // HeaderComponent,
+    HeaderComponent,
     NavComponent,
     FooterComponent,
+    CaseListComponent,
     RoutingComponents
   ],
   imports: [

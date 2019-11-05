@@ -1,15 +1,14 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-// import { HomeComponent } from './views/home.component';
-import { CaseListComponent } from './components/case-list.component';
+import { HomeComponent } from './components/home.component';
 import { CaseDetailComponent } from './components/case-detail.component';
 import { NotFoundComponent } from './components/not-found.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: CaseListComponent,
+    component: HomeComponent,
     data: {
       state: 'Home'
     }
@@ -18,7 +17,7 @@ const routes: Routes = [
     path: 'case/:id',
     component: CaseDetailComponent,
     data: {
-      state: 'Case'
+      state: 'Case Study'
     }
   },
   {
@@ -34,8 +33,8 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(
     routes,
     {
-      scrollPositionRestoration: 'top',
-      enableTracing: true
+      scrollPositionRestoration: 'enabled',
+      // enableTracing: true
     }
   )],
   exports: [RouterModule]
@@ -43,7 +42,7 @@ const routes: Routes = [
 export class AppRoutingModule { }
 
 export const RoutingComponents = [
-  CaseListComponent,
+  HomeComponent,
   CaseDetailComponent,
   NotFoundComponent
 ];
