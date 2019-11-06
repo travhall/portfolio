@@ -19,7 +19,7 @@ import { Component, OnInit } from '@angular/core';
           <use xlink:href="assets/icons/def.svg#icon-arrow-down"></use>
         </svg>
       </button>
-      <div class="hero__image"></div>
+      <!--<div class="hero__image"></div>-->
     </section>
     <app-case-list id="case-studies"></app-case-list>
     <!--<section id="about" class="about">

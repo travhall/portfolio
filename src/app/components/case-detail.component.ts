@@ -6,11 +6,10 @@ import { ActivatedRoute, Router, ParamMap } from '@angular/router';
   selector: 'app-case',
   template: `
     <article class="project__page">
-      <h2>Case ID {{caseId}}</h2>
-      <!--<div>{{caseInfo.title}}</div>
+      <h2>{{caseInfo.title}}</h2>
       <div>{{caseInfo.role}}</div>
       <div>{{caseInfo.client}}</div>
-      <div>{{caseInfo.date}}</div>-->
+      <div>{{caseInfo.date}}</div>
       <a (click)="goPrev()">Prev</a>
       <a (click)="goNext()">Next</a>
     </article>
@@ -20,7 +19,7 @@ import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 export class CaseDetailComponent implements OnInit {
 
   public cases = [];
-  // public caseInfo;
+  public caseInfo;
   public caseId;
 
   constructor(
@@ -31,27 +30,21 @@ export class CaseDetailComponent implements OnInit {
   ngOnInit() {
     this.cases = this.CaseService.getCase();
 
-    console.log(this.cases);
-
-    // const info = this.cases.find(x => x.id === this.route.snapshot.paramMap.get('id'));
-    // this.caseInfo = info;
-    // const info = parseInt(this.route.snapshot.paramMap.get('id'), 0);
-    // this.caseInfo = info;
-
     this.route.paramMap.subscribe((params: ParamMap) => {
       const id = parseInt(params.get('id'), 0);
+      const info = this.cases.find(x => x.id === id);
+      this.caseInfo = info;
       this.caseId = id;
-      console.log(this.caseId);
     });
 
   }
 
   goPrev() {
-    const prevId = this.caseId - 1;
+    const prevId = this.caseId > 1 ? this.caseId - 1 : this.caseId;
     this.router.navigate(['case', prevId]);
   }
   goNext() {
-    const nextId = this.caseId + 1;
+    const nextId = this.caseId === this.cases.length ? this.caseId : this.caseId + 1;
     this.router.navigate(['case', nextId]);
   }
 
