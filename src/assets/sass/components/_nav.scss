@@ -1,0 +1,22 @@
+.nav {
+  position: fixed;
+  bottom: 0;
+  @include breakpoint("medium") {
+    top: var(--spacer--lg);
+    right: var(--spacer--lg);
+    bottom: auto;
+  }
+
+  &__item {
+    display: inline-block;
+    font-family: var(--fontHeading);
+    a {
+      color: white;
+      font-size: 1.25rem;
+      padding: var(--spacer--base) var(--spacer--lg);
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+}

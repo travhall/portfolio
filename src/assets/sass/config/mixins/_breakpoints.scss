@@ -1,6 +1,6 @@
 // BREAKPOINTS : @include breakpoint("medium") {…}
 $breakpoints: (
-'xsmall': (min-width: 19.75rem),          // 316px - Tiny phones  < 320px
+'xsmall': (min-width: 21.25rem),          // 340px - Tiny phones  < 339px
 'small': (min-width: 37.25rem),           // 596px - Small tablets and large smartphones  < 600px
 'medium': (min-width: 48.75rem),          // 780px - Small tablets  < 768px
 'large': (min-width: 65rem),              // 1040px - Tablets and small desktops  < 1024px

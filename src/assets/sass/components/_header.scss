@@ -1,20 +1,20 @@
 .header {
-  height: 0;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  @include z-index(header);
   .logo {
     display: block;
     margin: var(--spacer--xl) auto 0;
-    height: 83px;
+    height: 80px;
     width: 100px;
     &.shrink {
       height: 60px;
+      width: 80px;
     }
     @include breakpoint("small") {
       display: inline-block;
       margin: var(--spacer--lg);
+    }
+    @include breakpoint("medium") {
+      height: 60px;
+      width: 80px;
     }
     svg {
       filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.25));

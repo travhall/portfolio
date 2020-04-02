@@ -1,15 +1,4 @@
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.h1,
-.h2,
-.h3,
-.h4,
-.h5,
-.h6 {
+%heading {
   font-family: var(--fontHeading);
   font-weight: var(--fontWeight--base);
   margin: 0 0 calc(var(--spacer--base));
@@ -17,36 +6,42 @@ h6,
 
 h1,
 .h1 {
+  @extend %heading;
   font-size: var(--fontSize--h1);
   line-height: var(--lineHeight--xs);
 }
 
 h2,
 .h2 {
+  @extend %heading;
   font-size: var(--fontSize--h2);
   line-height: var(--lineHeight--xs);
 }
 
 h3,
 .h3 {
+  @extend %heading;
   font-size: var(--fontSize--h3);
   line-height: var(--lineHeight--sm);
 }
 
 h4,
 .h4 {
+  @extend %heading;
   font-size: var(--fontSize--h4);
   line-height: var(--lineHeight--sm);
 }
 
 h5,
 .h5 {
+  @extend %heading;
   font-size: var(--fontSize--h5);
   line-height: var(--lineHeight--base);
 }
 
 h6,
 .h6 {
+  @extend %heading;
   font-size: var(--fontSize--h6);
   line-height: var(--lineHeight--base);
 }
@@ -138,4 +133,12 @@ em {
 
 small {
   font-size: var(--fontSize--sm);
+}
+
+figure,
+figcaption,
+blockquote,
+dl,
+dd {
+  margin: 0;
 }

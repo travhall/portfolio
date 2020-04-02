@@ -4,22 +4,20 @@ import { Component, OnInit } from '@angular/core';
   selector: 'app-home',
   template: `
     <section class="hero">
-      <div class="hero__content">
-        <h2>Hello, I'm Travis</h2>
-        <h3 class="h4 subtitle">and I enjoy making things for the web.</h3>
-        <p>
-          In other words,
-          <em>I specialize in crafting digital experiences that transform challenges into opportunities</em>. But I'm
-          guessing you're not here to read a bunch of industry jargon, are you?
-        </p>
-      </div>
+      <h2 class="title">Hello, <span>I'm Travis</span></h2>
+      <h3 class="h4 subtitle">&hellip; and I enjoy making things for the web.</h3>
+      <p class="body">
+        In other words,
+        <em>I specialize in crafting digital experiences that transform challenges into opportunities</em>. But I'm
+        guessing you're not here to read a bunch of industry jargon, are you?
+      </p>
       <button (click)="scroll('case-studies')" class="btn">
         Case Studies
         <svg class="icon -down">
           <use xlink:href="assets/icons/def.svg#icon-arrow-down"></use>
         </svg>
       </button>
-      <!--<div class="hero__image"></div>-->
+      <div class="hero__image"></div>
     </section>
     <app-case-list id="case-studies"></app-case-list>
     <!--<section id="about" class="about">

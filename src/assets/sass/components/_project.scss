@@ -1,0 +1,121 @@
+.project {
+  &__title {
+    color: var(--color--greyLt);
+    font-size: var(--fontSize--h3);
+    margin: 0;
+  }
+  &__role {
+    font-weight: var(--fontWeight--hairline);
+  }
+  &__details {
+    li {
+      margin: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  &__card {
+    align-items: start;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: 1fr auto auto 1fr;
+    position: relative;
+    @include full-height;
+    @include z-index(project);
+
+    @include breakpoint("medium") {
+      grid-template-rows: 1fr 1fr auto auto 1fr 1fr;
+    }
+
+    .project__details {
+      grid-column: 2/8;
+      grid-row: 2/3;
+      @include z-index(content);
+      @include breakpoint("medium") {
+        grid-row: 3/4;
+      }
+    }
+
+    .btn {
+      grid-column: 2/8;
+      grid-row: 4/5;
+      justify-self: start;
+      @include z-index(content);
+      &:hover {
+        ~ .project__image {
+          filter: blur(0);
+          @include box-shadow();
+        }
+      }
+    }
+
+    .project__image {
+      background-attachment: fixed;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-blend-mode: multiply;
+      // filter: blur(5px);
+      grid-column: 1/9;
+      grid-row: 1/6;
+      height: 100%;
+      margin: var(--spacer--base);
+      opacity: 0.8;
+      // transform: skewY(-3.5deg);
+      z-index: 1;
+      @include button-anim();
+      @include breakpoint("medium") {
+        grid-row: 2/6;
+        margin: 0;
+      }
+    }
+
+    &:nth-child(odd) {
+      @include breakpoint("medium") {
+        .project__details {
+          grid-column: 4/8;
+          text-align: right;
+        }
+        .btn {
+          justify-self: end;
+        }
+        .project__image {
+          grid-column: 1/7;
+        }
+      }
+      @include breakpoint("large") {
+        .project__details {
+          grid-column: 4/7;
+        }
+        .project__image {
+          grid-column: 1/6;
+        }
+      }
+    }
+
+    &:nth-child(even) {
+      @include breakpoint("medium") {
+        .project__details {
+          grid-column: 2/6;
+        }
+        .project__image {
+          grid-column: 3/9;
+        }
+      }
+      @include breakpoint("large") {
+        .project__details {
+          grid-column: 3/6;
+        }
+        .project__image {
+          grid-column: 4/9;
+        }
+      }
+    }
+  }
+
+  &__page {
+    min-height: 100vh;
+    padding: calc(var(--spacer--xl) * 4) var(--spacer--xl);
+    @include full-height;
+    @include z-index(content);
+  }
+}

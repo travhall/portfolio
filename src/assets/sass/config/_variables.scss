@@ -16,7 +16,7 @@
   --color--warning: #efe705;
   --color--error: #c84242;
 
-  --color--bg: var(--color--greyDk);
+  --color--bg: var(--color--black);
   --color--txt: white;
 
   --color--bg--alt: white;
@@ -26,6 +26,7 @@
   --fontFamily: "Inter", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", sans-serif;
+  // --fontFamily: system-ui, -apple-system;
   --fontHeading: "Antic Didone", serif;
 
   // Line Height
@@ -68,6 +69,12 @@
   --spacer--lg: calc(var(--baseline--unit) * 2);
   --spacer--xl: calc(var(--baseline--unit) * 3);
 }
+
+// @media (min-width: 25rem) {
+//   :root {
+//     --baseline--unit: 1rem;
+//   }
+// }
 
 @media (min-width: 62rem) {
   :root {

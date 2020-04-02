@@ -36,7 +36,8 @@
 
 // Text shadow
 @mixin text-shadow {
-  text-shadow: 4px 3px 0px #111, 9px 8px 0px rgba(0, 0, 0, 0.1);
+  // text-shadow: 4px 3px 0px #111, 9px 8px 0px rgba(0, 0, 0, 0.1);
+  text-shadow: 2px 3px 0px #111;
 }
 
 // z-index
@@ -51,11 +52,9 @@ $z-index: (
   hero: 0,
   background: -1
 );
-
 @function z-index($key) {
   @return map-get($z-index, $key);
 }
-
 @mixin z-index($key) {
   z-index: z-index($key);
 }

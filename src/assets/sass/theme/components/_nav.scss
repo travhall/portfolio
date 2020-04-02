@@ -1,9 +1,0 @@
-.nav {
-  position: fixed;
-  bottom: 0;
-  @include breakpoint("medium") {
-    top: 0;
-    right: 0;
-    bottom: auto;
-  }
-}

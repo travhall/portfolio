@@ -36,16 +36,23 @@ enum Direction {
           <use xlink:href="assets/icons/def.svg#icon-Logo-Crest"></use>
         </svg>
       </a>
+      <app-nav></app-nav>
     </header>
-  `,
+  `
+  ,
   styles: [
     `
       :host {
         height: 0;
-        position: fixed;
+        position: absolute;
         top: 0;
         width: 100%;
         z-index: 5000;
+      }
+      @media(min-width: 36em) {
+        :host {
+          position: fixed;
+        }
       }
     `
   ],
@@ -53,11 +60,11 @@ enum Direction {
     trigger('toggle', [
       state(
         VisibilityState.Hidden,
-        style({ opacity: 0.5, transform: 'translateY(-100%)' })
+        style({ opacity: 0.5, transform: 'translateY(-100%)', top: '-6rem' })
       ),
       state(
         VisibilityState.Visible,
-        style({ opacity: 1, transform: 'translateY(0)' })
+        style({ opacity: 1, transform: 'translateY(0)', top: '0' })
       ),
       transition('* => *', animate('200ms ease-in'))
     ])
