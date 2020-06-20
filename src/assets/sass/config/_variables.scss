@@ -1,4 +1,4 @@
-@import url("https://rsms.me/inter/inter.css");
+// @import url("https://rsms.me/inter/inter.css");
 :root {
   --baseline--unit: 1rem;
 
@@ -23,18 +23,20 @@
   --color--txt--alt: var(--color--black);
 
   // Typography
-  --fontFamily: "Inter", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", sans-serif;
+  // --fontFamily: "Inter", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  //   Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+  //   "Segoe UI Symbol", sans-serif;
   // --fontFamily: system-ui, -apple-system;
-  --fontHeading: "Antic Didone", serif;
+  // --fontHeading: "Antic Didone", serif;
+  --fontHeading: "Poppins", serif;
+  --fontFamily: "Poppins", serif;
 
   // Line Height
   --lineHeight--xs: 1;
-  --lineHeight--sm: 1.2;
-  --lineHeight--base: 1.333;
-  --lineHeight--lg: 1.666;
-  --lineHeight--xl: 1.999;
+  --lineHeight--sm: 1.25;
+  --lineHeight--base: 1.5;
+  --lineHeight--lg: 1.75;
+  --lineHeight--xl: 2;
 
   // Font Sizes
   --fontSize--base: var(--baseline--unit);
@@ -55,12 +57,12 @@
   --fontSize--p: calc(var(--fontSize--base));
 
   // Font Weights
-  --fontWeight--hairline: 100;
-  --fontWeight--light: 200;
+  // --fontWeight--hairline: 100;
+  --fontWeight--light: 100;
   --fontWeight--base: 300;
-  --fontWeight--medium: 500;
+  // --fontWeight--medium: 500;
   --fontWeight--bold: 700;
-  --fontWeight--heavy: 900;
+  // --fontWeight--bold: 900;
 
   // Spacers
   --spacer--xs: calc(var(--baseline--unit) * 0.25);
@@ -94,10 +96,10 @@
   }
 }
 
-@supports (font-variation-settings: normal) {
-  :root {
-    --fontFamily: "Inter var", Inter, -apple-system, BlinkMacSystemFont,
-      "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
-      "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
-  }
-}
+// @supports (font-variation-settings: normal) {
+//   :root {
+//     --fontFamily: "Inter var", Inter, -apple-system, BlinkMacSystemFont,
+//       "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
+//       "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+//   }
+// }

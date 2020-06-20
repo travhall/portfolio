@@ -2,10 +2,9 @@
   &__title {
     color: var(--color--greyLt);
     font-size: var(--fontSize--h3);
-    margin: 0;
   }
   &__role {
-    font-weight: var(--fontWeight--hairline);
+    font-weight: var(--fontWeight--light);
   }
   &__details {
     li {
@@ -22,6 +21,20 @@
     position: relative;
     @include full-height;
     @include z-index(project);
+
+    &::before {
+      background-color: var(--color--black);
+      content: "";
+      display: block;
+      height: 12rem;
+      position: absolute;
+      bottom: -2rem;
+      left: 0;
+      right: 0;
+      transform: skewY(-3.5deg);
+      transform-origin: center center;
+      z-index: 10;
+    }
 
     @include breakpoint("medium") {
       grid-template-rows: 1fr 1fr auto auto 1fr 1fr;

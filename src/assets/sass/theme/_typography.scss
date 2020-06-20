@@ -1,6 +1,7 @@
 %heading {
   font-family: var(--fontHeading);
-  font-weight: var(--fontWeight--base);
+  font-weight: var(--fontWeight--light);
+  line-height: var(--lineHeight--sm);
   margin: 0 0 calc(var(--spacer--base));
 }
 
@@ -8,42 +9,36 @@ h1,
 .h1 {
   @extend %heading;
   font-size: var(--fontSize--h1);
-  line-height: var(--lineHeight--xs);
 }
 
 h2,
 .h2 {
   @extend %heading;
   font-size: var(--fontSize--h2);
-  line-height: var(--lineHeight--xs);
 }
 
 h3,
 .h3 {
   @extend %heading;
   font-size: var(--fontSize--h3);
-  line-height: var(--lineHeight--sm);
 }
 
 h4,
 .h4 {
   @extend %heading;
   font-size: var(--fontSize--h4);
-  line-height: var(--lineHeight--sm);
 }
 
 h5,
 .h5 {
   @extend %heading;
   font-size: var(--fontSize--h5);
-  line-height: var(--lineHeight--base);
 }
 
 h6,
 .h6 {
   @extend %heading;
   font-size: var(--fontSize--h6);
-  line-height: var(--lineHeight--base);
 }
 
 .lead {
@@ -67,7 +62,6 @@ h6,
 
 p {
   font-size: var(--fontSize--p);
-  font-weight: var(--fontWeight--light);
   line-height: var(--lineHeight--lg);
   margin: 0 0 calc(var(--spacer--base));
 
@@ -80,7 +74,7 @@ p {
 
 a {
   color: var(--color--secondary);
-  font-weight: var(--fontWeight--medium);
+  font-weight: var(--fontWeight--base);
   cursor: pointer;
   position: relative;
   text-decoration: none;
@@ -112,13 +106,12 @@ cite {
   small {
     color: var(--color--greyLt);
     display: block;
-    font-weight: var(--fontWeight--medium);
     margin: calc(var(--spacer--base) * 0.5) auto 0;
   }
 }
 
 strong {
-  font-weight: var(--fontWeight--heavy);
+  font-weight: var(--fontWeight--bold);
 }
 
 b,
@@ -128,7 +121,7 @@ b,
 
 em {
   color: var(--color--secondary);
-  font-weight: var(--fontWeight--medium);
+  font-weight: var(--fontWeight--bold);
 }
 
 small {
