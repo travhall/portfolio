@@ -78,7 +78,7 @@ a {
   cursor: pointer;
   position: relative;
   text-decoration: none;
-  transition: all 0.25s ease-in-out;
+  @include button-anim();
 
   &:hover {
     cursor: pointer;

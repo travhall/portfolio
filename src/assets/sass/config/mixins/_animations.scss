@@ -1,3 +1,7 @@
 @mixin button-anim {
-  transition: all 0.3s ease-in-out 0s;
+  transition: all 200ms ease-in-out;
+}
+
+@mixin menu-anim {
+  transition: all 400ms ease-in-out;
 }

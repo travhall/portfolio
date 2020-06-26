@@ -33,7 +33,7 @@ import { PortfolioService } from '../portfolio.service';
           'background-image':
             'url(' +
             case.featureImage +
-            '), linear-gradient(125deg, #164b49, #367067)'
+            '), linear-gradient(120deg, #164b49, #d4af37)'
         }"
       ></div>
     </section>

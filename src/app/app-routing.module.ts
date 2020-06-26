@@ -2,15 +2,32 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { HomeComponent } from './components/home.component';
+import { AboutComponent } from './components/about.component';
+import { CollectionComponent } from './components/collection.component';
 import { CaseDetailComponent } from './components/case-detail.component';
 import { NotFoundComponent } from './components/not-found.component';
+// import { from } from 'rxjs';
 
 const routes: Routes = [
   {
     path: '',
     component: HomeComponent,
     data: {
-      state: 'Home'
+      state: 'home'
+    }
+  },
+  {
+    path: 'about',
+    component: AboutComponent,
+    data: {
+      state: 'about'
+    }
+  },
+  {
+    path: 'collection',
+    component: CollectionComponent,
+    data: {
+      state: 'collection'
     }
   },
   {
@@ -43,6 +60,8 @@ export class AppRoutingModule { }
 
 export const RoutingComponents = [
   HomeComponent,
+  AboutComponent,
+  CollectionComponent,
   CaseDetailComponent,
   NotFoundComponent
 ];

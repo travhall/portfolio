@@ -1,6 +1,5 @@
-// @import url("https://rsms.me/inter/inter.css");
 :root {
-  --baseline--unit: 1rem;
+  --baseline--unit: 0.75rem;
 
   // Colors
   --color--primary: #168683;
@@ -19,14 +18,10 @@
   --color--bg: var(--color--black);
   --color--txt: white;
 
-  --color--bg--alt: white;
-  --color--txt--alt: var(--color--black);
+  // --color--bg--alt: white;
+  // --color--txt--alt: var(--color--black);
 
   // Typography
-  // --fontFamily: "Inter", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
-  //   Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-  //   "Segoe UI Symbol", sans-serif;
-  // --fontFamily: system-ui, -apple-system;
   // --fontHeading: "Antic Didone", serif;
   --fontHeading: "Poppins", serif;
   --fontFamily: "Poppins", serif;
@@ -40,8 +35,7 @@
 
   // Font Sizes
   --fontSize--base: var(--baseline--unit);
-  --fontSize--heading: calc(var(--fontSize--base) * 1.15);
-  --fontSize--nav: calc(var(--fontSize--base) * 1.1);
+  --fontSize--heading: var(--baseline--unit);
 
   --fontSize--xs: calc(var(--fontSize--base) * 0.625);
   --fontSize--sm: calc(var(--fontSize--base) * 0.85);
@@ -57,12 +51,9 @@
   --fontSize--p: calc(var(--fontSize--base));
 
   // Font Weights
-  // --fontWeight--hairline: 100;
   --fontWeight--light: 100;
   --fontWeight--base: 300;
-  // --fontWeight--medium: 500;
   --fontWeight--bold: 700;
-  // --fontWeight--bold: 900;
 
   // Spacers
   --spacer--xs: calc(var(--baseline--unit) * 0.25);
@@ -72,15 +63,22 @@
   --spacer--xl: calc(var(--baseline--unit) * 3);
 }
 
-// @media (min-width: 25rem) {
-//   :root {
-//     --baseline--unit: 1rem;
-//   }
-// }
+@media (min-width: 20.5rem) {
+  :root {
+    --baseline--unit: 0.825rem;
+  }
+}
+
+@media (min-width: 25rem) {
+  :root {
+    --baseline--unit: 1rem;
+  }
+}
 
 @media (min-width: 62rem) {
   :root {
     --baseline--unit: 1.025rem;
+    --fontSize--heading: calc(var(--fontSize--base) * 1.15);
   }
 }
 
@@ -95,11 +93,3 @@
     --baseline--unit: 1.1rem;
   }
 }
-
-// @supports (font-variation-settings: normal) {
-//   :root {
-//     --fontFamily: "Inter var", Inter, -apple-system, BlinkMacSystemFont,
-//       "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
-//       "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
-//   }
-// }

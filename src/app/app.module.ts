@@ -14,6 +14,11 @@ import { NavComponent } from './components/nav.component';
 import { CaseListComponent } from './components/case-list.component';
 import { FooterComponent } from './components/footer.component';
 
+// Views
+import { HomeComponent } from './components/home.component';
+import { AboutComponent } from './components/about.component';
+import { CollectionComponent } from './components/collection.component';
+
 
 @NgModule({
   declarations: [
@@ -22,7 +27,10 @@ import { FooterComponent } from './components/footer.component';
     NavComponent,
     FooterComponent,
     CaseListComponent,
-    RoutingComponents
+    RoutingComponents,
+    HomeComponent,
+    AboutComponent,
+    CollectionComponent
   ],
   imports: [
     BrowserModule,

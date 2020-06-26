@@ -18,24 +18,9 @@
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: 1fr auto auto 1fr;
+    padding: var(--spacer--base) 0;
     position: relative;
     @include full-height;
-    @include z-index(project);
-
-    &::before {
-      background-color: var(--color--black);
-      content: "";
-      display: block;
-      height: 12rem;
-      position: absolute;
-      bottom: -2rem;
-      left: 0;
-      right: 0;
-      transform: skewY(-3.5deg);
-      transform-origin: center center;
-      z-index: 10;
-    }
-
     @include breakpoint("medium") {
       grid-template-rows: 1fr 1fr auto auto 1fr 1fr;
     }
@@ -43,7 +28,6 @@
     .project__details {
       grid-column: 2/8;
       grid-row: 2/3;
-      @include z-index(content);
       @include breakpoint("medium") {
         grid-row: 3/4;
       }
@@ -53,13 +37,12 @@
       grid-column: 2/8;
       grid-row: 4/5;
       justify-self: start;
-      @include z-index(content);
-      &:hover {
-        ~ .project__image {
-          filter: blur(0);
-          @include box-shadow();
-        }
-      }
+      // &:hover {
+      //   ~ .project__image {
+      //     filter: blur(0);
+      //     box-shadow: none;
+      //   }
+      // }
     }
 
     .project__image {
@@ -71,12 +54,13 @@
       grid-column: 1/9;
       grid-row: 1/6;
       height: 100%;
-      margin: var(--spacer--base);
-      opacity: 0.8;
-      // transform: skewY(-3.5deg);
-      z-index: 1;
+      margin: 0 var(--spacer--base);
+      opacity: 0.5;
+      @include box-shadow();
+      @include z-index(background);
       @include button-anim();
       @include breakpoint("medium") {
+        background-attachment: scroll;
         grid-row: 2/6;
         margin: 0;
       }
@@ -129,6 +113,5 @@
     min-height: 100vh;
     padding: calc(var(--spacer--xl) * 4) var(--spacer--xl);
     @include full-height;
-    @include z-index(content);
   }
 }

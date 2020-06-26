@@ -5,7 +5,7 @@ label {
   top: calc(50% - calc(var(--fontSize--sm) * 0.5));
   left: 0;
   opacity: 0;
-  transition: all 0.3s ease;
+  @include button-anim();
 }
 
 select,
@@ -22,7 +22,7 @@ textarea {
   line-height: 1;
   padding: var(--spacer--base) 0;
   position: relative;
-  transition: all 0.3s linear;
+  @include button-anim();
   vertical-align: middle;
   white-space: normal;
   width: 100%;

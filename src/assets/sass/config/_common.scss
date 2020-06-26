@@ -28,6 +28,26 @@ body {
   text-rendering: optimizeSpeed;
 }
 
+body.fixed {
+  overflow: hidden;
+  .logo,
+  .main,
+  .footer {
+    filter: blur(5px);
+    pointer-events: none;
+    @include menu-anim();
+  }
+  @include breakpoint("large") {
+    overflow: scroll;
+    .logo,
+    .main,
+    .footer {
+      filter: blur(0);
+      pointer-events: all;
+    }
+  }
+}
+
 hr {
   clear: both;
   display: block;
@@ -57,13 +77,6 @@ li {
     font-style: italic;
     font-weight: 100;
   }
-}
-
-ul[class],
-ol[class] {
-  list-style: none;
-  margin: 0;
-  padding: 0;
 }
 
 table {
@@ -118,7 +131,7 @@ img {
 }
 
 svg {
-  transition: all 0.3s ease-in-out 0s;
+  @include button-anim();
 }
 
 section,

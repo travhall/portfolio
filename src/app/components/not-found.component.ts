@@ -20,6 +20,18 @@ import { Component, OnInit } from '@angular/core';
         <use xlink:href="assets/icons/def.svg#icon-Logo-Flag"></use>
       </svg>
 
+      <svg class="icon -xl">
+        <use xlink:href="assets/icons/def.svg#icon-UX-Design"></use>
+      </svg>
+
+      <svg class="icon -xl">
+        <use xlink:href="assets/icons/def.svg#icon-UI-Dev"></use>
+      </svg>
+
+      <svg class="icon -xl">
+        <use xlink:href="assets/icons/def.svg#icon-Vis-Design"></use>
+      </svg>
+
       <svg class="icon -lg">
         <use xlink:href="assets/icons/def.svg#icon-arrow-down"></use>
       </svg>
@@ -35,6 +47,50 @@ import { Component, OnInit } from '@angular/core';
       <svg class="icon -lg">
         <use xlink:href="assets/icons/def.svg#icon-arrow-up"></use>
       </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-alert"></use>
+      </svg>
+
+      <!-- <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-check"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-hand"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-info"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-success"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-home"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-case"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-about"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-envelope"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-linkedin"></use>
+      </svg>
+
+      <svg class="icon -lg">
+        <use xlink:href="assets/icons/def.svg#icon-phone"></use>
+      </svg> -->
 
     </section>
 
@@ -59,12 +115,12 @@ import { Component, OnInit } from '@angular/core';
 
       <blockquote>Super inspirational text goes in blockquotes</blockquote>
 
-      <h1>Heading Level 1</h1>
-      <h2>Heading Level 2</h2>
-      <h3>Heading Level 3</h3>
-      <h4>Heading Level 4</h4>
-      <h5>Heading Level 5</h5>
-      <h6>Heading Level 6</h6>
+      <h1 class="h1">Heading Level 1</h1>
+      <h2 class="h2">Heading Level 2</h2>
+      <h3 class="h3">Heading Level 3</h3>
+      <h4 class="h4">Heading Level 4</h4>
+      <h5 class="h5">Heading Level 5</h5>
+      <h6 class="h6">Heading Level 6</h6>
 
       <p class="lead">
         This is a lead paragraph. Lead paragraphs are meant to introduce bodies of

@@ -5,7 +5,6 @@
   border: 1px solid transparent;
   border-bottom-color: $color;
   display: inline-block;
-  font-size: calc(var(--fontSize--base) * 0.95);
   font-weight: var(--fontWeight--base);
   font-family: var(--fontFamily);
   color: white;
@@ -30,8 +29,8 @@
     right: 0;
     visibility: hidden;
     transform: scale(0);
-    transition: all 0.3s ease-in-out 0s;
-    z-index: -1;
+    @include button-anim();
+    @include z-index(background);
   }
   &:hover {
     border-bottom-color: transparent;

@@ -31,7 +31,12 @@ enum Direction {
   selector: 'app-header',
   template: `
     <header class="header">
-      <a (click)="goHome()" class="logo" [ngClass]="isVisible ? '' : 'shrink'">
+      <a
+        [routerLink]="['']"
+        [routerLinkActiveOptions]="{exact:true}"
+        routerLinkActive="active"
+        class="logo"
+        [ngClass]="isVisible ? '' : 'shrink'">
         <svg>
           <use xlink:href="assets/icons/def.svg#icon-Logo-Crest"></use>
         </svg>
@@ -43,16 +48,10 @@ enum Direction {
   styles: [
     `
       :host {
+        position: fixed;
         height: 0;
-        position: absolute;
-        top: 0;
         width: 100%;
-        z-index: 5000;
-      }
-      @media(min-width: 36em) {
-        :host {
-          position: fixed;
-        }
+        z-index: 1500;
       }
     `
   ],
@@ -60,13 +59,13 @@ enum Direction {
     trigger('toggle', [
       state(
         VisibilityState.Hidden,
-        style({ opacity: 0.5, transform: 'translateY(-100%)', top: '-6rem' })
+        style({ transform: 'translateY(-8rem)' })
       ),
       state(
         VisibilityState.Visible,
-        style({ opacity: 1, transform: 'translateY(0)', top: '0' })
+        style({ transform: 'translateY(0)' })
       ),
-      transition('* => *', animate('200ms ease-in'))
+      transition('* => *', animate('300ms ease-in'))
     ])
   ]
 })
@@ -101,8 +100,4 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   constructor(private router: Router) { }
-
-  goHome() {
-    this.router.navigate(['/']);
-  }
 }
