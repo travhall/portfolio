@@ -32,6 +32,8 @@ enum Direction {
   template: `
     <header class="header">
       <a
+        aria-labelledby="Home"
+        title="Home"
         [routerLink]="['']"
         [routerLinkActiveOptions]="{exact:true}"
         routerLinkActive="active"
@@ -48,10 +50,15 @@ enum Direction {
   styles: [
     `
       :host {
-        position: fixed;
+        /* position: fixed; */
         height: 0;
         width: 100%;
         z-index: 1500;
+      }
+      @media (min-width: 64.375rem) {
+        :host {
+          position: fixed;
+        }
       }
     `
   ],
@@ -65,11 +72,12 @@ enum Direction {
         VisibilityState.Visible,
         style({ transform: 'translateY(0)' })
       ),
-      transition('* => *', animate('300ms ease-in'))
+      transition('* => *', animate('350ms ease-in'))
     ])
   ]
 })
 export class HeaderComponent implements AfterViewInit {
+
   public isVisible = true;
 
   @HostBinding('@toggle')

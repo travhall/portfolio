@@ -52,7 +52,7 @@ import { Component, OnInit } from '@angular/core';
         <use xlink:href="assets/icons/def.svg#icon-alert"></use>
       </svg>
 
-      <!-- <svg class="icon -lg">
+      <svg class="icon -lg">
         <use xlink:href="assets/icons/def.svg#icon-check"></use>
       </svg>
 
@@ -85,12 +85,12 @@ import { Component, OnInit } from '@angular/core';
       </svg>
 
       <svg class="icon -lg">
-        <use xlink:href="assets/icons/def.svg#icon-linkedin"></use>
+        <use xlink:href="assets/icons/def.svg#icon-Linkedin"></use>
       </svg>
 
       <svg class="icon -lg">
         <use xlink:href="assets/icons/def.svg#icon-phone"></use>
-      </svg> -->
+      </svg>
 
     </section>
 

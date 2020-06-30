@@ -42,7 +42,7 @@ h6,
 }
 
 .lead {
-  font-size: calc(var(--fontSize--p) * 1.25); // 22px
+  font-size: var(--fontSize--h4);
   font-weight: var(--fontWeight--light);
   position: relative;
   &::before {
@@ -61,10 +61,9 @@ h6,
 }
 
 p {
-  font-size: var(--fontSize--p);
+  font-size: var(--fontSize--base);
   line-height: var(--lineHeight--lg);
-  margin: 0 0 calc(var(--spacer--base));
-
+  margin: 0 0 var(--spacer--base);
   + button,
   + input[type="button"],
   + .btn {
@@ -98,7 +97,7 @@ blockquote {
 cite {
   display: block;
   font-family: var(--fontFamily);
-  font-size: var(--fontSize--p);
+  font-size: var(--fontSize--base);
   font-style: normal;
   font-weight: var(--fontWeight--normal);
   line-height: var(--lineHeight--base);
@@ -110,18 +109,14 @@ cite {
   }
 }
 
-strong {
-  font-weight: var(--fontWeight--bold);
-}
-
 b,
-.bold {
+.bold,
+strong {
   font-weight: var(--fontWeight--bold);
 }
 
 em {
   color: var(--color--secondary);
-  font-weight: var(--fontWeight--bold);
 }
 
 small {

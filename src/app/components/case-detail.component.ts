@@ -5,14 +5,20 @@ import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 @Component({
   selector: 'app-case',
   template: `
-    <article class="project__page">
-      <h2>{{caseInfo.title}}</h2>
-      <div>{{caseInfo.role}}</div>
-      <div>{{caseInfo.client}}</div>
-      <div>{{caseInfo.date}}</div>
+    <section class="hero case">
+      <h2 *ngIf="caseInfo.title" class="title h3">{{caseInfo.title}}</h2>
+      <h3 *ngIf="caseInfo.role" class="subtitle h5">{{caseInfo.role}}</h3>
+      <div class="body">
+        <h4 *ngIf="caseInfo.client">{{caseInfo.client}}</h4>
+        <h5 *ngIf="caseInfo.date">{{caseInfo.date}}</h5>
+        <h6 *ngIf="caseInfo.type">{{caseInfo.type}}</h6>
+        <p *ngIf="caseInfo.desc">{{caseInfo.desc}}</p>
+      </div>
+    </section>
+    <section class="pagination">
       <a (click)="goPrev()">Prev</a>
       <a (click)="goNext()">Next</a>
-    </article>
+    </section>
   `,
   styles: [`a {padding:1rem;}`]
 })

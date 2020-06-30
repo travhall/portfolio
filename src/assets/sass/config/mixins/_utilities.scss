@@ -10,7 +10,7 @@
 }
 
 // Full window height
-@mixin full-height {
+@mixin fullscreen {
   max-width: 100%;
   min-height: 100vh;
 }
@@ -35,14 +35,14 @@
 
 // Text shadow
 @mixin text-shadow {
-  text-shadow: 2px 3px 0px #111;
+  text-shadow: 0.075em 0.08em 0.1em rgba(0, 0, 0, 0.9);
 }
 
 // z-index
 $z-index: (
   modal: 2500,
   overlay: 2000,
-  header: 1500,
+  header: 1000,
   navigation: 500,
   logo: 300,
   footer: 275,

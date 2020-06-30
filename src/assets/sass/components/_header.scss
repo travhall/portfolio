@@ -1,5 +1,5 @@
 .header {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   left: 0;
@@ -10,8 +10,8 @@
     position: relative;
     height: 60px;
     width: 80px;
+    @include z-index(logo);
     &.shrink {
-      margin-top: calc(var(--spacer--lg) + 3px);
       opacity: 0.5;
       height: 40px;
       width: 60px;

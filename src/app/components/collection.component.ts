@@ -3,9 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-collection',
   template: `
-    <p>
-      collection works!
-    </p>
+    <app-case-list id="case-studies"></app-case-list>
   `,
   styles: []
 })

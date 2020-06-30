@@ -18,6 +18,7 @@ import { FooterComponent } from './components/footer.component';
 import { HomeComponent } from './components/home.component';
 import { AboutComponent } from './components/about.component';
 import { CollectionComponent } from './components/collection.component';
+import { ContactComponent } from './components/contact.component';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { CollectionComponent } from './components/collection.component';
     RoutingComponents,
     HomeComponent,
     AboutComponent,
-    CollectionComponent
+    CollectionComponent,
+    ContactComponent
   ],
   imports: [
     BrowserModule,

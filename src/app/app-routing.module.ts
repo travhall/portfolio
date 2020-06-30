@@ -4,6 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './components/home.component';
 import { AboutComponent } from './components/about.component';
 import { CollectionComponent } from './components/collection.component';
+import { ContactComponent } from './components/contact.component';
 import { CaseDetailComponent } from './components/case-detail.component';
 import { NotFoundComponent } from './components/not-found.component';
 // import { from } from 'rxjs';
@@ -28,6 +29,13 @@ const routes: Routes = [
     component: CollectionComponent,
     data: {
       state: 'collection'
+    }
+  },
+  {
+    path: 'contact',
+    component: ContactComponent,
+    data: {
+      state: 'contact'
     }
   },
   {
@@ -62,6 +70,7 @@ export const RoutingComponents = [
   HomeComponent,
   AboutComponent,
   CollectionComponent,
+  ContactComponent,
   CaseDetailComponent,
   NotFoundComponent
 ];

@@ -6,8 +6,9 @@
 
   &__container {
     background: var(--color--bg);
-    background-image: linear-gradient(60deg, #030303, #1b1b1b);
-    border-left: 2px solid var(--color--greyDk);
+    background-image: linear-gradient(60deg, #030303, #131313);
+    background-repeat: no-repeat;
+    border-left: 1px solid var(--color--greyDk);
     overflow: scroll;
     padding: 6rem 3rem;
     position: absolute;
@@ -211,33 +212,6 @@
         &:last-child {
           display: inline-block;
         }
-      }
-    }
-  }
-
-  .contact {
-    &__info {
-      margin: var(--spacer--lg) 0 0;
-      padding: var(--spacer--lg) 0 0;
-      position: relative;
-      &::before {
-        content: "";
-        display: block;
-        height: 2px;
-        width: var(--spacer--base);
-        background: var(--color--primary);
-        position: absolute;
-        top: 0;
-      }
-      li {
-        &:last-child {
-          display: inline-block;
-        }
-      }
-      @include breakpoint("large") {
-        display: none;
-        margin: 0;
-        padding: 0;
       }
     }
   }

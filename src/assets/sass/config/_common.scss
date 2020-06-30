@@ -1,13 +1,15 @@
 html {
   background-color: var(--color--bg);
+  background-image: linear-gradient(180deg, #030303, #1b1b1b);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--color--txt);
   font-family: var(--fontFamily);
   font-weight: var(--fontWeight--base);
   line-height: var(--lineHeight--base);
-
   // @media screen and (prefers-color-scheme: light) {
-  //   background-color: var(--color--bg--alt);
-  //   color: var(--color--txt--alt);
+  //   --color--txt: var(--color--black);
+  //   --color--bg: white;
   // }
 }
 
@@ -25,25 +27,40 @@ body {
   padding: 0;
   position: relative;
   scroll-behavior: smooth;
+  overscroll-behavior: none;
   text-rendering: optimizeSpeed;
+  -webkit-overflow-scrolling: touch;
 }
 
-body.fixed {
-  overflow: hidden;
-  .logo,
-  .main,
-  .footer {
-    filter: blur(5px);
-    pointer-events: none;
-    @include menu-anim();
-  }
-  @include breakpoint("large") {
-    overflow: scroll;
+body {
+  &.fixed {
+    overflow: hidden;
     .logo,
     .main,
     .footer {
-      filter: blur(0);
-      pointer-events: all;
+      filter: blur(5px);
+      pointer-events: none;
+      @include menu-anim();
+    }
+    @include breakpoint("large") {
+      overflow: scroll;
+      .logo,
+      .main,
+      .footer {
+        filter: blur(0);
+        pointer-events: all;
+      }
+    }
+  }
+  &.blur {
+    overflow: hidden;
+    .nav,
+    .logo,
+    .main,
+    .footer {
+      filter: blur(5px);
+      pointer-events: none;
+      @include menu-anim();
     }
   }
 }

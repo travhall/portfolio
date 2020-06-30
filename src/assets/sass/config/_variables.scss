@@ -1,5 +1,5 @@
 :root {
-  --baseline--unit: 0.75rem;
+  --baseline--unit: 1rem;
 
   // Colors
   --color--primary: #168683;
@@ -15,16 +15,12 @@
   --color--warning: #efe705;
   --color--error: #c84242;
 
-  --color--bg: var(--color--black);
   --color--txt: white;
-
-  // --color--bg--alt: white;
-  // --color--txt--alt: var(--color--black);
+  --color--bg: var(--color--black);
 
   // Typography
-  // --fontHeading: "Antic Didone", serif;
-  --fontHeading: "Poppins", serif;
   --fontFamily: "Poppins", serif;
+  --fontHeading: "Poppins", serif;
 
   // Line Height
   --lineHeight--xs: 1;
@@ -48,7 +44,6 @@
   --fontSize--h4: calc(var(--fontSize--heading) * 1.777);
   --fontSize--h5: calc(var(--fontSize--heading) * 1.333);
   --fontSize--h6: var(--fontSize--heading);
-  --fontSize--p: calc(var(--fontSize--base));
 
   // Font Weights
   --fontWeight--light: 100;
@@ -63,32 +58,19 @@
   --spacer--xl: calc(var(--baseline--unit) * 3);
 }
 
-@media (min-width: 20.5rem) {
-  :root {
-    --baseline--unit: 0.825rem;
-  }
-}
-
-@media (min-width: 25rem) {
-  :root {
-    --baseline--unit: 1rem;
-  }
-}
-
-@media (min-width: 62rem) {
+@media (min-width: 64.375rem) {
   :root {
     --baseline--unit: 1.025rem;
-    --fontSize--heading: calc(var(--fontSize--base) * 1.15);
   }
 }
 
-@media (min-width: 75rem) {
+@media (min-width: 88.75rem) {
   :root {
     --baseline--unit: 1.05rem;
   }
 }
 
-@media (min-width: 100rem) {
+@media (min-width: 99.75rem) {
   :root {
     --baseline--unit: 1.1rem;
   }

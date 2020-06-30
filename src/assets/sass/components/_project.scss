@@ -1,17 +1,16 @@
 .project {
-  &__title {
-    color: var(--color--greyLt);
-    font-size: var(--fontSize--h3);
-  }
-  &__role {
-    font-weight: var(--fontWeight--light);
-  }
-  &__details {
-    li {
-      margin: 0;
-      padding-bottom: 0;
-    }
-  }
+  // &__title {
+  // }
+  // &__role {
+  // }
+  // &__type {
+  // }
+  // &__client {
+  // }
+  // &__date {
+  // }
+  // &__details {
+  // }
 
   &__card {
     align-items: start;
@@ -20,16 +19,33 @@
     grid-template-rows: 1fr auto auto 1fr;
     padding: var(--spacer--base) 0;
     position: relative;
-    @include full-height;
+    @include fullscreen;
     @include breakpoint("medium") {
-      grid-template-rows: 1fr 1fr auto auto 1fr 1fr;
+      grid-template-rows: repeat(2, 1fr) repeat(2, auto) repeat(2, 1fr);
+    }
+    @include breakpoint("large") {
+      grid-template-columns: minmax(20vw, 1fr) repeat(6, 1fr) minmax(20vw, 1fr);
+      grid-template-rows: minmax(15vh, auto) 1fr repeat(4, auto) 1fr minmax(
+          15vh,
+          auto
+        );
+    }
+    @include breakpoint("xlarge") {
+      grid-template-columns: minmax(25vw, 1fr) repeat(6, 1fr) minmax(25vw, 1fr);
+    }
+    @include breakpoint("whoa") {
+      grid-template-columns: minmax(30vw, 1fr) repeat(6, 1fr) minmax(30vw, 1fr);
     }
 
     .project__details {
       grid-column: 2/8;
       grid-row: 2/3;
+      @include text-shadow();
       @include breakpoint("medium") {
         grid-row: 3/4;
+        .project__type {
+          font-size: var(--fontSize--sm);
+        }
       }
     }
 
@@ -37,20 +53,20 @@
       grid-column: 2/8;
       grid-row: 4/5;
       justify-self: start;
-      // &:hover {
-      //   ~ .project__image {
-      //     filter: blur(0);
-      //     box-shadow: none;
-      //   }
-      // }
+      margin: var(--spacer--base) 0;
+      &:hover {
+        ~ .project__image {
+          box-shadow: none;
+          opacity: 1;
+        }
+      }
     }
 
     .project__image {
-      background-attachment: fixed;
+      // background-attachment: fixed;
       background-size: cover;
       background-repeat: no-repeat;
       background-blend-mode: multiply;
-      // filter: blur(5px);
       grid-column: 1/9;
       grid-row: 1/6;
       height: 100%;
@@ -58,10 +74,10 @@
       opacity: 0.5;
       @include box-shadow();
       @include z-index(background);
-      @include button-anim();
+      @include menu-anim();
       @include breakpoint("medium") {
-        background-attachment: scroll;
-        grid-row: 2/6;
+        // background-attachment: scroll;
+        grid-row: 2/8;
         margin: 0;
       }
     }
@@ -87,6 +103,17 @@
           grid-column: 1/6;
         }
       }
+      @include breakpoint("whoa") {
+        .project__details {
+          grid-column: 3/7;
+        }
+        .project__image {
+          grid-column: 1/5;
+        }
+        .btn {
+          grid-column: 4/6;
+        }
+      }
     }
 
     &:nth-child(even) {
@@ -106,12 +133,17 @@
           grid-column: 4/9;
         }
       }
+      @include breakpoint("whoa") {
+        .project__details {
+          grid-column: 3/7;
+        }
+        .project__image {
+          grid-column: 5/9;
+        }
+        .btn {
+          grid-column: 4/6;
+        }
+      }
     }
-  }
-
-  &__page {
-    min-height: 100vh;
-    padding: calc(var(--spacer--xl) * 4) var(--spacer--xl);
-    @include full-height;
   }
 }

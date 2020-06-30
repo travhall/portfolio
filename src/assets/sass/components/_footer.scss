@@ -1,12 +1,8 @@
 .footer {
   font-family: var(--fontHeading);
   font-size: var(--fontSize--sm);
-  margin: var(--spacer--base) 0 var(--spacer--lg);
-  padding: var(--spacer--base);
+  font-weight: var(--fontWeight--light);
+  padding: var(--spacer--lg);
   position: relative;
-  scroll-snap-align: end;
   @include z-index(footer);
-  @include breakpoint("medium") {
-    margin: 0;
-  }
 }

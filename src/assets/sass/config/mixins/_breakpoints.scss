@@ -1,14 +1,13 @@
 // BREAKPOINTS : @include breakpoint("medium") {…}
 $breakpoints: (
-'xsmall': (min-width: 21.25rem),          // 340px - Tiny phones  < 339px
-'small': (min-width: 37.25rem),           // 596px - Small tablets and large smartphones  < 600px
-'medium': (min-width: 48.75rem),          // 780px - Small tablets  < 768px
-'large': (min-width: 65rem),              // 1040px - Tablets and small desktops  < 1024px
-'xlarge': (min-width: 74.75rem),          // 1196px - Large tablets and desktops  < 1200px
-'whoa': (min-width: 95rem),               // 1520px - Whoa dude that's a pretty big screen  < 1520px
+'xsmall': (max-width: 21rem),             // 336px - Tiny phones < 340px
+'small': (min-width: 21.25rem),           // 340px - Mobile > 340px
+'medium': (min-width: 48.125rem),         // 770px - Small tablets > 768px
+'large': (min-width: 64.375rem),          // 1030px - Tablets and small desktops > 1024px
+'xlarge': (min-width: 88.75rem),          // 1420px - Large tablets and desktops > 1200px
+'whoa': (min-width: 99.75rem),            // 1596px - Whoa dude that's a pretty big screen > 1600px
 'landscape': (orientation: landscape),    // Landscape mode
 'portrait': (orientation: portrait),      // Portrait mode
-'tootall': (min-height: 64.25rem),        // Too Tall 100vh
 ) !default;
 
 @mixin breakpoint($breakpoint) {
