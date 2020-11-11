@@ -15,7 +15,6 @@ import { Component, OnInit } from '@angular/core';
           <use xlink:href="assets/icons/def.svg#icon-arrow-down"></use>
         </svg>
       </button>
-      <div class="hero__image"></div>
     </section>
   `,
   styles: []

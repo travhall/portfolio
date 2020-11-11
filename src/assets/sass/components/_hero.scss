@@ -1,13 +1,13 @@
 .hero {
-  color: var(--color--text);
   display: grid;
-  grid-template-columns: var(--spacer--xl) repeat(6, 1fr) 3.5rem;
+  grid-template-columns: var(--spacer--xl) repeat(6, 1fr) var(--spacer--xl);
   grid-template-rows: minmax(10.5rem, 1fr) repeat(6, auto) 1fr;
-  overflow: hidden;
-  position: relative;
   @include fullscreen;
   @include breakpoint("small") {
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: minmax(18vw, 1fr) repeat(6, 1fr) minmax(18vw, 1fr);
+  }
+  @include breakpoint("medium") {
+    grid-template-columns: minmax(15vw, 1fr) repeat(6, 1fr) minmax(20vw, 1fr);
   }
   @include breakpoint("large") {
     grid-template-columns: minmax(20vw, 1fr) repeat(6, 1fr) minmax(30vw, 1fr);
@@ -18,7 +18,6 @@
   }
 
   > * {
-    @include text-shadow;
     @include z-index(content);
   }
 
@@ -32,118 +31,35 @@
     grid-row: 5/6;
   }
 
-  .title,
-  .subtitle,
-  .body {
-    grid-column: 2/8;
-    @include breakpoint("large") {
-      grid-column: 3/8;
-    }
-  }
-
-  > .btn {
-    justify-self: start;
-    grid-column: 2/5;
+  .btn {
     grid-row: 6/7;
-    @include z-index(content);
     &:hover {
       ~ .hero__image {
         box-shadow: none;
         opacity: 1;
       }
     }
+  }
+
+  .title,
+  .subtitle,
+  .body,
+  .btn {
+    grid-column: 2/8;
+    justify-self: start;
+    @include z-index(content);
     @include breakpoint("large") {
-      grid-column: 2/3;
-      justify-self: end;
+      grid-column: 3/8;
     }
   }
 
-  &__image {
-    background-repeat: no-repeat;
-    background-size: cover;
-    // background-attachment: fixed;
-    background-blend-mode: multiply;
-    backface-visibility: hidden;
-    grid-column: 1/9;
-    grid-row: 1/9;
-    margin: var(--spacer--base);
-    opacity: 0.5;
-    pointer-events: none;
-    position: relative;
-    will-change: transform;
-    @include box-shadow();
-    @include menu-anim();
-    @include z-index(background);
-    @include breakpoint("large") {
-      // background-attachment: scroll;
-      grid-column: 4/9;
-      grid-row: 2/8;
-      margin: 0;
-    }
-  }
-
-  &.home {
-    .title {
-      span {
-        display: inline-block;
-        white-space: nowrap;
-      }
-    }
-    .subtitle {
-      @include breakpoint("xlarge") {
-        display: inline-block;
-        white-space: nowrap;
-      }
-    }
-    .body {
-      max-width: 35rem;
-    }
-    .hero__image {
-      background-position: 75% 50%;
-      background-image: url(src/assets/img/hero--home--lg.jpg),
-        linear-gradient(10deg, #164b49, #d4af37);
-    }
-  }
-
-  &.about {
-    @include breakpoint("large") {
-      grid-template-columns: minmax(30vw, 1fr) repeat(6, 1fr) minmax(20vw, 1fr);
-    }
-    .title,
-    .subtitle,
-    .body {
-      @include breakpoint("large") {
-        grid-column: 3/7;
-      }
-      @include breakpoint("xlarge") {
-        grid-column: 4/7;
-      }
-    }
-    > .btn {
-      @include breakpoint("large") {
-        grid-column: 6/8;
-      }
-    }
-    .hero__image {
-      background-position: left center;
-      background-image: url(src/assets/img/hero--about--lg.jpg),
-        linear-gradient(10deg, #164b49, #d4af37);
-      @include breakpoint("large") {
-        grid-column: 1/6;
-      }
-    }
-  }
-
-  // &.contact {
+  // &.case {
+  //   .title,
+  //   .subtitle,
+  //   .body {
+  //     @include breakpoint("large") {
+  //       grid-column: 2/6;
+  //     }
+  //   }
   // }
-
-  &.case {
-    .title,
-    .subtitle,
-    .body {
-      @include breakpoint("large") {
-        grid-column: 2/6;
-      }
-    }
-  }
 }

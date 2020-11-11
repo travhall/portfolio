@@ -1,26 +1,50 @@
+@font-face {
+  font-family: "Manrope";
+  src: url("src/assets/fonts/Manrope.woff2") format("woff2 supports variations"),
+    url("src/assets/fonts/Manrope.woff2") format("woff2-variations"),
+    url("src/assets/fonts/Manrope.woff2") format("woff2");
+  font-display: swap;
+  font-optical-sizing: auto;
+  font-stretch: 85% 125%;
+  font-style: normal;
+  font-weight: 100 700;
+}
+
 :root {
   --baseline--unit: 1rem;
 
   // Colors
-  --color--primary: #168683;
+  --color--primary: #0a9d98;
   --color--secondary: #d4af37;
-  --color--tertiary: #999779;
+  --color--tertiary: #78775a;
 
   --color--black: #111;
-  --color--greyDk: #1b1b1b;
+  --color--grey3: #1b1b1b;
   --color--grey: #5a5d60;
-  --color--greyLt: #f0f0f0;
+  --color--grey1: #f0f0f0;
 
-  --color--success: #09d42e;
-  --color--warning: #efe705;
-  --color--error: #c84242;
+  --color--success: #008445;
+  --color--warning: #ffc845;
+  --color--error: #c92428;
 
-  --color--txt: white;
-  --color--bg: var(--color--black);
+  --color--txt: var(--color--black);
+  --color--bg: var(--color--grey1);
+
+  --gradient--start: var(--color--grey1);
+  --gradient--end: white;
+
+  --rgb--light: 255, 255, 255;
+  --rgb--dark: 27, 27, 27;
+  --opacity--color: var(--rgb--light);
+  --opacity--90: rgba(var(--opacity--color), 0.9);
+  --opacity--80: rgba(var(--opacity--color), 0.8);
+  --opacity--50: rgba(var(--opacity--color), 0.5);
+  --opacity--20: rgba(var(--opacity--color), 0.2);
+  --opacity--10: rgba(var(--opacity--color), 0.1);
 
   // Typography
-  --fontFamily: "Poppins", serif;
-  --fontHeading: "Poppins", serif;
+  --fontFamily: "Manrope", Manrope, system-ui, -apple-system, sans-serif;
+  --fontHeading: "Manrope", Manrope, system-ui, -apple-system, sans-serif;
 
   // Line Height
   --lineHeight--xs: 1;
@@ -48,6 +72,7 @@
   // Font Weights
   --fontWeight--light: 100;
   --fontWeight--base: 300;
+  --fontWeight--medium: 500;
   --fontWeight--bold: 700;
 
   // Spacers
@@ -73,5 +98,31 @@
 @media (min-width: 99.75rem) {
   :root {
     --baseline--unit: 1.1rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    // --color--primary: #03a59f;
+    // --color--secondary: #d4af37;
+    --color--txt: white;
+    --color--bg: var(--color--black);
+    --color--grey3: #f0f0f0;
+    --color--grey1: #1b1b1b;
+    --gradient--end: var(--color--black);
+    --opacity--color: var(--rgb--dark);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    // --color--primary: #00837e;
+    // --color--secondary: #8f7200;
+    --color--txt: var(--color--black);
+    --color--bg: white;
+    --color--grey3: #1b1b1b;
+    --color--grey1: #f0f0f0;
+    --gradient--end: white;
+    --opacity--color: var(--rgb--light);
   }
 }

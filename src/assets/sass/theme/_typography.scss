@@ -2,7 +2,7 @@
   font-family: var(--fontHeading);
   font-weight: var(--fontWeight--light);
   line-height: var(--lineHeight--sm);
-  margin: 0 0 calc(var(--spacer--base));
+  margin: 0 0 calc(var(--spacer--lg));
 }
 
 h1,
@@ -42,28 +42,14 @@ h6,
 }
 
 .lead {
-  font-size: var(--fontSize--h4);
-  font-weight: var(--fontWeight--light);
+  font-size: var(--fontSize--lg);
   position: relative;
-  &::before {
-    background-color: var(--color--secondary);
-    content: "";
-    display: block;
-    position: absolute;
-    height: 2px;
-    left: -1.5rem;
-    width: var(--spacer--base);
-    top: var(--spacer--base);
-  }
-  + p {
-    margin-top: -0.5rem;
-  }
 }
 
 p {
   font-size: var(--fontSize--base);
   line-height: var(--lineHeight--lg);
-  margin: 0 0 var(--spacer--base);
+  margin: 0 0 var(--spacer--lg);
   + button,
   + input[type="button"],
   + .btn {
@@ -72,38 +58,31 @@ p {
 }
 
 a {
-  color: var(--color--secondary);
-  font-weight: var(--fontWeight--base);
+  color: var(--color--primary);
+  font-weight: var(--fontWeight--bold);
   cursor: pointer;
   position: relative;
-  text-decoration: none;
+  text-decoration-color: var(--color--primary);
+  text-decoration-thickness: 0.125em;
+  text-underline-offset: 2px;
   @include button-anim();
-
   &:hover {
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: none;
   }
 }
 
 blockquote {
-  font-family: var(--fontHeading);
-  font-size: var(--fontSize--lg);
+  font-size: var(--fontSize--h5);
   line-height: var(--lineHeight--lg);
-  margin: var(--spacer--lg);
-  padding: var(--spacer--lg);
+  padding: var(--spacer--base);
   position: relative;
 }
 
 cite {
   display: block;
-  font-family: var(--fontFamily);
-  font-size: var(--fontSize--base);
-  font-style: normal;
-  font-weight: var(--fontWeight--normal);
-  line-height: var(--lineHeight--base);
   margin: var(--spacer--lg) auto 0;
   small {
-    color: var(--color--greyLt);
     display: block;
     margin: calc(var(--spacer--base) * 0.5) auto 0;
   }
@@ -115,8 +94,14 @@ strong {
   font-weight: var(--fontWeight--bold);
 }
 
+i,
 em {
   color: var(--color--secondary);
+  font-weight: var(--fontWeight--bold);
+  // -webkit-text-stroke: 0.5px var(--color--txt);
+  // text-stroke: 0.5px var(--color--txt);
+  // font-style: italic;
+  // font-variation-settings: "ital" 1;
 }
 
 small {

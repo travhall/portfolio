@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="2564" height="1477" viewBox="0 0 2564 1477">
+  <defs>
+    <linearGradient id="laptop-b" x1="0%" x2="100%" y1="50%" y2="50%">
+      <stop offset="0%" stop-opacity=".04"/>
+      <stop offset="100%" stop-color="#FFF" stop-opacity=".04"/>
+    </linearGradient>
+    <polygon id="laptop-a" points="2.386 2.393 2565.614 2.393 2565.614 16.75 2.386 16.75"/>
+    <filter id="laptop-c" width="99.9%" height="91.7%" x="0%" y="4.2%" filterUnits="objectBoundingBox">
+      <feOffset dy="1" in="SourceAlpha" result="shadowOffsetInner1"/>
+      <feComposite in="shadowOffsetInner1" in2="SourceAlpha" k2="-1" k3="1" operator="arithmetic" result="shadowInnerInner1"/>
+      <feColorMatrix in="shadowInnerInner1" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.02 0"/>
+    </filter>
+    <linearGradient id="laptop-d" x1="124.719%" x2="0%" y1="50%" y2="50%">
+      <stop offset="0%"/>
+      <stop offset="100%" stop-color="#FFF"/>
+      <stop offset="100%" stop-color="#FFF"/>
+    </linearGradient>
+    <linearGradient id="laptop-e" x1="0%" x2="100%" y1="50%" y2="50%">
+      <stop offset="0%"/>
+      <stop offset="100%" stop-color="#FFF"/>
+      <stop offset="100%" stop-color="#FFF"/>
+    </linearGradient>
+    <linearGradient id="laptop-g" x1="0%" x2="100%" y1="50%" y2="50%">
+      <stop offset="0%" stop-opacity=".07"/>
+      <stop offset="100%" stop-color="#EAEAEA" stop-opacity=".07"/>
+      <stop offset="200%" stop-color="#FFF" stop-opacity=".07"/>
+    </linearGradient>
+    <linearGradient id="laptop-h" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-opacity=".07"/>
+      <stop offset="100%" stop-color="#FFF" stop-opacity=".07"/>
+    </linearGradient>
+    <linearGradient id="laptop-i" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".05"/>
+      <stop offset="100%" stop-opacity=".05"/>
+    </linearGradient>
+    <path id="laptop-f" d="M2.385672,16.7499713 L2565.61433,16.7499713 C2550.4657,26.2345296 2416.10023,65.1434444 1968.96007,55.0355946 C1929.46937,55.0355946 816.616296,53.8392857 572.787264,53.8392857 C289.801368,53.8392857 172.654344,54.9794247 65.733096,34.3218411 C28.301928,27.0902919 9.558096,21.1176965 2.385672,16.7499713 Z"/>
+    <path id="laptop-j" d="M1038.17848,15.5534685 L1038.17848,2.39285355 L1528.62799,2.39285355 L1528.62799,15.5534685 C1528.62799,20.5969809 1480.89631,21.5356138 1480.89631,21.5356138 L1085.91064,21.5356138 C1085.91064,21.5356138 1038.17848,20.5969809 1038.17848,15.5534685 Z"/>
+    <filter id="laptop-k" width="100.2%" height="105.2%" x="-.1%" y="-2.6%" filterUnits="objectBoundingBox">
+      <feOffset dy="1" in="SourceAlpha" result="shadowOffsetInner1"/>
+      <feComposite in="shadowOffsetInner1" in2="SourceAlpha" k2="-1" k3="1" operator="arithmetic" result="shadowInnerInner1"/>
+      <feColorMatrix in="shadowInnerInner1" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.03 0"/>
+    </filter>
+    <linearGradient id="laptop-l" x1="0%" x2="100%" y1="50%" y2="50%">
+      <stop offset="0%"/>
+      <stop offset="100%" stop-color="#FFF"/>
+      <stop offset="100%" stop-color="#FFF"/>
+    </linearGradient>
+    <linearGradient id="laptop-m" x1="100%" x2="0%" y1="50%" y2="50%">
+      <stop offset="0%"/>
+      <stop offset="100%" stop-color="#FFF"/>
+      <stop offset="100%" stop-color="#FFF"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" fill-rule="evenodd" transform="translate(-2 -2)">
+    <path fill="#FFF" d="M356.051422,2.386692 L2210.94858,2.386692 C2251.52133,2.386692 2262.90595,2.386692 2280.37396,8.25822 C2301.02521,15.803532 2317.38601,32.160564 2324.93311,52.805376 C2330.80681,70.269408 2330.80681,81.650844 2330.80681,122.214276 L2330.80681,1353.78572 C2330.80681,1394.34916 2330.80681,1405.73059 2324.93311,1423.19462 C2317.38601,1443.83944 2301.02521,1460.19647 2280.37396,1467.74178 C2262.90595,1473.61331 2251.52133,1473.61331 2210.94858,1473.61331 L356.051422,1473.61331 C315.478666,1473.61331 304.091956,1473.61331 286.626043,1467.74178 C265.974787,1460.19647 249.613993,1443.83944 242.06689,1423.19462 C236.193193,1405.73059 236.193193,1394.34916 236.193193,1353.78572 L236.193193,122.214276 C236.193193,81.650844 236.193193,70.269408 242.06689,52.805376 C249.613993,32.160564 265.974787,15.803532 286.626043,8.25822 C304.091956,2.386692 315.478666,2.386692 356.051422,2.386692 Z"/>
+    <path fill="#D8D8D8" d="M1280,52.200024 C1284.30785,52.200024 1287.80008,55.692186 1287.80008,60.000036 C1287.80008,64.307868 1284.30785,67.800048 1280,67.800048 C1275.69217,67.800048 1272.19993,64.307868 1272.19993,60.000036 C1272.19993,55.692186 1275.69217,52.200024 1280,52.200024 Z"/>
+    <g transform="translate(0 1422)">
+      <use fill="#FFF" xlink:href="#laptop-a"/>
+      <use fill="url(#laptop-b)" xlink:href="#laptop-a" style="mix-blend-mode:multiply"/>
+      <use fill="#000" filter="url(#laptop-c)" xlink:href="#laptop-a"/>
+      <polygon fill="url(#laptop-d)" points="2470.149 2.393 2565.613 2.393 2565.613 16.75 2470.149 16.75" opacity=".1" style="mix-blend-mode:multiply"/>
+      <polygon fill="url(#laptop-e)" points="2.387 2.393 97.851 2.393 97.851 16.75 2.387 16.75" opacity=".1" style="mix-blend-mode:multiply"/>
+      <use fill="#FFF" xlink:href="#laptop-f"/>
+      <use fill="url(#laptop-g)" xlink:href="#laptop-f" style="mix-blend-mode:multiply"/>
+      <use fill="url(#laptop-g)" xlink:href="#laptop-f" style="mix-blend-mode:multiply"/>
+      <use fill="url(#laptop-h)" xlink:href="#laptop-f" style="mix-blend-mode:multiply"/>
+      <use fill="url(#laptop-i)" xlink:href="#laptop-f" style="mix-blend-mode:multiply"/>
+      <use fill="#FFF" xlink:href="#laptop-j"/>
+      <use fill="#000" filter="url(#laptop-k)" xlink:href="#laptop-j"/>
+      <path fill="url(#laptop-l)" d="M1038.17825,2.39285355 L1085.91077,2.39285355 L1085.91077,21.5356138 C1085.91077,21.5356138 1038.17825,20.5969809 1038.17825,15.5534685 L1038.17825,2.39285355 Z" opacity=".07" style="mix-blend-mode:multiply"/>
+      <path fill="url(#laptop-m)" d="M1528.62813,2.39285355 L1480.89609,2.39285355 L1480.89609,21.5356138 C1480.89609,21.5356138 1528.62813,20.5969809 1528.62813,15.5534685 L1528.62813,2.39285355 Z" opacity=".07" style="mix-blend-mode:multiply"/>
+    </g>
+    <rect width="1941" height="1241" x="-.5" y="-.5" stroke="#D8D8D8" transform="translate(313 97)"/>
+  </g>
+</svg>

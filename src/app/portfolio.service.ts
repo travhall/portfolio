@@ -10,7 +10,8 @@ export class PortfolioService {
   getCase() {
     return [
       {
-        id: 6,
+        // Case Overview
+        id: 5,
         title: 'Arrow Global Information Architecture',
         role: 'UX Lead',
         type: 'UX Research, Information Architecture',
@@ -18,28 +19,11 @@ export class PortfolioService {
         date: '2020',
         desc: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod. Praesent commodo cursus magna, velt.',
         btnLabel: 'Read Case Study',
-        featureImageSm: './assets/img/project--img--sm6.jpg',
-        featureImageMd: './assets/img/project--img--md6.jpg',
-        featureImageLg: './assets/img/project--img--lg6.jpg',
-        featureImageXl: './assets/img/project--img--xl6.jpg',
-        featureAlt: 'Featured Image Alt Text'
+        featureImage: './assets/img/project--img.jpg',
+        featureAlt: 'Featured Image Alt Text',
       },
       {
-        id: 5,
-        title: 'Arrow Global Header Design',
-        role: 'UX Lead',
-        type: 'UX, UI & Interaction Design',
-        client: 'Arrow Electronics',
-        date: '2020',
-        desc: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod. Praesent commodo cursus magna, velt.',
-        btnLabel: 'Read Case Study',
-        featureImageSm: './assets/img/project--img--sm5.jpg',
-        featureImageMd: './assets/img/project--img--md5.jpg',
-        featureImageLg: './assets/img/project--img--lg5.jpg',
-        featureImageXl: './assets/img/project--img--xl5.jpg',
-        featureAlt: 'Featured Image Alt Text'
-      },
-      {
+        // Case Overview
         id: 4,
         title: 'Arrow Design System',
         role: 'UX Lead',
@@ -48,13 +32,11 @@ export class PortfolioService {
         date: '2020',
         desc: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod. Praesent commodo cursus magna, velt.',
         btnLabel: 'Read Case Study',
-        featureImageSm: './assets/img/project--img--sm4.jpg',
-        featureImageMd: './assets/img/project--img--md4.jpg',
-        featureImageLg: './assets/img/project--img--lg4.jpg',
-        featureImageXl: './assets/img/project--img--xl4.jpg',
-        featureAlt: 'Featured Image Alt Text'
+        featureImage: './assets/img/project--img.jpg',
+        featureAlt: 'Featured Image Alt Text',
       },
       {
+        // Case Overview
         id: 3,
         title: 'Not a Robot',
         role: 'UX, Visual Designer & WordPress Developer',
@@ -63,13 +45,11 @@ export class PortfolioService {
         date: '2020',
         desc: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod. Praesent commodo cursus magna, velt.',
         btnLabel: 'Read Case Study',
-        featureImageSm: './assets/img/project--img--sm3.jpg',
-        featureImageMd: './assets/img/project--img--md3.jpg',
-        featureImageLg: './assets/img/project--img--lg3.jpg',
-        featureImageXl: './assets/img/project--img--xl3.jpg',
-        featureAlt: 'Featured Image Alt Text'
+        featureImage: './assets/img/project--img.jpg',
+        featureAlt: 'Featured Image Alt Text',
       },
       {
+        // Case Overview
         id: 2,
         title: 'Blossom Grow Light App',
         role: 'UX & Visual Design',
@@ -78,13 +58,11 @@ export class PortfolioService {
         date: '2020',
         desc: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod. Praesent commodo cursus magna, velt.',
         btnLabel: 'Read Case Study',
-        featureImageSm: './assets/img/project--img--sm2.jpg',
-        featureImageMd: './assets/img/project--img--md2.jpg',
-        featureImageLg: './assets/img/project--img--lg2.jpg',
-        featureImageXl: './assets/img/project--img--xl2.jpg',
-        featureAlt: 'Featured Image Alt Text'
+        featureImage: './assets/img/project--img.jpg',
+        featureAlt: 'Featured Image Alt Text',
       },
       {
+        // Case Overview
         id: 1,
         title: 'Past Work Showcase',
         role: '',
@@ -93,11 +71,52 @@ export class PortfolioService {
         date: '2010 - 2018',
         desc: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod. Praesent commodo cursus magna, velt.',
         btnLabel: 'View Showcase',
-        featureImageSm: './assets/img/project--img--sm1.jpg',
-        featureImageMd: './assets/img/project--img--md1.jpg',
-        featureImageLg: './assets/img/project--img--lg1.jpg',
-        featureImageXl: './assets/img/project--img--xl1.jpg',
-        featureAlt: 'Featured Image Alt Text'
+        featureImage: '',
+        featureAlt: 'Featured Image Alt Text',
+        caseItem: [
+          {
+            isPublic: true,
+            class: 'centered',
+            heading: 'Centered Case Block',
+            subhead: 'Fermentum Pharetra Justo',
+            bodyCopy: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod.',
+            hasImage: true,
+            imagePath: 'past_projects/caseImage.svg',
+            imageClass: 'centered',
+            altText: 'Alt text',
+            link: 'link',
+            linkUrl: 'http://www.google.com',
+            linkTarget: '_blank',
+          },
+          {
+            isPublic: true,
+            class: 'left',
+            heading: 'Left Case Block',
+            subhead: 'Block subhead',
+            bodyCopy: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod.',
+            hasImage: true,
+            imagePath: 'past_projects/test.png',
+            imageClass: 'full',
+            altText: 'Alt text',
+            link: 'link',
+            linkUrl: 'http://www.google.com',
+            linkTarget: '_blank',
+          },
+          {
+            isPublic: true,
+            class: 'right',
+            heading: 'Right Case Block',
+            subhead: 'Block subhead',
+            bodyCopy: 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod.',
+            hasImage: true,
+            imagePath: 'past_projects/test.png',
+            imageClass: 'full',
+            altText: 'Alt text',
+            link: 'link',
+            linkUrl: 'http://www.google.com',
+            linkTarget: '_blank',
+          },
+        ],
       }
     ];
   }

@@ -3,13 +3,233 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-not-found',
   template: `
-    <section>
-      <h2>404 son!</h2>
+    <section class="hero">
+      <h2 class="title">404!</h2>
+    </section>
+
+    <!-- Typography -->
+    <section style="padding: 20vh 20vw">
+      <h3>Typography</h3>
+
+      <p>
+        This an example paragraph that demonstrates some basic text elements.
+        The following is <b>bold text</b> and this is
+        <strong>strong text</strong>. This line features
+        <sup>superscript text</sup> and <sub>subscript text</sub>, as well as,
+        <u>underlined text</u>, <del>strikethrough text</del>,
+        <a>an anchor</a> and <em>emphasized text</em>. All of these items are
+        inline elements, which can be used in headings, paragraphs and just
+        about anywhere really.
+      </p>
+
+      <h1 class="h1">Heading Level 1</h1>
+      <h2 class="h2">Heading Level 2</h2>
+      <h3 class="h3">Heading Level 3</h3>
+      <h4 class="h4">Heading Level 4</h4>
+      <h5 class="h5">Heading Level 5</h5>
+      <h6 class="h6">Heading Level 6</h6>
+
+      <hr />
+
+      <h1 class="h1" style="font-weight: var(--fontWeight--bold)">
+        Heading Level 1 Bold
+      </h1>
+      <h2 class="h2" style="font-weight: var(--fontWeight--bold)">
+        Heading Level 2 Bold
+      </h2>
+      <h3 class="h3" style="font-weight: var(--fontWeight--bold)">
+        Heading Level 3 Bold
+      </h3>
+      <h4 class="h4" style="font-weight: var(--fontWeight--bold)">
+        Heading Level 4 Bold
+      </h4>
+      <h5 class="h5" style="font-weight: var(--fontWeight--bold)">
+        Heading Level 5 Bold
+      </h5>
+      <h6 class="h6" style="font-weight: var(--fontWeight--bold)">
+        Heading Level 6 Bold
+      </h6>
+
+      <hr />
+
+      <h1 class="h1" style="font-weight: var(--fontWeight--medium)">
+        Heading Level 1 Medium
+      </h1>
+      <h2 class="h2" style="font-weight: var(--fontWeight--medium)">
+        Heading Level 2 Medium
+      </h2>
+      <h3 class="h3" style="font-weight: var(--fontWeight--medium)">
+        Heading Level 3 Medium
+      </h3>
+      <h4 class="h4" style="font-weight: var(--fontWeight--medium)">
+        Heading Level 4 Medium
+      </h4>
+      <h5 class="h5" style="font-weight: var(--fontWeight--medium)">
+        Heading Level 5 Medium
+      </h5>
+      <h6 class="h6" style="font-weight: var(--fontWeight--medium)">
+        Heading Level 6 Medium
+      </h6>
+
+      <hr />
+
+      <h1 class="h1" style="font-weight: var(--fontWeight--base)">
+        Heading Level 1 Base
+      </h1>
+      <h2 class="h2" style="font-weight: var(--fontWeight--base)">
+        Heading Level 2 Base
+      </h2>
+      <h3 class="h3" style="font-weight: var(--fontWeight--base)">
+        Heading Level 3 Base
+      </h3>
+      <h4 class="h4" style="font-weight: var(--fontWeight--base)">
+        Heading Level 4 Base
+      </h4>
+      <h5 class="h5" style="font-weight: var(--fontWeight--base)">
+        Heading Level 5 Base
+      </h5>
+      <h6 class="h6" style="font-weight: var(--fontWeight--base)">
+        Heading Level 6 Base
+      </h6>
+
+      <hr />
+
+      <h1 class="h1" style="font-weight: var(--fontWeight--light)">
+        Heading Level 1 Light
+      </h1>
+      <h2 class="h2" style="font-weight: var(--fontWeight--light)">
+        Heading Level 2 Light
+      </h2>
+      <h3 class="h3" style="font-weight: var(--fontWeight--light)">
+        Heading Level 3 Light
+      </h3>
+      <h4 class="h4" style="font-weight: var(--fontWeight--light)">
+        Heading Level 4 Light
+      </h4>
+      <h5 class="h5" style="font-weight: var(--fontWeight--light)">
+        Heading Level 5 Light
+      </h5>
+      <h6 class="h6" style="font-weight: var(--fontWeight--light)">
+        Heading Level 6 Light
+      </h6>
+
+      <hr />
+
+      <p class="lead">
+        This is a lead paragraph. Lead paragraphs are meant to introduce bodies
+        of text. It makes use of the .lead class, has a font-size 1.5 rem and
+        line-height of 1.75.
+      </p>
+
+      <p>
+        Nulla vitae elit libero, a pharetra augue. Aenean lacinia bibendum nulla
+        sed consectetur. Aenean eu leo quam. Pellentesque ornare sem lacinia
+        quam venenatis vestibulum. Vestibulum id ligula porta felis euismod
+        semper. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+        Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nulla vitae
+        elit libero, a pharetra augue. Vestibulum id ligula porta felis euismod
+        semper. Maecenas faucibus mollis interdum.
+      </p>
+      <p>
+        Sample paragraph. Maecenas sed diam eget risus varius blandit sit amet
+        non magna. Cum sociis natoque penatibus et magnis dis parturient montes,
+        nascetur ridiculus mus. Fusce dapibus, tellus ac cursus commodo, tortor
+        mauris condimentum nibh, ut fermentum massa justo sit amet risus. Duis
+        mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia
+        odio sem nec elit. Lorem ipsum dolor sit amet, consectetur adipiscing
+        elit.
+      </p>
+      <p>
+        Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh,
+        ut fermentum massa justo sit amet risus. Morbi leo risus, porta ac
+        consectetur ac, vestibulum at eros. Vivamus sagittis lacus vel augue
+        laoreet rutrum faucibus dolor auctor. Vivamus sagittis lacus vel augue
+        laoreet rutrum faucibus dolor auctor. Cras mattis consectetur purus sit
+        amet fermentum.
+      </p>
+
+      <h4>Blockquote</h4>
+      <blockquote>
+        Travis is a powerful customer advocate. During the time I was blessed to
+        work with him, he crafted the user personas we used to drive a
+        user-centric product, guided the product managers in adopting
+        data-driven prioritization, and mentored his direct reports into deeply
+        passionate professionals.
+        <cite>
+          Donald Meyer - SDLC Practice Lead at Janus Henderson Investors U.S.
+          <small>Former Head Of Product Management at Arrow Digital</small>
+        </cite>
+      </blockquote>
+
+      <hr />
+
+      <p
+        style="font-weight: var(--fontWeight--light); font-size: var(--fontSize--xl);"
+      >
+        1 2 3 4 5 6 7 8 9 10 ! @ # $ % ^ & * ( ) _ + - =
+      </p>
+      <p
+        style="font-weight: var(--fontWeight--light); font-size: var(--fontSize--xl); text-transform: uppercase;"
+      >
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+      </p>
+      <p
+        style="font-weight: var(--fontWeight--light); font-size: var(--fontSize--xl);"
+      >
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+      </p>
+
+      <hr />
+
+      <p style="font-size: var(--fontSize--xl);">
+        1 2 3 4 5 6 7 8 9 10 ! @ # $ % ^ & * ( ) _ + - =
+      </p>
+      <p style="font-size: var(--fontSize--xl); text-transform: uppercase;">
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+      </p>
+      <p style="font-size: var(--fontSize--xl);">
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+      </p>
+
+      <hr />
+
+      <p
+        style="font-weight: var(--fontWeight--medium); font-size: var(--fontSize--xl);"
+      >
+        1 2 3 4 5 6 7 8 9 10 ! @ # $ % ^ & * ( ) _ + - =
+      </p>
+      <p
+        style="font-weight: var(--fontWeight--medium); font-size: var(--fontSize--xl); text-transform: uppercase;"
+      >
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+      </p>
+      <p
+        style="font-weight: var(--fontWeight--medium); font-size: var(--fontSize--xl);"
+      >
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+      </p>
+
+      <hr />
+
+      <p
+        style="font-weight: var(--fontWeight--bold); font-size: var(--fontSize--xl);"
+      >
+        1 2 3 4 5 6 7 8 9 10 ! @ # $ % ^ & * ( ) _ + - =
+      </p>
+      <p
+        style="font-weight: var(--fontWeight--bold); font-size: var(--fontSize--xl); text-transform: uppercase;"
+      >
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+      </p>
+      <p
+        style="font-weight: var(--fontWeight--bold); font-size: var(--fontSize--xl);"
+      >
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+      </p>
     </section>
 
     <!-- Icons -->
-    <section>
-
+    <section style="padding: 20vh 20vw">
       <h3>Icons</h3>
 
       <svg class="icon -xl">
@@ -91,106 +311,29 @@ import { Component, OnInit } from '@angular/core';
       <svg class="icon -lg">
         <use xlink:href="assets/icons/def.svg#icon-phone"></use>
       </svg>
-
-    </section>
-
-    <!-- Typography -->
-    <section>
-
-      <h3>Typography</h3>
-
-      <p>
-        This an example paragraph that demonstrates some basic text elements. The
-        following is <b>bold text</b> and this is <strong>strong text</strong>. This
-        is <i>italic text</i>, whereas this is <em>emphasized text</em>. This line
-        features <sup>superscript text</sup> and <sub>subscript text</sub>, as well
-        as, <u>underlined text</u>, <del>strikethrough text</del>, <a>an anchor</a>, a and
-        another anchor with
-        <a  class="link">
-          an icon <svg class="icon -sm">
-            <use xlink:href="assets/icons/def.svg#icon-arrow-down"></use>
-          </svg></a>. All of these items are inline elements, which can be used in headings,
-        paragraphs and just about anywhere really.
-      </p>
-
-      <blockquote>Super inspirational text goes in blockquotes</blockquote>
-
-      <h1 class="h1">Heading Level 1</h1>
-      <h2 class="h2">Heading Level 2</h2>
-      <h3 class="h3">Heading Level 3</h3>
-      <h4 class="h4">Heading Level 4</h4>
-      <h5 class="h5">Heading Level 5</h5>
-      <h6 class="h6">Heading Level 6</h6>
-
-      <p class="lead">
-        This is a lead paragraph. Lead paragraphs are meant to introduce bodies of
-        text. It makes use of the .lead class.
-      </p>
-
-      <p>
-        Nulla vitae elit libero, a pharetra augue. Aenean lacinia bibendum nulla sed
-        consectetur. Aenean eu leo quam. Pellentesque ornare sem lacinia quam
-        venenatis vestibulum. Vestibulum id ligula porta felis euismod semper. Morbi
-        leo risus, porta ac consectetur ac, vestibulum at eros. Cras justo odio,
-        dapibus ac facilisis in, egestas eget quam. Nulla vitae elit libero, a
-        pharetra augue. Vestibulum id ligula porta felis euismod semper. Maecenas
-        faucibus mollis interdum.
-      </p>
-      <p>
-        Sample paragraph. Maecenas sed diam eget risus varius blandit sit amet non
-        magna. Cum sociis natoque penatibus et magnis dis parturient montes,
-        nascetur ridiculus mus. Fusce dapibus, tellus ac cursus commodo, tortor
-        mauris condimentum nibh, ut fermentum massa justo sit amet risus. Duis
-        mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia
-        odio sem nec elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      </p>
-      <p>
-        Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
-        fermentum massa justo sit amet risus. Morbi leo risus, porta ac consectetur
-        ac, vestibulum at eros. Vivamus sagittis lacus vel augue laoreet rutrum
-        faucibus dolor auctor. Vivamus sagittis lacus vel augue laoreet rutrum
-        faucibus dolor auctor. Cras mattis consectetur purus sit amet fermentum.
-      </p>
-
-      <h4>Blockquote</h4>
-      <blockquote>
-        Travis is a powerful customer advocate. During the time I was blessed to
-        work with him, he crafted the user personas we used to drive a user-centric
-        product, guided the product managers in adopting data-driven prioritization,
-        and mentored his direct reports into deeply passionate professionals. I
-        would jump at the chance to work with him again and hope I am provided the
-        opportunity to do so.
-        <cite>
-          Donald Meyer - SDLC Practice Lead at Janus Henderson Investors U.S.
-          <small>Former Head Of Product Management at Arrow Digital</small>
-        </cite>
-      </blockquote>
     </section>
 
     <!-- Buttons -->
-    <section>
-
+    <section style="padding: 20vh 20vw">
       <button>Button</button>
       <button class="-secondary">Button</button>
       <button class="-tertiary">Button</button>
-      <button class="-white">Button</button>
-      <button class="-ghost">Button</button>
+      <!-- <button class="-ghost">Button</button> -->
       <button class="isDisabled">Disabled</button>
 
-      <hr>
+      <hr />
 
       <a class="btn" href="#!">Anchor</a>
       <a class="btn -secondary" href="#!">Anchor</a>
       <a class="btn -tertiary" href="#!">Anchor</a>
-      <a class="btn -white" href="#!">Anchor</a>
-      <a class="btn -ghost" href="#!">Anchor</a>
+      <!-- <a class="btn -ghost" href="#!">Anchor</a> -->
       <a class="btn isDisabled" href="#!">Anchor</a>
 
-      <hr>
+      <hr />
 
       <button class="btn">
         Button
-        <svg class="icon">
+        <svg class="icon -right">
           <use xlink:href="assets/icons/def.svg#icon-arrow-right"></use>
         </svg>
       </button>
@@ -202,24 +345,24 @@ import { Component, OnInit } from '@angular/core';
       </button>
       <button class="btn -tertiary">
         Button
-        <svg class="icon">
+        <svg class="icon -right">
           <use xlink:href="assets/icons/def.svg#icon-arrow-right"></use>
         </svg>
       </button>
       <button class="btn -white">
         Button
-        <svg class="icon">
+        <svg class="icon -right">
           <use xlink:href="assets/icons/def.svg#icon-arrow-right"></use>
         </svg>
       </button>
-      <button class="btn -ghost">
+      <!-- <button class="btn -ghost">
         Button
-        <svg class="icon">
+        <svg class="icon -right">
           <use xlink:href="assets/icons/def.svg#icon-arrow-right"></use>
         </svg>
-      </button>
+      </button> -->
 
-      <hr>
+      <hr />
 
       <button class="btn -success">
         Button
@@ -239,18 +382,16 @@ import { Component, OnInit } from '@angular/core';
           <use xlink:href="assets/icons/def.svg#icon-alert"></use>
         </svg>
       </button>
-      <button class="btn -ghost -block">
+      <!-- <button class="btn -ghost -block">
         Block Button
         <svg class="icon">
           <use xlink:href="assets/icons/def.svg#icon-arrow-down"></use>
         </svg>
-      </button>
-
+      </button> -->
     </section>
 
     <!-- Lists -->
-    <section>
-
+    <section style="padding: 20vh 20vw">
       <h3>Lists</h3>
 
       <h4>Unordered</h4>
@@ -270,12 +411,10 @@ import { Component, OnInit } from '@angular/core';
         <li>Etiam vel felis lorem.</li>
         <li>Felis enim et feugiat.</li>
       </ol>
-
     </section>
 
     <!-- Tables -->
-    <section>
-
+    <section style="padding: 20vh 20vw">
       <h3>Tables</h3>
 
       <h4>Default</h4>
@@ -300,7 +439,7 @@ import { Component, OnInit } from '@angular/core';
           </tr>
           <tr>
             <td>Item Three</td>
-            <td> Morbi faucibus arcu accumsan lorem.</td>
+            <td>Morbi faucibus arcu accumsan lorem.</td>
             <td>29.99</td>
           </tr>
           <tr>
@@ -317,7 +456,7 @@ import { Component, OnInit } from '@angular/core';
         <tfoot>
           <tr>
             <td colspan="2"></td>
-            <td>100.00</td>
+            <td>129.95</td>
           </tr>
         </tfoot>
       </table>
@@ -344,7 +483,7 @@ import { Component, OnInit } from '@angular/core';
           </tr>
           <tr>
             <td>Item Three</td>
-            <td> Morbi faucibus arcu accumsan lorem.</td>
+            <td>Morbi faucibus arcu accumsan lorem.</td>
             <td>29.99</td>
           </tr>
           <tr>
@@ -361,24 +500,35 @@ import { Component, OnInit } from '@angular/core';
         <tfoot>
           <tr>
             <td colspan="2"></td>
-            <td>100.00</td>
+            <td>129.95</td>
           </tr>
         </tfoot>
       </table>
     </section>
 
     <!-- Forms -->
-    <section>
-
+    <section style="padding: 20vh 20vw">
       <h3>Forms</h3>
 
       <form class="form" method="post" action="#">
         <div class="row">
-          <input class="field" type="text" name="demo-name" id="demo-name" placeholder="Jane Doe" />
+          <input
+            class="field"
+            type="text"
+            name="demo-name"
+            id="demo-name"
+            placeholder="Jane Doe"
+          />
           <label for="demo-name">Name</label>
         </div>
         <div class="row">
-          <input class="field" type="email" name="demo-email" id="demo-email" placeholder="jane@untitled.tld" />
+          <input
+            class="field"
+            type="email"
+            name="demo-email"
+            id="demo-email"
+            placeholder="jane@untitled.tld"
+          />
           <label for="demo-email">Email</label>
         </div>
         <div class="row">
@@ -392,45 +542,46 @@ import { Component, OnInit } from '@angular/core';
           <label for="demo-category">Category</label>
         </div>
         <div class="row">
-          <input type="radio" id="demo-priority-low" name="demo-priority" checked>
+          <input
+            type="radio"
+            id="demo-priority-low"
+            name="demo-priority"
+            checked
+          />
           <label for="demo-priority-low">Low</label>
         </div>
         <div class="row">
-          <input type="radio" id="demo-priority-high" name="demo-priority">
+          <input type="radio" id="demo-priority-high" name="demo-priority" />
           <label for="demo-priority-high">High</label>
         </div>
         <div class="row">
-          <input type="checkbox" id="demo-copy" name="demo-copy">
+          <input type="checkbox" id="demo-copy" name="demo-copy" />
           <label for="demo-copy">Email me a copy</label>
         </div>
         <div class="row">
-          <input type="checkbox" id="demo-human" name="demo-human" checked>
+          <input type="checkbox" id="demo-human" name="demo-human" checked />
           <label for="demo-human">Not a robot</label>
         </div>
         <div class="row">
-          <textarea name="demo-message" id="demo-message" placeholder="Enter your message" rows="6"></textarea>
+          <textarea
+            name="demo-message"
+            id="demo-message"
+            placeholder="Enter your message"
+            rows="6"
+          ></textarea>
           <label for="demo-message">Message</label>
         </div>
         <ul class="actions">
-          <li><input type="submit" value="Send Message" class="primary" /></li>
-          <li><input type="reset" value="Reset" /></li>
+          <li><input type="submit" value="Send Message" class="btn" /></li>
+          <li><input type="reset" value="Reset" class="btn" /></li>
         </ul>
       </form>
-
     </section>
   `,
-  styles: [
-    `section {
-      min-height: 50vh;
-      padding:var(--spacer--lg);
-    }`
-  ]
+  styles: []
 })
 export class NotFoundComponent implements OnInit {
-
   constructor() { }
 
-  ngOnInit() {
-  }
-
+  ngOnInit() { }
 }

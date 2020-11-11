@@ -6,12 +6,11 @@
   border-bottom-color: $color;
   display: inline-block;
   font-weight: var(--fontWeight--base);
-  font-family: var(--fontFamily);
-  color: white;
+  color: var(--color--txt);
   cursor: pointer;
   line-height: var(--lineHeight--sm);
   margin: var(--spacer--sm) var(--spacer--sm) var(--spacer--sm) 0;
-  padding: var(--spacer--base) 0;
+  padding: var(--spacer--base) var(--spacer--xs);
   position: relative;
   text-align: center;
   text-decoration: none;
@@ -33,7 +32,6 @@
     @include z-index(background);
   }
   &:hover {
-    border-bottom-color: transparent;
     cursor: pointer;
     text-decoration: none;
     &::after {
@@ -57,6 +55,6 @@
   }
   &:focus {
     border-bottom-color: $color;
-    outline: 0;
+    // outline: 0;
   }
 }

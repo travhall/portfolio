@@ -1,26 +1,17 @@
-html {
-  background-color: var(--color--bg);
-  background-image: linear-gradient(180deg, #030303, #1b1b1b);
+html,
+body {
+  background: var(--color--bg);
+  background-image: linear-gradient(
+    345deg,
+    var(--gradient--start),
+    var(--gradient--end)
+  );
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: var(--color--txt);
   font-family: var(--fontFamily);
   font-weight: var(--fontWeight--base);
   line-height: var(--lineHeight--base);
-  // @media screen and (prefers-color-scheme: light) {
-  //   --color--txt: var(--color--black);
-  //   --color--bg: white;
-  // }
-}
-
-*,
-*:before,
-*:after {
-  box-sizing: border-box;
-}
-
-html,
-body {
   height: 100%;
   margin: 0;
   min-height: 100vh;
@@ -32,37 +23,10 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-body {
-  &.fixed {
-    overflow: hidden;
-    .logo,
-    .main,
-    .footer {
-      filter: blur(5px);
-      pointer-events: none;
-      @include menu-anim();
-    }
-    @include breakpoint("large") {
-      overflow: scroll;
-      .logo,
-      .main,
-      .footer {
-        filter: blur(0);
-        pointer-events: all;
-      }
-    }
-  }
-  &.blur {
-    overflow: hidden;
-    .nav,
-    .logo,
-    .main,
-    .footer {
-      filter: blur(5px);
-      pointer-events: none;
-      @include menu-anim();
-    }
-  }
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
 }
 
 hr {
@@ -88,12 +52,6 @@ ol {
 li {
   margin: 0;
   padding: var(--spacer--sm) 0;
-  span {
-    color: var(--color--tertiary);
-    font-size: 75%;
-    font-style: italic;
-    font-weight: 100;
-  }
 }
 
 table {
@@ -102,9 +60,11 @@ table {
   overflow-x: auto;
   text-align: left;
   width: 100%;
+  * {
+    @include button-anim;
+  }
   thead {
     border-bottom: 3px solid var(--color--primary);
-    font-weight: var(--fontWeight--light);
   }
   tbody {
     border-bottom: 1px solid var(--color--tertiary);
@@ -118,19 +78,18 @@ table {
       var(--spacer--sm);
   }
   td {
-    font-weight: var(--fontWeight--light);
     padding: var(--spacer--base) var(--spacer--base) var(--spacer--base)
       var(--spacer--sm);
   }
   &.striped {
     tr:nth-child(even) {
-      background-color: var(--color--grey);
+      background-color: var(--color--grey1);
     }
   }
   &.clickable {
     tr:hover {
-      background-color: var(--color--greyLt);
-      color: var(--color--black);
+      background-color: rgba($color: #5a5d60, $alpha: 0.5);
+      color: var(--color--txt);
       cursor: pointer;
     }
     thead tr:hover,
@@ -148,6 +107,9 @@ img {
 }
 
 svg {
+  fill: var(--color--txt);
+  height: 100%;
+  width: 100%;
   @include button-anim();
 }
 

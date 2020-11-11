@@ -1,8 +1,11 @@
 .footer {
-  font-family: var(--fontHeading);
   font-size: var(--fontSize--sm);
-  font-weight: var(--fontWeight--light);
   padding: var(--spacer--lg);
   position: relative;
   @include z-index(footer);
+  a {
+    color: var(--color--txt);
+    font-weight: var(--fontWeight--base);
+    text-decoration: none;
+  }
 }

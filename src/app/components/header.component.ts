@@ -55,7 +55,7 @@ enum Direction {
         width: 100%;
         z-index: 1500;
       }
-      @media (min-width: 64.375rem) {
+      @media (min-width: 48.125rem) {
         :host {
           position: fixed;
         }

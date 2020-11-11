@@ -1,11 +1,6 @@
 label {
   font-size: var(--fontSize--sm);
   padding: 0;
-  position: absolute;
-  top: calc(50% - calc(var(--fontSize--sm) * 0.5));
-  left: 0;
-  opacity: 0;
-  @include button-anim();
 }
 
 select,
@@ -15,17 +10,12 @@ textarea {
   background: transparent;
   border: transparent;
   border-bottom: 1px solid var(--color--grey);
-  color: white;
-  font-family: var(--fontFamily);
-  font-size: var(--fontSize--base);
-  font-weight: var(--fontWeight--light);
   line-height: 1;
-  padding: var(--spacer--base) 0;
   position: relative;
-  @include button-anim();
   vertical-align: middle;
   white-space: normal;
   width: 100%;
+  @include button-anim();
 }
 
 select[multiple] {
@@ -79,61 +69,6 @@ input[type="search"] {
   padding: 0;
   border: 0;
   background: none;
-}
-
-// Theme
-.form {
-  .row {
-    margin: 0 0 var(--spacer--xl);
-    position: relative;
-    &:last-child {
-      display: grid;
-      margin: 0;
-    }
-  }
-  .field,
-  .textarea {
-    &:focus {
-      background: transparent;
-      border-bottom: solid 1px white;
-      color: white;
-      outline: 0;
-      box-shadow: 0 2px 6px -8px rgba(white, 0.45);
-    }
-    &::placeholder {
-      color: white;
-      color: rgba(white, 0.8);
-      font-style: italic;
-    }
-  }
-  .field {
-    &:not(:placeholder-shown) + label {
-      transform: translateY(-30px);
-      opacity: 0.7;
-    }
-  }
-  .textarea {
-    height: calc(var(--spacer--base) * 5.5);
-    resize: none;
-    &:not(:placeholder-shown) + label {
-      transform: translateY(-60px);
-      opacity: 0.7;
-    }
-  }
-  .help {
-    color: var(--color--error);
-    font-size: var(--fontSize--sm);
-    margin: var(--base--sm) 0;
-    padding: 4px 0 0;
-    position: absolute;
-  }
-  .btn {
-    margin: 0;
-    @include breakpoint("medium") {
-      justify-self: end;
-      min-width: 200px;
-    }
-  }
 }
 
 @keyframes autofill {
