@@ -1,0 +1,358 @@
+/* ═══════════════════════════════ LAYOUT ═════════════════════════════════
+   layout.css — page shells and section-specific structure for the
+   portfolio site: topbar, hero scroll-stack, about page, menu overlay.
+   Not portable — these classes assume this site's content and routes.
+   Built on the design-system primitives in components.css and the tokens
+   in globals.css.
+
+   Ported + rethought from the prototype's styles.css.
+   The layered-scroll trick:
+     z-1: .hero-section  (sticky, top:0) — OGL canvas, stays pinned
+     z-2: .glass-veil    (in normal flow) — rides up over the hero
+     z-3: .work-panel    (in normal flow) — frosted panel, carries the work
+   The topbar floats above everything at z-100.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── TOPBAR ──────────────────────────────────────────────────────────────── */
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  /* Above .menu-overlay (z-index 300) — the toggle button stays put as the
+     overlay sweeps in/out, so it can act as the single open/close control. */
+  z-index: 350;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px var(--gut);
+  max-width: var(--maxw);
+  margin: 0 auto;
+  pointer-events: none;
+}
+.topbar > * {
+  pointer-events: auto;
+}
+.topbar__brand {
+  font-size: 15px;
+  letter-spacing: var(--track-snug);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: var(--fw-medium);
+  transition: opacity 0.2s var(--ease);
+}
+
+/* ── INTRO ───────────────────────────────────────────────────────────────── */
+/* Statement scrolls away normally before the hero pins. */
+.intro-section {
+  padding: clamp(120px, 18vh, 320px) var(--gut) 0;
+  min-height: 64vh;
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+.intro-section__statement {
+  max-width: 30ch;
+  text-wrap: balance;
+}
+
+/* ── HERO SECTION ────────────────────────────────────────────────────────── */
+/* Sticky container — image pins at the top while content scrolls over it.   */
+.hero-section {
+  position: sticky;
+  top: 2rem;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+/* The image frame: 65% wide, fixed height token, landscape on desktop.
+   The mobile breakpoint switches to portrait aspect-ratio.                 */
+.hero-media {
+  position: relative;
+  width: 65%;
+  height: var(--ih);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  /* view-transition-name so the browser morphs this into the about portrait  */
+  view-transition-name: hero-image;
+}
+/* CSS fallback image — visible until WebGL is ready, hidden after            */
+.hero-media__fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.5s var(--ease);
+}
+.hero-media__fallback img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* WebGL canvas — fades in once shader is ready                               */
+.hero-media__gl {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+.hero-media.is-gl .hero-media__fallback {
+  opacity: 0;
+  pointer-events: none;
+}
+.hero-media.is-gl .hero-media__gl {
+  opacity: 1;
+}
+
+/* ── GLASS VEIL ──────────────────────────────────────────────────────────── */
+/* Rides up over the pinned hero image in normal scroll flow. The backdrop
+   blur + faint white tint creates the "image distorting under glass" look
+   as the chromatic-aberration parallax shader plays beneath.                */
+.glass-veil {
+  position: relative;
+  z-index: 2;
+  min-height: 70vh;
+  background: color-mix(in oklch, var(--glass-tint) 8%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+/* ── WORK PANEL ──────────────────────────────────────────────────────────── */
+/* Frosted panel that carries the project cards and all subsequent content.   */
+.work-panel {
+  position: relative;
+  z-index: 3;
+  background: color-mix(in oklch, var(--surface) 90%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid var(--line);
+  overflow-x: clip;
+}
+.work-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: clamp(96px, 12vw, 168px) var(--gut) 22px;
+  border-bottom: 1px solid var(--hairline);
+}
+.work-panel__placeholder {
+  min-height: 200vh;
+  padding: clamp(60px, 8vw, 120px) var(--gut);
+}
+
+/* ── ABOUT LAYOUT ────────────────────────────────────────────────────────── */
+.about-hero {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 120px var(--gut) 80px;
+  display: grid;
+  grid-template-columns: clamp(260px, 30%, 360px) 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+/* 4:5 portrait — matches the card image proportion for the view transition   */
+.about-portrait {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  view-transition-name: hero-image;
+}
+.about-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  object-position: center top;
+}
+/* Bio column heading */
+.about-title {
+  max-width: 20ch;
+  text-wrap: balance;
+}
+/* Lead + supporting paragraphs under the title */
+.about-bio {
+  margin-top: clamp(24px, 3vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.about-bio__measure {
+  max-width: 54ch;
+}
+/* Social + CV button row */
+.about-actions {
+  margin-top: clamp(28px, 4vw, 48px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ── SKILLS & EXPERIENCE ─────────────────────────────────────────────────── */
+.about-grid {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 var(--gut) clamp(80px, 12vw, 160px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+}
+.about-grid h2 {
+  margin-bottom: clamp(32px, 4vw, 56px);
+}
+.about-skill-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.about-skill-groups__label {
+  margin-bottom: 12px;
+}
+.about-skill-groups__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.about-roles {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 48px);
+}
+.about-roles__meta {
+  margin-top: 4px;
+}
+.about-roles__body {
+  margin-top: 10px;
+  max-width: 44ch;
+}
+
+/* ── FOOTER CTA + FOOTER ─────────────────────────────────────────────────── */
+.about-cta {
+  border-top: 1px solid var(--line);
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: clamp(32px, 4vw, 56px) var(--gut);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.about-footer {
+  border-top: 1px solid var(--line);
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px var(--gut);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.about-footer__social {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ── MENU OVERLAY ────────────────────────────────────────────────────────── */
+/* Full-screen glass takeover. clip-path is driven by GSAP; CSS only sets the
+   final resting state and material properties.                               */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: color-mix(in oklch, var(--surface-dim) 88%, transparent);
+  -webkit-backdrop-filter: blur(32px) saturate(1.2);
+  backdrop-filter: blur(32px) saturate(1.2);
+  border-bottom: 1px solid var(--line);
+  /* Hidden at rest — GSAP fades/scales/blurs this in to reveal, out to hide  */
+  opacity: 0;
+  will-change: opacity, transform, filter;
+  overflow: hidden;
+  /* Prevent interaction while hidden */
+  pointer-events: none;
+  /* Smooth the background when the theme toggle switches modes               */
+  transition: background-color 0.25s var(--ease);
+}
+
+/* Inner content layer — separate element so the open/close water-ripple
+   (its own `filter: url(#...)`) doesn't fight GSAP's `filter: blur()` on
+   the outer .menu-overlay above.                                           */
+.menu-overlay__surface {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 40px var(--gut) clamp(40px, 6vh, 72px);
+  will-change: filter;
+}
+
+/* Nav links — large, airy, spaced                                            */
+.menu-overlay__nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(8px, 2vh, 16px);
+  padding: clamp(40px, 6vh, 80px) 0;
+}
+.menu-overlay__link {
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: var(--fw-light);
+  letter-spacing: var(--track-tight);
+  line-height: 1.05;
+  color: var(--ink);
+  text-decoration: none;
+  display: block;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: color 0.2s var(--ease);
+}
+.menu-overlay__link:hover {
+  color: var(--water);
+}
+
+/* Bottom row — theme toggle + copyright                                      */
+.menu-overlay__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  opacity: 0;
+}
+.menu-overlay__theme-label {
+  font-size: 13px;
+  letter-spacing: var(--track-snug);
+  color: var(--ink-muted);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .hero-section {
+    padding-left: var(--gut);
+    padding-right: var(--gut);
+  }
+  .hero-media {
+    width: 100%;
+    height: auto;
+    margin-left: 0;
+    aspect-ratio: 3 / 4;
+  }
+  .about-hero {
+    grid-template-columns: 1fr;
+  }
+  .about-portrait {
+    max-width: 280px;
+  }
+}

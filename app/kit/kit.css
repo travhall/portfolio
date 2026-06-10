@@ -1,0 +1,306 @@
+/* ════════════════════════════════════════════════════════════════════════
+   kit.css — layout for the internal /kit style guide. Scoped to this page
+   only; not part of the public design system in components.css/layout.css.
+   Built on the same tokens as the rest of the site.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.kit-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 128px 24px;
+}
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+.kit-header {
+  padding: 64px 0;
+}
+.kit-header__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.kit-header__title {
+  margin-top: 12px;
+}
+.kit-header__lead {
+  margin-top: 20px;
+  max-width: 60ch;
+}
+
+/* ── SECTION ─────────────────────────────────────────────────────────────── */
+.kit-section {
+  padding: 48px 0;
+  border-top: 1px solid var(--line);
+}
+.kit-section:first-of-type {
+  padding-top: 0;
+  border-top: none;
+}
+.kit-section__head {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--hairline);
+}
+.kit-section__note {
+  max-width: 42ch;
+  text-align: right;
+}
+
+/* ── COLOR ───────────────────────────────────────────────────────────────── */
+.kit-color-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.kit-color-group__note {
+  margin-top: 4px;
+}
+.kit-swatches {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.kit-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kit-swatch__color {
+  height: 64px;
+  border-radius: 8px;
+  border: 1px solid var(--hairline);
+}
+
+/* ── BRAND RAMPS ─────────────────────────────────────────────────────────── */
+.kit-ramp {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.kit-ramp__swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── COLOR IN CONTEXT (contrast audit) ──────────────────────────────────── */
+.kit-pairings {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.kit-pairing {
+  display: grid;
+  grid-template-columns: 1fr;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.kit-pairing__demo {
+  display: flex;
+  align-items: center;
+  padding: 32px 24px;
+  min-height: 96px;
+}
+.kit-pairing__sample {
+  margin: 0;
+  max-width: 48ch;
+}
+.kit-pairing__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-dim);
+}
+.kit-pairing__tokens {
+  word-break: break-word;
+}
+.kit-pairing__ratio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.kit-pairing__ratio-value {
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+}
+.kit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+}
+.kit-badge--pass {
+  background: color-mix(in oklch, var(--water) 22%, transparent);
+  color: var(--water-deep);
+}
+.kit-badge--fail {
+  background: color-mix(in oklch, var(--chemical) 22%, transparent);
+  color: color-mix(in oklch, var(--chemical) 60%, var(--ink));
+}
+
+/* ── TYPE ────────────────────────────────────────────────────────────────── */
+.kit-type-rows {
+  display: flex;
+  flex-direction: column;
+}
+.kit-type-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: baseline;
+  gap: 12px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+.kit-type-row:first-child {
+  border-top: none;
+}
+.kit-type-row__sample {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-bottom: 0.22em;
+}
+.kit-type-row__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kit-type-row__label {
+  font-weight: var(--fw-medium);
+}
+
+/* ── GLASS SURFACE DEMO ──────────────────────────────────────────────────────
+   Two real contexts for .glass-surface, per its own doc comment ("reads over
+   imagery as frosted glass, over paper as a soft lifted card"). Captions sit
+   on --surface using .text-ink-muted (an audited pairing) rather than a
+   hardcoded color guessed against a translucent backdrop.                   */
+.kit-glass-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+.kit-glass-demo__backdrop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid var(--hairline);
+}
+/* Fixed brand-1 mid-tones — unlike --water/--water-deep these don't invert
+   between light/dark, so the "imagery" backdrop stays a backdrop in both.   */
+.kit-glass-demo__backdrop--photo {
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-1-600),
+    var(--color-brand-1-400)
+  );
+}
+.kit-glass-demo__backdrop--paper {
+  background: var(--surface-dim);
+}
+.kit-glass-demo__card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: 12px;
+}
+.kit-glass-demo__caption {
+  margin-top: 12px;
+  max-width: 48ch;
+}
+
+/* ── GENERIC STACKS / ROWS ───────────────────────────────────────────────── */
+.kit-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.kit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+.kit-row--tight {
+  gap: 12px;
+}
+
+/* ── ICONS ───────────────────────────────────────────────────────────────── */
+.kit-icons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.kit-icon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .kit-page {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  .kit-swatches {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .kit-type-row {
+    grid-template-columns: 1fr 220px;
+  }
+  .kit-type-row__meta {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .kit-icons {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  .kit-ramp {
+    grid-template-columns: repeat(11, 1fr);
+  }
+  .kit-pairing {
+    grid-template-columns: 1.4fr 1fr;
+  }
+  .kit-pairing__meta {
+    border-top: none;
+    border-left: 1px solid var(--line);
+  }
+  .kit-glass-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .kit-swatches {
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .kit-pairings {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

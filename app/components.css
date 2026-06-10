@@ -1,0 +1,474 @@
+/* ════════════════════════════════════════════════════════════════════════
+   components.css — reusable surface + control system for the portfolio.
+   Glass surface · Buttons · Tags · Type scale · Theme toggle. Rules only —
+   every custom property they consume is declared in the single :root block
+   in globals.css, so retuning the whole system means editing values there,
+   not hunting through component code.
+
+   This file is the *portable* design-system layer: every class here could
+   be lifted into another project as-is. Page- and section-specific
+   structure (topbar, hero, about page, menu overlay, etc.) lives in
+   layout.css.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────── TYPE UTILITIES ───────────────────────────
+   Reusable classes for every role. Apply to any element; they set only
+   font properties so they compose with layout + color freely. Font family
+   is inherited from `body` (--font-sans) — only .type-mono overrides it.  */
+.type-display {
+  font-size: var(--text-display);
+  font-weight: var(--fw-light);
+  letter-spacing: var(--track-tight);
+  line-height: var(--leading-none);
+}
+.type-h1 {
+  font-size: var(--text-h1);
+  font-weight: var(--fw-light);
+  letter-spacing: var(--track-snug);
+  line-height: var(--leading-h1);
+}
+.type-h2 {
+  font-size: var(--text-h2);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-snug);
+  line-height: var(--leading-tight);
+}
+.type-h3 {
+  font-size: var(--text-h3);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-normal);
+  line-height: var(--leading-h3);
+}
+.type-statement {
+  font-size: var(--text-statement);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--track-snug);
+  line-height: var(--leading-statement);
+}
+.type-lead {
+  font-size: var(--text-lead);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--track-flat);
+  line-height: var(--leading-body);
+}
+.type-body {
+  font-size: var(--text-body);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--track-flat);
+  line-height: var(--leading-body);
+}
+.type-small {
+  font-size: var(--text-small);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--track-flat);
+  line-height: var(--leading-snug);
+}
+.type-caption {
+  font-size: var(--text-caption);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-flat);
+  line-height: var(--leading-caption);
+}
+.type-eyebrow {
+  font-size: var(--text-eyebrow);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-wide);
+  line-height: var(--leading-eyebrow);
+  text-transform: uppercase;
+}
+.type-micro {
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-flat);
+  line-height: var(--leading-snug);
+}
+.type-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  font-weight: var(--fw-regular);
+  letter-spacing: 0;
+  line-height: var(--leading-caption);
+}
+.type-tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────── TEXT COLOR UTILITIES ─────────────────────────
+   Pairs with the type scale above — apply alongside a .type-* class to set
+   the ink register without reaching for inline styles.                     */
+.text-ink {
+  color: var(--ink);
+}
+.text-ink-muted {
+  color: var(--ink-muted);
+}
+.text-ink-faint {
+  color: var(--ink-faint);
+}
+.text-water {
+  color: var(--water);
+}
+
+/* ───────────────────────────── GLASS SURFACE ─────────────────────────────
+   Apply `.glass-surface` to any element. The frost + sheen paint on top of a
+   blurred, saturated backdrop; an inset specular line + outer hairline give
+   it dimensional edges — the "water & glass" register made tactile.        */
+.glass-surface {
+  position: relative;
+  /* force its own compositing layer — Chromium renders a stray edge line
+     where backdrop-filter blur meets a rounded, semi-transparent
+     background otherwise */
+  transform: translateZ(0);
+  background:
+    linear-gradient(
+      180deg,
+      var(--glass-sheen-top) 0%,
+      var(--glass-sheen-bot) 46%,
+      transparent 100%
+    ),
+    var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+    saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  /* .btn and .tag both declare `border: 1px solid transparent` at equal
+     specificity but later in the cascade, so they win and this border is
+     never painted directly — exposed via --surface-border instead, which
+     their border shorthands read with a `transparent` fallback. */
+  --surface-border: var(--glass-edge);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-spec),
+    inset 0 -1px 1px 0 var(--glass-contact),
+    0 0 0 0.5px var(--glass-hair),
+    var(--glass-drop);
+}
+
+/* ═══════════════════════════════ BUTTONS ════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--btn-gap);
+  height: var(--btn-h);
+  padding: 0 var(--btn-px);
+  border: 1px solid var(--surface-border, transparent);
+  border-radius: var(--btn-radius);
+  font: inherit;
+  font-size: var(--btn-font);
+  font-weight: var(--btn-weight);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  appearance: none;
+  user-select: none;
+  transition:
+    background var(--btn-dur) var(--ease),
+    color var(--btn-dur) var(--ease),
+    border-color var(--btn-dur) var(--ease),
+    box-shadow var(--btn-dur) var(--ease),
+    transform 0.22s var(--ease);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.btn__icon {
+  flex: none;
+  display: inline-flex;
+  width: var(--btn-icon);
+  height: var(--btn-icon);
+  transition: transform var(--btn-dur) var(--ease);
+}
+.btn__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.btn__label {
+  position: relative;
+  display: inline-block;
+}
+
+/* —— surface: SOLID (primary) —— */
+.btn--solid {
+  /* volume via inset highlight/shadow, not a lightness gradient — --ink sits
+     at a lightness extreme in both themes (near-black in light, near-white
+     in dark), where mixing toward white/black collapses to nothing. Alpha
+     blending stays visible against either extreme: the white highlight reads
+     on dark surfaces, the black shadow reads on light surfaces. */
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, white 12%, transparent) 0%,
+      transparent 50%,
+      color-mix(in oklch, black 12%, transparent) 100%
+    ),
+    var(--ink);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklch, white 40%, transparent),
+    inset 0 -1px 1px 0 color-mix(in oklch, black 40%, transparent);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+.btn--solid:hover {
+  background: color-mix(in oklch, var(--ink) 88%, var(--surface));
+  border-color: color-mix(in oklch, var(--ink) 88%, black);
+}
+
+/* —— surface: GLASS —— inherits the frosted material, fills with ink on hover.
+   Label reads in --water-deep (not --ink-muted) — the dark end of the same
+   blue-teal register the glass itself is tinted with, so it stays legible
+   over imagery and saturated water-tones, not just flat paper. */
+.btn--glass {
+  color: var(--water-deep);
+}
+.btn--glass.glass-surface:hover,
+.btn--glass:hover {
+  background: var(--ink);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  color: var(--surface);
+  border-color: var(--ink);
+  box-shadow:
+    0 1px 2px color-mix(in oklch, var(--ink) 6%, transparent),
+    0 10px 24px -14px color-mix(in oklch, var(--ink) 40%, transparent);
+}
+
+/* —— surface: GHOST —— hairline outline, subtle tint on hover */
+.btn--ghost {
+  background: transparent;
+  border-color: var(--hairline);
+  color: var(--ink);
+}
+.btn--ghost:hover {
+  background: var(--btn-ghost-hover);
+  border-color: var(--ink);
+}
+
+/* —— surface: LINK —— text + animated underline, no chrome */
+.btn--link {
+  height: auto;
+  padding: 0;
+  gap: 6px;
+  border-radius: 0;
+  background: none;
+  border: none;
+  color: var(--ink);
+}
+.btn--link .btn__label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--btn-dur) var(--ease);
+}
+.btn--link:hover .btn__label::after {
+  transform: scaleX(1);
+}
+.btn--link:active {
+  transform: none;
+}
+
+/* —— shape: ICON-ONLY —— square footprint, centred glyph; compose with any surface */
+.btn--icon {
+  width: var(--btn-h);
+  padding: 0;
+}
+.btn--icon .btn__icon {
+  width: calc(var(--btn-icon) + 2px);
+  height: calc(var(--btn-icon) + 2px);
+}
+
+/* —— sizes —— */
+.btn--sm {
+  --btn-h: 34px;
+  --btn-px: 16px;
+  --btn-font: 12px;
+  --btn-gap: 7px;
+  --btn-icon: 14px;
+}
+.btn--lg {
+  --btn-h: 54px;
+  --btn-px: 30px;
+  --btn-font: 15px;
+  --btn-gap: 11px;
+  --btn-icon: 18px;
+}
+
+/* —— icon motion cues (opt-in via Button component) —— */
+.btn:hover .btn__icon--nudge-r {
+  transform: translateX(3px);
+}
+.btn:hover .btn__icon--nudge-d {
+  transform: translateY(3px);
+}
+.btn:hover .btn__icon--diag {
+  transform: translate(2px, -2px);
+}
+.btn:hover .btn__icon--spin {
+  transform: rotate(90deg);
+}
+
+/* ═══════════════════════════════ TAGS ═══════════════════════════════════ */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tag-gap);
+  height: var(--tag-h);
+  padding: 0 var(--tag-px);
+  border-radius: var(--tag-radius);
+  font-size: var(--tag-font);
+  font-weight: var(--tag-weight);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  border: 1px solid var(--surface-border, transparent);
+}
+.tag__icon {
+  flex: none;
+  display: inline-flex;
+  width: 13px;
+  height: 13px;
+  opacity: 0.8;
+}
+.tag__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* —— surfaces —— */
+.tag--glass {
+  color: var(--water-deep);
+} /* + .glass-surface — matches .btn--glass */
+.tag--solid {
+  background: var(--ink);
+  color: var(--surface);
+}
+.tag--ghost {
+  border-color: var(--hairline);
+  color: var(--ink);
+}
+
+/* —— dismissible —— trailing × that fills on hover —— */
+.tag--dismiss {
+  padding-right: 5px;
+}
+.tag__x {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 1px;
+  border: none;
+  border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
+  opacity: 1;
+  background: color-mix(in oklch, currentColor 20%, transparent);
+  transition:
+    background var(--tag-dur) var(--ease),
+    color var(--tag-dur) var(--ease),
+    opacity var(--tag-dur) var(--ease);
+}
+.tag__x svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+.tag__x svg path {
+  stroke-width: 2.6;
+}
+.tag__x:hover {
+  background: var(--ink);
+  color: var(--surface);
+}
+.tag__x:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+.tag--solid .tag__x:hover {
+  background: color-mix(in oklch, var(--surface) 22%, var(--ink));
+  color: var(--surface);
+}
+
+/* graceful removal animation (driven by the Tag component) */
+.tag--leaving {
+  animation: tag-out 0.26s var(--ease) forwards;
+}
+@keyframes tag-out {
+  to {
+    opacity: 0;
+    transform: scale(0.86);
+    margin-right: calc(-1 * var(--tag-px));
+    padding-left: 0;
+    padding-right: 0;
+    width: 0;
+    gap: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn__icon,
+  .tag__x {
+    transition: none;
+  }
+  .tag--leaving {
+    animation-duration: 0.01s;
+  }
+}
+
+/* ── THEME TOGGLE ────────────────────────────────────────────────────────── */
+/* Segmented pill: three options side by side, active pill gets a surface
+   background so the current mode is always visible at a glance.             */
+.theme-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: color-mix(in oklch, var(--glass-tint) 60%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+}
+.theme-toggle__opt {
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  letter-spacing: var(--track-snug);
+  color: var(--ink-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition:
+    background 0.18s var(--ease),
+    color 0.18s var(--ease);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.theme-toggle__opt.is-active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 4px color-mix(in oklch, var(--ink) 10%, transparent);
+}
+.theme-toggle__opt:not(.is-active):hover {
+  color: var(--ink);
+}
