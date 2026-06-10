@@ -77,19 +77,18 @@
   /* view-transition-name so the browser morphs this into the about portrait  */
   view-transition-name: hero-image;
 }
-/* CSS fallback image — visible until WebGL is ready, hidden after            */
+/* CSS fallback — visible until WebGL is ready, hidden after.
+   background-image (not <img>) so the correct light/dark variant resolves
+   from --hero-fallback-img at first paint, before any JS runs.             */
 .hero-media__fallback {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  background-image: var(--hero-fallback-img);
+  background-size: cover;
+  background-position: center;
   transition: opacity 0.5s var(--ease);
-}
-.hero-media__fallback img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 /* WebGL canvas — fades in once shader is ready                               */
 .hero-media__gl {

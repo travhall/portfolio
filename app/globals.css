@@ -172,6 +172,11 @@
   --maxw: 1512px;
   --edge: 16px;
   --ih: clamp(360px, 38vw, 600px); /* hero + collapsed card image height  */
+
+  /* Hero fallback image — resolved entirely by CSS (same cascade as the
+     color tokens below) so the correct image paints on first frame with
+     zero JS dependency. See html[data-theme] overrides for dark/light.   */
+  --hero-fallback-img: url('/images/hero-light.jpg');
 }
 
 /* ─────────────────────────── Dark mode override ──────────────────────────
@@ -223,6 +228,8 @@
 
     /* Tell the browser this is a dark context so native elements theme correctly */
     color-scheme: dark;
+
+    --hero-fallback-img: url('/images/hero-dark.jpg');
   }
 }
 
@@ -246,6 +253,7 @@ html[data-theme="dark"] {
   --chemical: var(--color-brand-2-400);
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: dark;
+  --hero-fallback-img: url('/images/hero-dark.jpg');
 }
 /* Explicit light: must re-declare every token so this selector (0,1,1)
  * overrides the dark @media block (0,1,0) when the OS is in dark mode.
@@ -266,6 +274,7 @@ html[data-theme="light"] {
   --chemical: var(--color-brand-2-500);
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: light;
+  --hero-fallback-img: url('/images/hero-light.jpg');
 }
 
 html {

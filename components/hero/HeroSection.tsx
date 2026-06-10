@@ -5,20 +5,20 @@
  *
  * Structural roles:
  *   - Holds the OGL canvas (parallax shader).
- *   - `<img>` fallback inside for the loading state (no <source> — see below).
+ *   - `.hero-media__fallback` div for the loading state — its background-image
+ *     is `var(--hero-fallback-img)`, resolved entirely by CSS (see globals.css)
+ *     so the correct light/dark variant paints on the first frame with zero
+ *     JS dependency. No <img>/<source> here: <source media="..."> is resolved
+ *     by the browser using OS preference only, with no knowledge of
+ *     data-theme — that caused a hard flash whenever the forced theme
+ *     conflicted with the OS.
  *   - `view-transition-name: hero-image` on the media wrapper so the browser
  *     morphs it into the about portrait on route change.
  *
  * The component owns the HeroGL lifecycle: instantiate on mount, dispose on
  * unmount. swapTexture() reads data-theme + prefers-color-scheme to pick the
- * correct image, and is called on mount, OS scheme change, and manual toggle.
- *
- * Why no <source media="(prefers-color-scheme: dark)">:
- *   The browser evaluates <source media="..."> using OS preference only —
- *   it has no concept of data-theme. When the forced theme conflicts with
- *   the OS, the browser would load the wrong image before any JS runs,
- *   causing a hard flash. Removing <source> lets swapTexture() always
- *   be the single source of truth for which image is displayed.
+ * correct WebGL texture, and is called on mount, OS scheme change, and manual
+ * toggle.
  */
 
 import { useEffect, useRef } from 'react';
@@ -34,7 +34,6 @@ interface Props {
 export function HeroSection({ intensity = 1.5 }: Props) {
   const mediaRef     = useRef<HTMLDivElement>(null);
   const canvasRef    = useRef<HTMLCanvasElement>(null);
-  const fallbackRef  = useRef<HTMLImageElement>(null);
   const glRef        = useRef<HeroGL | null>(null);
 
   useEffect(() => {
@@ -46,9 +45,6 @@ export function HeroSection({ intensity = 1.5 }: Props) {
     // Called on mount and whenever the active theme changes.
     const swapTexture = () => {
       const src = getHeroSrc(LIGHT, DARK);
-
-      // Update the <img> fallback so it matches if GL hasn't loaded yet
-      if (fallbackRef.current) fallbackRef.current.src = src;
 
       // Dispose the old instance WITHOUT losing the WebGL context — both the
       // old and new HeroGL share the same canvas (and therefore the same GL
@@ -94,21 +90,9 @@ export function HeroSection({ intensity = 1.5 }: Props) {
   return (
     <section className="hero-section">
       <div ref={mediaRef} className="hero-media">
-        {/* CSS/SSR fallback — shown until the shader is ready.
-            No <source media="..."> here: the browser evaluates <source>
-            using OS-level media queries which have no knowledge of
-            data-theme. That caused a hard flash of the wrong image when
-            the forced theme competed with the OS preference. swapTexture()
-            sets the correct src on mount before the canvas is ready.      */}
-        <picture className="hero-media__fallback">
-          <img
-            ref={fallbackRef}
-            src={LIGHT}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-          />
-        </picture>
+        {/* CSS fallback — background-image driven by --hero-fallback-img,
+            resolved by CSS before first paint. See globals.css.            */}
+        <div className="hero-media__fallback" aria-hidden="true" />
         {/* OGL canvas — fades in via .is-gl on hero-media */}
         <canvas ref={canvasRef} className="hero-media__gl" aria-hidden="true" />
       </div>
