@@ -28,7 +28,16 @@ let uid = 0;
 const partsByElement = new WeakMap<Element, RippleParts>();
 
 function ensureHost(): SVGSVGElement {
-  if (host) return host;
+  if (host?.isConnected) return host;
+  // Module state resets on hot reload, but a host appended by a previous
+  // module instance can still be sitting in the DOM — reuse it instead of
+  // appending a duplicate (which would leave stale, frozen <filter>s with
+  // ids that collide with the new ones below).
+  const existing = document.querySelector<SVGSVGElement>("svg.ripple-filters");
+  if (existing) {
+    host = existing;
+    return host;
+  }
   host = document.createElementNS(SVG_NS, "svg") as SVGSVGElement;
   host.setAttribute("aria-hidden", "true");
   host.setAttribute("class", "ripple-filters");
@@ -39,7 +48,13 @@ function ensureHost(): SVGSVGElement {
 
 function makeFilter(src: string): RippleParts {
   const svgHost = ensureHost();
-  const id = "ripple-fx-" + ++uid;
+  // Skip any id still occupied by a leftover <filter> from a previous module
+  // instance (e.g. hot reload reset `uid` to 0) — a duplicate id would
+  // resolve `url(#id)` to that stale, frozen filter instead of this one.
+  let id: string;
+  do {
+    id = "ripple-fx-" + ++uid;
+  } while (svgHost.querySelector(`#${id}`));
   const filter = document.createElementNS(SVG_NS, "filter");
   filter.setAttribute("id", id);
   // userSpaceOnUse so the region lines up 1:1 with the primitives' own px
@@ -111,7 +126,7 @@ function run(el: HTMLElement, parts: RippleParts, cx: number, cy: number, opts: 
 
   function frame(now: number) {
     if (parts.gen !== myGen) return;
-    const t = Math.min((now - start) / duration, 1);
+    const t = Math.min(Math.max((now - start) / duration, 0), 1);
     const size = maxSize * easeOut(t); // ring grows + decelerates
     const s = size / 2;
     parts.img.setAttribute("x", (cx - s).toFixed(1));
