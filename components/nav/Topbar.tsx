@@ -14,10 +14,13 @@
  * button and overlay share a single source of truth.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { Link } from 'next-view-transitions';
 import { Button } from '@/components/ui/Button';
 import { MenuOverlay } from './MenuOverlay';
+import { prefersReducedMotion, triggerRipple } from '@/components/ui/ripple';
+
+const RIPPLE_BRAND = { strength: 9, size: 90, duration: 600 };
 
 export function Topbar() {
   const headerRef          = useRef<HTMLElement>(null);
@@ -79,7 +82,15 @@ export function Topbar() {
   return (
     <>
       <header ref={headerRef} className="topbar" aria-label="Site navigation">
-        <Link ref={brandRef} href="/" className="topbar__brand" onClick={close}>
+        <Link
+          ref={brandRef}
+          href="/"
+          className="topbar__brand"
+          onClick={(e: MouseEvent<HTMLAnchorElement>) => {
+            if (!prefersReducedMotion()) triggerRipple(e.currentTarget, e, RIPPLE_BRAND);
+            close();
+          }}
+        >
           travishall.design
         </Link>
         <Button

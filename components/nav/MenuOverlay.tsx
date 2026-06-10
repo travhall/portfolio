@@ -24,7 +24,7 @@
  */
 
 import { useEffect, useRef, type RefObject } from 'react';
-import { Link } from 'next-view-transitions';
+import { Link, useTransitionRouter } from 'next-view-transitions';
 import { gsap } from 'gsap';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useLenis } from '@/components/providers/SmoothScroll';
@@ -48,6 +48,9 @@ const NAV_LINKS = [
 const RIPPLE_MENU_OPEN  = { strength: 28, duration: 850 };
 const RIPPLE_MENU_CLOSE = { strength: 20, duration: 450 };
 
+// Smaller, quicker ripple on the nav link itself, under the cursor.
+const RIPPLE_LINK = { strength: 14, size: 160, duration: 500 };
+
 export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
   const overlayRef  = useRef<HTMLDivElement>(null);
   const surfaceRef  = useRef<HTMLDivElement>(null);
@@ -55,6 +58,13 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
   const bottomRef   = useRef<HTMLDivElement>(null);
   const tlRef       = useRef<gsap.core.Timeline | null>(null);
   const lenis       = useLenis();
+  const router      = useTransitionRouter();
+
+  // Set by a nav link's click — the close animation's onComplete navigates
+  // here once the menu has fully exited, so the route transition starts
+  // against a clean (menu-free) screenshot instead of one with the overlay
+  // still on top.
+  const pendingHrefRef = useRef<string | null>(null);
 
   // ── Fade + settle animation ───────────────────────────────────────────────
   //
@@ -70,6 +80,10 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
 
     if (isOpen) {
       lenis?.stop();
+
+      // A reopen mid-close (e.g. toggled again before a link's close
+      // finished) should cancel any pending nav-link navigation.
+      pendingHrefRef.current = null;
 
       const tl = gsap.timeline();
       tlRef.current = tl;
@@ -117,6 +131,19 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
           // Restore pointer-events: none so the hidden overlay isn't clickable
           gsap.set(overlay, { pointerEvents: 'none' });
           lenis?.start();
+
+          // If a nav link triggered this close, navigate now that the menu
+          // has fully exited — the route's view transition then starts
+          // against a clean screenshot, with no overlay in the way.
+          const href = pendingHrefRef.current;
+          pendingHrefRef.current = null;
+          if (href) {
+            if (href.startsWith('mailto:') || href.startsWith('http')) {
+              window.location.href = href;
+            } else {
+              router.push(href);
+            }
+          }
         },
       });
       tlRef.current = tl;
@@ -201,7 +228,21 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
               href={href}
               className="menu-overlay__link"
               ref={(el) => { if (el) linksRef.current[i] = el; }}
-              onClick={onClose}
+              onClick={(e) => {
+                e.preventDefault();
+
+                // Ripple on the link itself, plus the surface-wide close
+                // ripple radiating from the same point.
+                if (!prefersReducedMotion()) {
+                  triggerRipple(e.currentTarget, e, RIPPLE_LINK);
+                }
+                originRef.current = { x: e.clientX, y: e.clientY };
+
+                // Navigate once the close animation finishes — see
+                // pendingHrefRef and the close timeline's onComplete above.
+                pendingHrefRef.current = href;
+                onClose();
+              }}
             >
               {label}
             </Link>

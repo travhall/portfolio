@@ -80,7 +80,12 @@ export function HeroSection({ intensity = 1.5 }: Props) {
     return () => {
       mq.removeEventListener('change', swapTexture);
       observer.disconnect();
-      glRef.current?.dispose();
+      // keepContext: forcing context loss here breaks React StrictMode's
+      // double-invoke (mount -> cleanup -> mount) — the second mount reuses
+      // this canvas, but a lost WebGL context returns null from
+      // getExtension(), which crashes ogl's Geometry on bindVertexArray.
+      // The detached canvas is GC'd shortly after anyway.
+      glRef.current?.dispose(true);
       glRef.current = null;
       media.classList.remove('is-gl');
     };
