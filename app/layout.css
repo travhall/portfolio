@@ -323,18 +323,21 @@
   color: var(--water);
 }
 
-/* Bottom row — theme toggle + copyright                                      */
+/* Bottom row — theme toggle + quick links (social + CV)                     */
 .menu-overlay__bottom {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   flex-shrink: 0;
   opacity: 0;
 }
-.menu-overlay__theme-label {
-  font-size: 13px;
-  letter-spacing: var(--track-snug);
-  color: var(--ink-muted);
+.menu-overlay__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 /* ── RESPONSIVE ──────────────────────────────────────────────────────────── */

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
+import { EmailButton } from "@/components/ui/EmailButton";
 import { Tag } from "@/components/ui/Tag";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "About — Travis Hall",
@@ -55,25 +57,20 @@ export default function AboutPage() {
                 variant="glass"
                 iconOnly="github"
                 aria-label="GitHub"
-                href="https://github.com/travishall"
+                href={siteConfig.links.github}
               />
               <Button
                 variant="glass"
-                iconOnly="external"
+                iconOnly="linkedin"
                 aria-label="LinkedIn"
-                href="https://linkedin.com"
+                href={siteConfig.links.linkedin}
               />
-              <Button
-                variant="glass"
-                iconOnly="mail"
-                aria-label="Email"
-                href="mailto:hello@travishall.design"
-              />
+              <EmailButton variant="glass" iconOnly="mail" aria-label="Email" />
               <Button
                 variant="solid"
                 icon="download"
                 iconPos="right"
-                href="/cv.pdf"
+                href={siteConfig.cv}
               >
                 Download my CV
               </Button>
@@ -142,25 +139,19 @@ export default function AboutPage() {
               variant="glass"
               iconOnly="github"
               aria-label="GitHub"
-              href="https://github.com/travishall"
+              href={siteConfig.links.github}
               size="sm"
             />
             <Button
               variant="glass"
-              iconOnly="external"
+              iconOnly="linkedin"
               aria-label="LinkedIn"
-              href="https://linkedin.com"
+              href={siteConfig.links.linkedin}
               size="sm"
             />
-            <Button
-              variant="ghost"
-              icon="mail"
-              iconPos="right"
-              size="sm"
-              href="mailto:hello@travishall.design"
-            >
-              hello@travishall.design
-            </Button>
+            <EmailButton variant="glass" icon="mail" iconPos="right" size="sm">
+              {siteConfig.email}
+            </EmailButton>
           </div>
         </footer>
       </main>

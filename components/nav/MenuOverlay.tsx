@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * MenuOverlay — full-screen glass takeover with a fade + settle animation.
@@ -24,12 +24,15 @@
  *         control and remains visible above the overlay throughout.
  */
 
-import { useEffect, useRef, type RefObject } from 'react';
-import { Link, useTransitionRouter } from 'next-view-transitions';
-import { gsap } from 'gsap';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { useLenis } from '@/components/providers/SmoothScroll';
-import { prefersReducedMotion, triggerRipple } from '@/components/ui/ripple';
+import { useEffect, useRef, type RefObject } from "react";
+import { Link, useTransitionRouter } from "next-view-transitions";
+import { gsap } from "gsap";
+import { Button } from "@/components/ui/Button";
+import { EmailButton } from "@/components/ui/EmailButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useLenis } from "@/components/providers/SmoothScroll";
+import { prefersReducedMotion, triggerRipple } from "@/components/ui/ripple";
+import { siteConfig } from "@/lib/site-config";
 
 interface Props {
   isOpen: boolean;
@@ -39,27 +42,27 @@ interface Props {
 }
 
 const NAV_LINKS = [
-  { label: 'Work',    href: '/' },
-  { label: 'About',   href: '/about' },
-  { label: 'Contact', href: 'mailto:travis@travishall.design' },
+  { label: "Work", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "mailto:travis@travishall.design" },
 ];
 
 // Same water-ripple technique as buttons (components/ui/ripple.ts), scaled
 // up to wash across the full-screen menu surface.
-const RIPPLE_MENU_OPEN  = { strength: 28, duration: 850 };
+const RIPPLE_MENU_OPEN = { strength: 28, duration: 850 };
 const RIPPLE_MENU_CLOSE = { strength: 20, duration: 450 };
 
 // Smaller, quicker ripple on the nav link itself, under the cursor.
 const RIPPLE_LINK = { strength: 14, size: 160, duration: 500 };
 
 export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
-  const overlayRef  = useRef<HTMLDivElement>(null);
-  const surfaceRef  = useRef<HTMLDivElement>(null);
-  const linksRef    = useRef<HTMLAnchorElement[]>([]);
-  const bottomRef   = useRef<HTMLDivElement>(null);
-  const tlRef       = useRef<gsap.core.Timeline | null>(null);
-  const lenis       = useLenis();
-  const router      = useTransitionRouter();
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const linksRef = useRef<HTMLAnchorElement[]>([]);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const lenis = useLenis();
+  const router = useTransitionRouter();
 
   // Set by a nav link's click — the close animation's onComplete navigates
   // here once the menu has fully exited, so the route transition starts
@@ -90,41 +93,53 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
       tlRef.current = tl;
 
       gsap.set(overlay, {
-        opacity:       0,
-        scale:         1.03,
-        pointerEvents: 'auto',
+        opacity: 0,
+        scale: 1.03,
+        pointerEvents: "auto",
       });
-      gsap.set(surfaceRef.current, { filter: 'blur(12px)' });
+      gsap.set(surfaceRef.current, { filter: "blur(12px)" });
       gsap.set([...linksRef.current, bottomRef.current], { opacity: 0, y: 18 });
 
       tl.to(overlay, {
-        opacity:  1,
-        scale:    1,
+        opacity: 1,
+        scale: 1,
         duration: 0.6,
-        ease:     'power3.out',
+        ease: "power3.out",
       });
 
-      tl.to(surfaceRef.current, {
-        filter:   'blur(0px)',
-        duration: 0.6,
-        ease:     'power3.out',
-      }, '<');
+      tl.to(
+        surfaceRef.current,
+        {
+          filter: "blur(0px)",
+          duration: 0.6,
+          ease: "power3.out",
+        },
+        "<",
+      );
 
       // Links stagger in as the overlay is still settling
-      tl.to(linksRef.current, {
-        opacity:  1,
-        y:        0,
-        duration: 0.5,
-        ease:     'power3.out',
-        stagger:  0.09,
-      }, '-=0.4');
+      tl.to(
+        linksRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power3.out",
+          stagger: 0.09,
+        },
+        "-=0.4",
+      );
 
-      tl.to(bottomRef.current, {
-        opacity:  1,
-        y:        0,
-        duration: 0.4,
-        ease:     'power2.out',
-      }, '-=0.3');
+      tl.to(
+        bottomRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          ease: "power2.out",
+        },
+        "-=0.3",
+      );
 
       // Ripple the whole pane — background, blur, and content together —
       // from the toggle button's click point.
@@ -132,12 +147,11 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
         const { x, y } = originRef.current;
         triggerRipple(overlay, { clientX: x, clientY: y }, RIPPLE_MENU_OPEN);
       }
-
     } else {
       const tl = gsap.timeline({
         onComplete: () => {
           // Restore pointer-events: none so the hidden overlay isn't clickable
-          gsap.set(overlay, { pointerEvents: 'none' });
+          gsap.set(overlay, { pointerEvents: "none" });
           lenis?.start();
 
           // If a nav link triggered this close, navigate now that the menu
@@ -146,7 +160,7 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
           const href = pendingHrefRef.current;
           pendingHrefRef.current = null;
           if (href) {
-            if (href.startsWith('mailto:') || href.startsWith('http')) {
+            if (href.startsWith("mailto:") || href.startsWith("http")) {
               window.location.href = href;
             } else {
               router.push(href);
@@ -158,25 +172,33 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
 
       // Content exits first, quickly
       tl.to([...linksRef.current, bottomRef.current], {
-        opacity:  0,
-        y:        -8,
+        opacity: 0,
+        y: -8,
         duration: 0.15,
-        ease:     'power2.in',
-        stagger:  { each: 0.04, from: 'end' },
+        ease: "power2.in",
+        stagger: { each: 0.04, from: "end" },
       });
 
-      tl.to(overlay, {
-        opacity:  0,
-        scale:    1.02,
-        duration: 0.4,
-        ease:     'power2.in',
-      }, '-=0.05');
+      tl.to(
+        overlay,
+        {
+          opacity: 0,
+          scale: 1.02,
+          duration: 0.4,
+          ease: "power2.in",
+        },
+        "-=0.05",
+      );
 
-      tl.to(surfaceRef.current, {
-        filter:   'blur(8px)',
-        duration: 0.4,
-        ease:     'power2.in',
-      }, '<');
+      tl.to(
+        surfaceRef.current,
+        {
+          filter: "blur(8px)",
+          duration: 0.4,
+          ease: "power2.in",
+        },
+        "<",
+      );
 
       if (!prefersReducedMotion()) {
         const { x, y } = originRef.current;
@@ -200,12 +222,14 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
     linksRef.current[0]?.focus();
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      const focusable = overlay.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+      if (e.key !== "Tab") return;
+      const focusable = overlay.querySelectorAll<HTMLElement>(
+        "a[href], button:not([disabled])",
+      );
       if (focusable.length === 0) return;
 
       const first = focusable[0];
-      const last  = focusable[focusable.length - 1];
+      const last = focusable[focusable.length - 1];
 
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
@@ -216,8 +240,8 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
       }
     };
 
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen]);
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -240,7 +264,9 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
               key={label}
               href={href}
               className="menu-overlay__link"
-              ref={(el) => { if (el) linksRef.current[i] = el; }}
+              ref={(el) => {
+                if (el) linksRef.current[i] = el;
+              }}
               onClick={(e) => {
                 e.preventDefault();
 
@@ -262,15 +288,37 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
           ))}
         </nav>
 
-        {/* Bottom row — theme toggle */}
+        {/* Bottom row — theme toggle + quick links */}
         <div ref={bottomRef} className="menu-overlay__bottom">
           <ThemeToggle />
-          <span className="menu-overlay__theme-label" style={{ opacity: 0.5 }}>
-            © 2026 Travis Hall
-          </span>
+          <div className="menu-overlay__actions">
+            <Button
+              variant="ghost"
+              iconOnly="github"
+              aria-label="GitHub"
+              href={siteConfig.links.github}
+              onClick={onClose}
+            />
+            <Button
+              variant="ghost"
+              iconOnly="linkedin"
+              aria-label="LinkedIn"
+              href={siteConfig.links.linkedin}
+              onClick={onClose}
+            />
+            <Button
+              variant="ghost"
+              icon="download"
+              iconPos="right"
+              href={siteConfig.cv}
+              onClick={onClose}
+            >
+              Download CV
+            </Button>
+            <EmailButton variant="ghost" iconOnly="mail" aria-label="Email" />
+          </div>
         </div>
       </div>
-
     </div>
   );
 }

@@ -68,6 +68,27 @@ const PATHS = {
       {...STROKE}
     />
   ),
+  linkedin: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="8" cy="7.5" r="1" fill="currentColor" stroke="none" />
+      <path d="M8 11v6" {...STROKE} />
+      <path d="M12 17v-6" {...STROKE} />
+      <path d="M12 13c0-1.4 1.1-2 2.2-2 1.4 0 2.8 1 2.8 3v3" {...STROKE} />
+    </>
+  ),
+  send: (
+    <>
+      <path d="M21 4 3 11l7 2.5L13 21l8-17z" {...STROKE} />
+      <path d="M10 13.5 21 4" {...STROKE} />
+    </>
+  ),
+  copy: (
+    <>
+      <rect x="9" y="9" width="12" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" {...STROKE} />
+    </>
+  ),
   play: <path d="M7 5l11 7-11 7V5z" {...STROKE} fill="currentColor" stroke="none" />,
   "chevron-down": <path d="M6 9l6 6 6-6" {...STROKE} />,
   menu: (

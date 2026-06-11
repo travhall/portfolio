@@ -3,6 +3,7 @@ import { Manrope, Geist_Mono } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Topbar } from "@/components/nav/Topbar";
+import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -16,13 +17,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = new URL(siteConfig.url);
+
 export const metadata: Metadata = {
+  metadataBase: siteUrl,
   title: {
-    template: "%s — travishall.design",
-    default: "Travis Hall — Design & Code",
+    template: `%s — ${siteUrl.host}`,
+    default: siteConfig.title,
   },
-  description:
-    "Portfolio of Travis Hall — senior UX designer and front-end developer creating thoughtful digital experiences.",
+  description: siteConfig.description,
 };
 
 export default function RootLayout({

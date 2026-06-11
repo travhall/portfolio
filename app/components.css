@@ -238,7 +238,8 @@
 }
 .btn--glass.glass-surface:hover,
 .btn--glass:hover {
-  background: var(--ink);
+  /* background: var(--ink); */
+  --glass-fill: color-mix(in oklch, var(--ink) 65%, transparent);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   color: var(--surface);
   border-color: var(--ink);
@@ -474,4 +475,93 @@
 }
 .theme-toggle__opt:not(.is-active):hover {
   color: var(--ink);
+}
+
+/* ── EMAIL ACTION ────────────────────────────────────────────────────────── */
+/* Glass popover holding "Open in mail app" / "Copy email" side by side,
+   anchored to its trigger. Sharing .glass-surface with the trigger and
+   growing from its corner (small gap + scale from that corner) makes the
+   panel read as attached to the button rather than a separate floater.
+   Below 480px it stacks to a single column and pins to the viewport edges
+   so it can't overflow on narrow screens.                                  */
+.email-action {
+  position: relative;
+  display: inline-flex;
+}
+.email-action__panel {
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  padding: 6px;
+  border-radius: var(--edge);
+  white-space: nowrap;
+  animation: email-panel-in 0.18s var(--ease);
+}
+.email-action__panel--bottom {
+  top: calc(100% + 6px);
+  transform-origin: top right;
+}
+.email-action__panel--top {
+  bottom: calc(100% + 6px);
+  transform-origin: bottom right;
+}
+@keyframes email-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.email-action__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: calc(var(--edge) - 6px);
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: var(--track-snug);
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--btn-dur) var(--ease);
+}
+.email-action__option:hover {
+  background: var(--btn-ghost-hover);
+}
+.email-action__option svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* ── EMAIL ACTION — small screens ───────────────────────────────────────── */
+/* Stack the two options into a column so the panel is only as wide as the
+   wider option, not both combined — anchored to the trigger's right edge,
+   that keeps it clear of the left viewport edge even when the trigger
+   itself sits near the left side of a narrow layout. The viewport-relative
+   max-width is a backstop against overflow either direction.              */
+@media (max-width: 480px) {
+  .email-action__panel {
+    flex-direction: column;
+    max-width: calc(100vw - 2 * var(--gut));
+  }
+  .email-action__option {
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .email-action__panel {
+    animation: none;
+  }
 }
