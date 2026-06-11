@@ -3,12 +3,13 @@
 /**
  * MenuOverlay — full-screen glass takeover with a fade + settle animation.
  *
- * Open  — The overlay fades and scales in from a slightly blurred, slightly
- *         enlarged state to its resting size — like glass settling into
- *         place. Nav links stagger in while it's still settling. At the same
- *         time, a water-ripple (the same SVG displacement technique used on
- *         buttons) radiates across the content from the toggle button's
- *         click point, as if the button's tap dropped into the glass.
+ * Open  — The overlay fades and scales in while its content layer eases from
+ *         blurred to sharp — like glass settling into place. Nav links
+ *         stagger in while it's still settling. At the same time, a
+ *         water-ripple (the same SVG displacement technique used on buttons)
+ *         radiates across the whole pane — background, blur and all — from
+ *         the toggle button's click point, as if the button's tap dropped
+ *         into the glass.
  *
  * Close — Nav links exit first, then the overlay fades/blurs back out, with
  *         a quicker ripple pulse from the same origin.
@@ -91,18 +92,23 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
       gsap.set(overlay, {
         opacity:       0,
         scale:         1.03,
-        filter:        'blur(12px)',
         pointerEvents: 'auto',
       });
+      gsap.set(surfaceRef.current, { filter: 'blur(12px)' });
       gsap.set([...linksRef.current, bottomRef.current], { opacity: 0, y: 18 });
 
       tl.to(overlay, {
         opacity:  1,
         scale:    1,
-        filter:   'blur(0px)',
         duration: 0.6,
         ease:     'power3.out',
       });
+
+      tl.to(surfaceRef.current, {
+        filter:   'blur(0px)',
+        duration: 0.6,
+        ease:     'power3.out',
+      }, '<');
 
       // Links stagger in as the overlay is still settling
       tl.to(linksRef.current, {
@@ -120,9 +126,11 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
         ease:     'power2.out',
       }, '-=0.3');
 
-      if (surfaceRef.current && !prefersReducedMotion()) {
+      // Ripple the whole pane — background, blur, and content together —
+      // from the toggle button's click point.
+      if (!prefersReducedMotion()) {
         const { x, y } = originRef.current;
-        triggerRipple(surfaceRef.current, { clientX: x, clientY: y }, RIPPLE_MENU_OPEN);
+        triggerRipple(overlay, { clientX: x, clientY: y }, RIPPLE_MENU_OPEN);
       }
 
     } else {
@@ -160,14 +168,19 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
       tl.to(overlay, {
         opacity:  0,
         scale:    1.02,
-        filter:   'blur(8px)',
         duration: 0.4,
         ease:     'power2.in',
       }, '-=0.05');
 
-      if (surfaceRef.current && !prefersReducedMotion()) {
+      tl.to(surfaceRef.current, {
+        filter:   'blur(8px)',
+        duration: 0.4,
+        ease:     'power2.in',
+      }, '<');
+
+      if (!prefersReducedMotion()) {
         const { x, y } = originRef.current;
-        triggerRipple(surfaceRef.current, { clientX: x, clientY: y }, RIPPLE_MENU_CLOSE);
+        triggerRipple(overlay, { clientX: x, clientY: y }, RIPPLE_MENU_CLOSE);
       }
     }
   }, [isOpen, lenis]);

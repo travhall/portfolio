@@ -228,11 +228,13 @@
 }
 
 /* —— surface: GLASS —— inherits the frosted material, fills with ink on hover.
-   Label reads in --water-deep (not --ink-muted) — the dark end of the same
-   blue-teal register the glass itself is tinted with, so it stays legible
-   over imagery and saturated water-tones, not just flat paper. */
+   Neutral frost: fill and edge derive from --surface/--hairline rather than
+   the brand-1 --glass-tint, so the button reads as clear glass over whatever
+   sits beneath it instead of carrying its own blue-teal cast. Label sits in
+   --ink, matching the ghost surface's resting color. */
 .btn--glass {
-  color: var(--water-deep);
+  --glass-fill: color-mix(in oklch, var(--surface) 2.5%, transparent);
+  color: var(--ink);
 }
 .btn--glass.glass-surface:hover,
 .btn--glass:hover {
@@ -356,7 +358,8 @@
 
 /* —— surfaces —— */
 .tag--glass {
-  color: var(--water-deep);
+  --glass-fill: color-mix(in oklch, var(--surface) 2.5%, transparent);
+  color: var(--ink);
 } /* + .glass-surface — matches .btn--glass */
 .tag--solid {
   background: var(--ink);
