@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * HeroSection — the sticky parallax hero image.
@@ -19,25 +19,36 @@
  * unmount. swapTexture() reads data-theme + prefers-color-scheme to pick the
  * correct WebGL texture, and is called on mount, OS scheme change, and manual
  * toggle.
+ *
+ * Float-in entrance — once per session, `.hero-media` drifts up from fully
+ * below its frame (GSAP, transform-only — no fade/blur so the image stays
+ * sharp and visible throughout), while the GL layer plays a synced radial
+ * ripple that decays to nothing as it settles — the print rising through the
+ * fixer bath. Runs in a layout effect so the initial (pre-animation) state is
+ * committed before paint, with no flash of the settled frame.
  */
 
-import { useEffect, useRef } from 'react';
-import { HeroGL, getHeroSrc } from '@/lib/hero-gl';
+import { useLayoutEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { HeroGL, getHeroSrc } from "@/lib/hero-gl";
+import { prefersReducedMotion } from "@/components/ui/ripple";
 
-const LIGHT = '/images/hero-light.jpg';
-const DARK  = '/images/hero-dark.jpg';
+const ENTRANCE_KEY = "hero-entrance-done";
+
+const LIGHT = "/images/hero-light.jpg";
+const DARK = "/images/hero-dark-alt.jpg";
 
 interface Props {
   intensity?: number;
 }
 
 export function HeroSection({ intensity = 1.5 }: Props) {
-  const mediaRef     = useRef<HTMLDivElement>(null);
-  const canvasRef    = useRef<HTMLCanvasElement>(null);
-  const glRef        = useRef<HeroGL | null>(null);
+  const mediaRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const glRef = useRef<HeroGL | null>(null);
 
-  useEffect(() => {
-    const media  = mediaRef.current;
+  useLayoutEffect(() => {
+    const media = mediaRef.current;
     const canvas = canvasRef.current;
     if (!media || !canvas) return;
 
@@ -54,28 +65,49 @@ export function HeroSection({ intensity = 1.5 }: Props) {
 
       glRef.current = new HeroGL(canvas, {
         src,
-        effect:    'parallax',
+        effect: "parallax",
         intensity,
-        onReady: () => media.classList.add('is-gl'),
+        onReady: () => media.classList.add("is-gl"),
       });
     };
 
     swapTexture();
 
     // Watch OS-level color scheme changes
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    mq.addEventListener('change', swapTexture);
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", swapTexture);
 
     // Watch manual data-theme attribute set by the in-menu theme toggle
     const observer = new MutationObserver(swapTexture);
     observer.observe(document.documentElement, {
-      attributes:      true,
-      attributeFilter: ['data-theme'],
+      attributes: true,
+      attributeFilter: ["data-theme"],
     });
 
+    // Float-in entrance — once per session, settling from below with a
+    // synced GL ripple. Skipped (and marked done) under reduced motion or on
+    // repeat visits within the session.
+    let entranceTween: gsap.core.Tween | null = null;
+    if (prefersReducedMotion() || sessionStorage.getItem(ENTRANCE_KEY)) {
+      sessionStorage.setItem(ENTRANCE_KEY, "1");
+    } else {
+      gsap.set(media, { yPercent: 100 });
+      entranceTween = gsap.to(media, {
+        yPercent: 0,
+        duration: 1.6,
+        ease: "power3.out",
+        clearProps: "transform",
+        onUpdate() {
+          glRef.current?.setEntrance(1 - this.progress());
+        },
+        onComplete: () => sessionStorage.setItem(ENTRANCE_KEY, "1"),
+      });
+    }
+
     return () => {
-      mq.removeEventListener('change', swapTexture);
+      mq.removeEventListener("change", swapTexture);
       observer.disconnect();
+      entranceTween?.kill();
       // keepContext: forcing context loss here breaks React StrictMode's
       // double-invoke (mount -> cleanup -> mount) — the second mount reuses
       // this canvas, but a lost WebGL context returns null from
@@ -83,7 +115,7 @@ export function HeroSection({ intensity = 1.5 }: Props) {
       // The detached canvas is GC'd shortly after anyway.
       glRef.current?.dispose(true);
       glRef.current = null;
-      media.classList.remove('is-gl');
+      media.classList.remove("is-gl");
     };
   }, [intensity]);
 

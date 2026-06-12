@@ -111,6 +111,7 @@ uniform float u_time;
 uniform float u_vel;
 uniform float u_scroll;
 uniform float u_intensity;
+uniform float u_entrance;
 uniform vec2  u_ratio;
 varying vec2 v_uv;
 // Cover-fit: scale UVs so the image fills the canvas at the correct aspect ratio.
@@ -131,6 +132,20 @@ void main(){
   uv.y += (u_scroll - 0.5) * 0.06 * u_intensity;
   // Subtle scale breath so edges never reveal background
   uv = (uv - .5) * (1.0 - u_scroll * 0.04 * u_intensity) + .5;
+
+  // Entrance ripple — radial wave from low-center, amplitude fades to 0 as
+  // u_entrance decays from 1 to 0: the print settling into the fixer bath.
+  vec2  rippleCenter = vec2(0.5, 0.85);
+  vec2  rd     = uv - rippleCenter;
+  float ripple = sin(length(rd) * 16.0 - u_time * 3.5) * u_entrance * 0.05;
+  uv += normalize(rd + 1e-4) * ripple;
+
+  // Ambient water-surface wave — gentle simplex displacement layered on top
+  // of the smear below, growing with scroll velocity.
+  float wx = snoise3(vec3(uv * 1.4, t));
+  float wy = snoise3(vec3(uv * 1.4 + 7.0, t));
+  uv += vec2(wx, wy) * (0.004 + abs(u_vel) * 0.02) * u_intensity;
+
   float disp = snoise3(vec3(uv * 1.6, t)) * 0.5 + 0.5;
   float v    = u_vel * u_intensity;
   vec2  off  = vec2(0.0, 1.0) * (0.012 + disp * 0.02) * v;
@@ -191,6 +206,10 @@ export class HeroGL {
   private scroll  = 0;  // rendered 0..1
   private scrollT = 0;  // target 0..1
   private lastY   = 0;
+
+  // Entrance ripple amplitude — 1 at drop, decays to 0 as the image settles.
+  // Driven externally (see setEntrance) by the float-in GSAP timeline.
+  private entrance = 0;
 
   private _boundScroll!: () => void;
   private _boundResize!: () => void;
@@ -262,6 +281,7 @@ export class HeroGL {
         u_vel:       { value: 0 },
         u_scroll:    { value: 0 },
         u_intensity: { value: this.opts.intensity },
+        u_entrance:  { value: this.entrance },
         u_ratio:     { value: coverRatio(w, h, this.imgW, this.imgH) },
       },
       transparent: true,
@@ -318,6 +338,16 @@ export class HeroGL {
     this.start();
   }
 
+  /**
+   * Drive the entrance-ripple amplitude — 1 at drop, 0 once settled.
+   * Call from a GSAP onUpdate during the hero's float-in animation.
+   */
+  setEntrance(v: number) {
+    this.entrance = v;
+    if (this.program) this.program.uniforms.u_entrance.value = v;
+    this.start();
+  }
+
   setEffect(name: HeroEffect) {
     if (this.opts.effect === name) return;
     this.opts.effect = name;
@@ -333,6 +363,7 @@ export class HeroGL {
         u_vel:       { value: 0 },
         u_scroll:    { value: this.scroll },
         u_intensity: { value: this.opts.intensity },
+        u_entrance:  { value: this.entrance },
         u_ratio:     { value: coverRatio(w, h, this.imgW, this.imgH) },
       },
       transparent: true,
@@ -382,7 +413,8 @@ export class HeroGL {
     const settling =
       Math.abs(this.vel)    > 0.001 ||
       Math.abs(this.velT)   > 0.001 ||
-      Math.abs(this.scroll - this.scrollT) > 0.001;
+      Math.abs(this.scroll - this.scrollT) > 0.001 ||
+      this.entrance         > 0.001;
 
     // Pause entirely when scrolled out of view and fully settled
     if (!visible && !settling) { this.stop(); return; }

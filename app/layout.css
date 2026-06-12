@@ -64,18 +64,19 @@
   min-height: 100vh;
   display: flex;
   align-items: flex-start;
-  padding-top: 8px;
+  padding: var(--gut);
   max-width: var(--maxw);
   margin: 0 auto;
 }
 /* The image frame: 65% wide, fixed height token, landscape on desktop.
    The mobile breakpoint switches to portrait aspect-ratio.                 */
 .hero-media {
+  aspect-ratio: 16 / 9;
   position: relative;
   width: 65%;
   height: var(--ih);
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 3px;
   overflow: hidden;
   /* view-transition-name so the browser morphs this into the about portrait  */
   view-transition-name: hero-image;
@@ -347,10 +348,6 @@
 
 /* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
 @media (max-width: 1080px) {
-  .hero-section {
-    padding-left: var(--gut);
-    padding-right: var(--gut);
-  }
   .hero-media {
     width: 100%;
     height: auto;
@@ -365,7 +362,7 @@
   }
 }
 
-@media (min-width: 1580px) {
+@media (min-width: 1800px) {
   .menu-overlay__surface {
     padding: var(--gut) 0 clamp(48px, 4vw, 96px);
   }

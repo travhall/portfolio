@@ -18,7 +18,11 @@ type Props = Omit<Extract<ButtonProps, { href?: undefined }>, "onClick"> & {
   panelPlacement?: "top" | "bottom";
 };
 
-export function EmailButton({ onAction, panelPlacement = "top", ...buttonProps }: Props) {
+export function EmailButton({
+  onAction,
+  panelPlacement = "top",
+  ...buttonProps
+}: Props) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -69,7 +73,7 @@ export function EmailButton({ onAction, panelPlacement = "top", ...buttonProps }
       />
       {open && (
         <div
-          className={`email-action__panel glass-surface email-action__panel--${panelPlacement}`}
+          className={`email-action__panel email-action__panel--${panelPlacement}`}
           role="menu"
         >
           <a

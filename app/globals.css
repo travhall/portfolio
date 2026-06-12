@@ -169,7 +169,7 @@
 
   /* ── LAYOUT ─────────────────────────────────────────────────────────────── */
   --gut: clamp(20px, 4vw, 48px);
-  --maxw: 1512px;
+  --maxw: 1680px;
   --edge: 16px;
   --ih: clamp(360px, 38vw, 600px); /* hero + collapsed card image height  */
 
