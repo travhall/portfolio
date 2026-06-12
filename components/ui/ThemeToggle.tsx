@@ -80,7 +80,7 @@ export function ThemeToggle({ className = "" }: Props) {
 
   return (
     <div
-      className={`theme-toggle glass ${className}`.trim()}
+      className={`theme-toggle ${className}`.trim()}
       role="group"
       aria-label="Color theme"
     >
@@ -88,7 +88,7 @@ export function ThemeToggle({ className = "" }: Props) {
         <button
           key={mode}
           type="button"
-          className={`glass theme-toggle__opt${theme === mode ? " is-active" : ""}`}
+          className={`theme-toggle__opt${theme === mode ? " is-active" : ""}`}
           onClick={(e) => apply(mode, e)}
           aria-pressed={theme === mode}
         >

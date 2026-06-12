@@ -95,7 +95,7 @@
   --glass-sheen-top: color-mix(in oklch, white 55%, transparent);
   --glass-sheen-bot: color-mix(in oklch, white 6%, transparent);
   --glass-spec: color-mix(in oklch, white 90%, transparent);
-  --glass-edge: var(--color-brand-1-50);
+  --glass-edge: var(--color-brand-3-50);
   --glass-hair: var(--hairline);
   --glass-contact: color-mix(in oklch, var(--ink) 5%, transparent);
   --glass-drop:
@@ -187,10 +187,10 @@
   :root {
     /* paper & ink — light on dark bath */
     --surface: var(
-      --color-brand-1-950
+      --color-brand-3-950
     ); /* oklch(0.18 0.03 195.9) deep teal-black */
     --surface-dim: var(
-      --color-brand-1-900
+      --color-brand-3-900
     ); /* oklch(0.23 0.04 195.9)                 */
     --ink: var(
       --color-brand-3-50
@@ -220,7 +220,7 @@
     --glass-contact: color-mix(in oklch, black 5%, transparent);
     /* solid edge — a translucent white edge let the gradient/blur seam show
        through at the bottom; a solid teal rim frames the glass instead */
-    --glass-edge: var(--color-brand-1-600);
+    --glass-edge: var(--color-brand-3-600);
 
     /* chemical — amber pops harder against the dark bath */
     --chemical: var(--color-brand-2-400); /* oklch(0.79 0.16 80)    */
@@ -238,8 +238,8 @@
  * Co-located with the @media block so every dark-mode token override lives
  * in one place — see also html[data-theme="light"] below.                  */
 html[data-theme="dark"] {
-  --surface: var(--color-brand-1-950);
-  --surface-dim: var(--color-brand-1-900);
+  --surface: var(--color-brand-3-950);
+  --surface-dim: var(--color-brand-3-900);
   --ink: var(--color-brand-3-50);
   --ink-muted: var(--color-brand-3-300);
   --ink-faint: var(--color-brand-3-400);
@@ -249,7 +249,7 @@ html[data-theme="dark"] {
   --water-deep: var(--color-brand-1-200);
   --glass-tint: var(--color-brand-1-800);
   --glass-contact: color-mix(in oklch, black 5%, transparent);
-  --glass-edge: var(--color-brand-1-600);
+  --glass-edge: var(--color-brand-3-600);
   --chemical: var(--color-brand-2-400);
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: dark;
@@ -274,7 +274,7 @@ html[data-theme="light"] {
     var(--color-brand-3-950) 5%,
     transparent
   );
-  --glass-edge: var(--color-brand-1-50);
+  --glass-edge: var(--color-brand-3-50);
   --chemical: var(--color-brand-2-500);
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: light;

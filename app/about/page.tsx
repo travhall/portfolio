@@ -47,27 +47,27 @@ export default function AboutPage() {
               </p>
               <p className="type-body text-ink-muted about-bio__measure">
                 I&apos;ve built design systems, led UX teams, taught front-end
-                development at the postsecondary level, and shipped the code
+                development at the post-secondary level, and shipped the code
                 myself. The work in this portfolio is the through-line.
               </p>
             </div>
 
             <div className="about-actions">
               <Button
-                variant="glass"
+                variant="ghost"
                 iconOnly="github"
                 aria-label="GitHub"
                 href={siteConfig.links.github}
               />
               <Button
-                variant="glass"
+                variant="ghost"
                 iconOnly="linkedin"
                 aria-label="LinkedIn"
                 href={siteConfig.links.linkedin}
               />
-              <EmailButton variant="glass" iconOnly="mail" aria-label="Email" />
+              <EmailButton variant="ghost" iconOnly="mail" aria-label="Email" />
               <Button
-                variant="solid"
+                variant="ghost"
                 icon="download"
                 iconPos="right"
                 href={siteConfig.cv}

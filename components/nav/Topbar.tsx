@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Topbar — fixed navigation bar + menu overlay controller.
@@ -14,18 +14,18 @@
  * button and overlay share a single source of truth.
  */
 
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
-import { Link } from 'next-view-transitions';
-import { Button } from '@/components/ui/Button';
-import { MenuOverlay } from './MenuOverlay';
-import { prefersReducedMotion, triggerRipple } from '@/components/ui/ripple';
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { Link } from "next-view-transitions";
+import { Button } from "@/components/ui/Button";
+import { MenuOverlay } from "./MenuOverlay";
+import { prefersReducedMotion, triggerRipple } from "@/components/ui/ripple";
 
 const RIPPLE_BRAND = { strength: 9, size: 90, duration: 600 };
 
 export function Topbar() {
-  const headerRef          = useRef<HTMLElement>(null);
-  const brandRef           = useRef<HTMLAnchorElement>(null);
-  const menuOriginRef      = useRef({ x: 0, y: 0 });
+  const headerRef = useRef<HTMLElement>(null);
+  const brandRef = useRef<HTMLAnchorElement>(null);
+  const menuOriginRef = useRef({ x: 0, y: 0 });
   const [isOpen, setIsOpen] = useState(false);
 
   // Wordmark fade on scroll — pinned fully visible while the menu is open
@@ -35,18 +35,18 @@ export function Topbar() {
     if (!el) return;
 
     if (isOpen) {
-      el.style.opacity       = '1';
-      el.style.pointerEvents = 'auto';
+      el.style.opacity = "1";
+      el.style.pointerEvents = "auto";
       return;
     }
 
     let ticking = false;
 
     const update = () => {
-      const y       = window.scrollY;
+      const y = window.scrollY;
       const opacity = Math.max(0, 1 - y / 120);
-      el.style.opacity       = String(opacity.toFixed(3));
-      el.style.pointerEvents = opacity < 0.05 ? 'none' : 'auto';
+      el.style.opacity = String(opacity.toFixed(3));
+      el.style.pointerEvents = opacity < 0.05 ? "none" : "auto";
       ticking = false;
     };
     update();
@@ -58,25 +58,27 @@ export function Topbar() {
       }
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, [isOpen]);
 
   // Closing always returns focus to the toggle button — whether triggered
   // by Escape, a nav link, or the toggle itself.
   const close = () => {
     setIsOpen(false);
-    headerRef.current?.querySelector<HTMLButtonElement>('.topbar__toggle')?.focus();
+    headerRef.current
+      ?.querySelector<HTMLButtonElement>(".topbar__toggle")
+      ?.focus();
   };
 
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
+      if (e.key === "Escape") close();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [isOpen]);
 
   return (
@@ -87,7 +89,8 @@ export function Topbar() {
           href="/"
           className="topbar__brand"
           onClick={(e: MouseEvent<HTMLAnchorElement>) => {
-            if (!prefersReducedMotion()) triggerRipple(e.currentTarget, e, RIPPLE_BRAND);
+            if (!prefersReducedMotion())
+              triggerRipple(e.currentTarget, e, RIPPLE_BRAND);
             close();
           }}
         >
@@ -97,7 +100,7 @@ export function Topbar() {
           variant="glass"
           size="sm"
           className="topbar__toggle"
-          aria-label={isOpen ? 'Close menu' : 'Open menu'}
+          aria-label={isOpen ? "Close menu" : "Open menu"}
           aria-expanded={isOpen}
           aria-controls="site-menu"
           onClick={(e) => {
@@ -105,7 +108,7 @@ export function Topbar() {
             setIsOpen((o) => !o);
           }}
         >
-          {isOpen ? 'close' : 'menu'}
+          {isOpen ? "close" : "menu"}
         </Button>
       </header>
 
