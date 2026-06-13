@@ -154,17 +154,14 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
           gsap.set(overlay, { pointerEvents: "none" });
           lenis?.start();
 
-          // If a nav link triggered this close, navigate now that the menu
-          // has fully exited — the route's view transition then starts
-          // against a clean screenshot, with no overlay in the way.
+          // mailto/external links wait for the menu to fully exit before
+          // leaving the SPA. Internal routes navigate immediately on click
+          // (see onClick below) — the still-opaque overlay covers the page
+          // swap, so it's never visible underneath as the menu closes.
           const href = pendingHrefRef.current;
           pendingHrefRef.current = null;
           if (href) {
-            if (href.startsWith("mailto:") || href.startsWith("http")) {
-              window.location.href = href;
-            } else {
-              router.push(href);
-            }
+            window.location.href = href;
           }
         },
       });
@@ -277,9 +274,16 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
                 }
                 originRef.current = { x: e.clientX, y: e.clientY };
 
-                // Navigate once the close animation finishes — see
-                // pendingHrefRef and the close timeline's onComplete above.
-                pendingHrefRef.current = href;
+                if (href.startsWith("mailto:") || href.startsWith("http")) {
+                  // Wait for the close animation to finish before leaving
+                  // the SPA — see pendingHrefRef and onComplete above.
+                  pendingHrefRef.current = href;
+                } else {
+                  // Navigate immediately — the still-opaque overlay covers
+                  // the page swap as it plays its own close animation, so
+                  // the old page is never revealed underneath.
+                  router.push(href);
+                }
                 onClose();
               }}
             >
@@ -293,21 +297,21 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
           <ThemeToggle />
           <div className="menu-overlay__actions">
             <Button
-              variant="ghost"
+              variant="solid"
               iconOnly="github"
               aria-label="GitHub"
               href={siteConfig.links.github}
               onClick={onClose}
             />
             <Button
-              variant="ghost"
+              variant="solid"
               iconOnly="linkedin"
               aria-label="LinkedIn"
               href={siteConfig.links.linkedin}
               onClick={onClose}
             />
             <Button
-              variant="ghost"
+              variant="solid"
               icon="download"
               iconPos="right"
               href={siteConfig.cv}
@@ -315,7 +319,7 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
             >
               Download CV
             </Button>
-            <EmailButton variant="ghost" iconOnly="mail" aria-label="Email" />
+            <EmailButton variant="solid" iconOnly="mail" aria-label="Email" />
           </div>
         </div>
       </div>

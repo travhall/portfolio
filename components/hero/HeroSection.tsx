@@ -12,20 +12,21 @@
  *     by the browser using OS preference only, with no knowledge of
  *     data-theme — that caused a hard flash whenever the forced theme
  *     conflicted with the OS.
- *   - `view-transition-name: hero-image` on the media wrapper so the browser
- *     morphs it into the about portrait on route change.
  *
  * The component owns the HeroGL lifecycle: instantiate on mount, dispose on
  * unmount. swapTexture() reads data-theme + prefers-color-scheme to pick the
  * correct WebGL texture, and is called on mount, OS scheme change, and manual
  * toggle.
  *
- * Float-in entrance — once per session, `.hero-media` drifts up from fully
- * below its frame (GSAP, transform-only — no fade/blur so the image stays
- * sharp and visible throughout), while the GL layer plays a synced radial
- * ripple that decays to nothing as it settles — the print rising through the
- * fixer bath. Runs in a layout effect so the initial (pre-animation) state is
- * committed before paint, with no flash of the settled frame.
+ * Float-in entrance — once per session, `.hero-media` fades and slides up
+ * into place from below its frame (GSAP), while the GL layer plays a synced
+ * radial ripple that decays to nothing as it settles — the print rising
+ * through the fixer bath. The pre-entrance (hidden) state is set in CSS via
+ * the `data-hero-pending` attribute (see app/layout.tsx's inline script +
+ * html[data-hero-pending] in layout.css), so SSR paints it directly with no
+ * flash of the settled frame before this effect runs. This layout effect
+ * then either plays the entrance (first visit) or instantly clears that
+ * state (repeat visit / reduced motion).
  */
 
 import { useLayoutEffect, useRef } from "react";
@@ -36,7 +37,7 @@ import { prefersReducedMotion } from "@/components/ui/ripple";
 const ENTRANCE_KEY = "hero-entrance-done";
 
 const LIGHT = "/images/hero-light.jpg";
-const DARK = "/images/hero-dark-alt.jpg";
+const DARK = "/images/hero-dark.jpg";
 
 interface Props {
   intensity?: number;
@@ -86,21 +87,27 @@ export function HeroSection({ intensity = 1.5 }: Props) {
 
     // Float-in entrance — once per session, settling from below with a
     // synced GL ripple. Skipped (and marked done) under reduced motion or on
-    // repeat visits within the session.
+    // repeat visits within the session — both cases instantly clear the
+    // CSS pre-entrance state set by the layout.tsx anti-FOUC script.
     let entranceTween: gsap.core.Tween | null = null;
     if (prefersReducedMotion() || sessionStorage.getItem(ENTRANCE_KEY)) {
       sessionStorage.setItem(ENTRANCE_KEY, "1");
+      document.documentElement.removeAttribute("data-hero-pending");
     } else {
-      gsap.set(media, { yPercent: 100 });
+      gsap.set(media, { yPercent: 100, opacity: 0 });
       entranceTween = gsap.to(media, {
         yPercent: 0,
+        opacity: 1,
         duration: 1.6,
         ease: "power3.out",
-        clearProps: "transform",
+        clearProps: "transform,opacity",
         onUpdate() {
           glRef.current?.setEntrance(1 - this.progress());
         },
-        onComplete: () => sessionStorage.setItem(ENTRANCE_KEY, "1"),
+        onComplete: () => {
+          sessionStorage.setItem(ENTRANCE_KEY, "1");
+          document.documentElement.removeAttribute("data-hero-pending");
+        },
       });
     }
 

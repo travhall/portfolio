@@ -97,7 +97,7 @@ export function Topbar() {
           travishall.design
         </Link>
         <Button
-          variant="glass"
+          variant="solid"
           size="sm"
           className="topbar__toggle"
           aria-label={isOpen ? "Close menu" : "Open menu"}

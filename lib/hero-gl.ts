@@ -144,15 +144,15 @@ void main(){
   // of the smear below, growing with scroll velocity.
   float wx = snoise3(vec3(uv * 1.4, t));
   float wy = snoise3(vec3(uv * 1.4 + 7.0, t));
-  uv += vec2(wx, wy) * (0.004 + abs(u_vel) * 0.02) * u_intensity;
+  uv += vec2(wx, wy) * (0.002 + abs(u_vel) * 0.01) * u_intensity;
 
   float disp = snoise3(vec3(uv * 1.6, t)) * 0.5 + 0.5;
   float v    = u_vel * u_intensity;
-  vec2  off  = vec2(0.0, 1.0) * (0.012 + disp * 0.02) * v;
+  vec2  off  = vec2(0.0, 1.0) * (0.02 + disp * 0.035) * v;
   vec2  cuv  = cover(uv);
   float r    = texture2D(u_map, cover(uv + off * 1.0)).r;
   float g    = texture2D(u_map, cuv).g;
-  float b    = texture2D(u_map, cover(uv + off * 2.0)).b;
+  float b    = texture2D(u_map, cover(uv + off * 2.5)).b;
   gl_FragColor = vec4(r, g, b, 1.0);
 }`;
 

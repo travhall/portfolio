@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { AboutPortrait } from "@/components/about/AboutPortrait";
 import { Button } from "@/components/ui/Button";
 import { EmailButton } from "@/components/ui/EmailButton";
 import { Tag } from "@/components/ui/Tag";
@@ -15,42 +15,11 @@ export default function AboutPage() {
   return (
     <>
       <main>
-        {/* ── About hero: portrait + bio ─────────────────────────────────
-            The .about-portrait gets view-transition-name: hero-image (via CSS)
-            so the browser morphs it from/to the home hero image on navigation. */}
-        <section className="about-hero">
-          {/* Portrait — 4:5 aspect ratio, same proportion as project cards.
-              The view-transition-name is set in CSS on .about-portrait.       */}
-          <div className="about-portrait">
-            <Image
-              src="/images/about-img.jpg"
-              alt="Travis Hall"
-              fill
-              sizes="(max-width: 1080px) 100vw, 360px"
-              style={{ objectFit: "cover", objectPosition: "center top" }}
-              priority
-            />
-          </div>
-
-          {/* Bio column */}
-          <div className="about-content" style={{ paddingTop: "8px" }}>
-            <h1 className="type-h1 text-ink about-title">
-              Hi, I&apos;m Travis &amp; I make things people use.
-            </h1>
-
-            <div className="about-bio">
-              <p className="type-lead text-ink about-bio__measure">
-                I hold an MFA in Interactive Media and have spent nearly two
-                decades at the intersection of design and engineering — teaching
-                it at art school, building it at agencies, and scaling it across
-                eCommerce platforms used by millions of engineers worldwide.
-              </p>
-              <p className="type-body text-ink-muted about-bio__measure">
-                I&apos;ve built design systems, led UX teams, taught front-end
-                development at the post-secondary level, and shipped the code
-                myself. The work in this portfolio is the through-line.
-              </p>
-            </div>
+        {/* ── About: portrait rail + content column ────────────────────── */}
+        <section className="about-layout">
+          {/* Portrait + actions — sticky left rail on desktop */}
+          <div className="about-media">
+            <AboutPortrait />
 
             <div className="about-actions">
               <Button
@@ -76,45 +45,64 @@ export default function AboutPage() {
               </Button>
             </div>
           </div>
-        </section>
 
-        {/* ── Skills & Experience ─────────────────────────────────────────── */}
-        <section className="about-grid">
-          <div>
-            <h2 className="type-h2 text-ink">Skills &amp; Expertise</h2>
+          {/* Bio, skills, experience — single column */}
+          <div className="about-content">
+            <h1 className="type-h1 text-ink about-title">
+              Hi, I&apos;m Travis &amp; I make things people use.
+            </h1>
 
-            <div className="about-skill-groups">
-              {SKILL_GROUPS.map(({ label, items }) => (
-                <div key={label}>
-                  <p className="type-eyebrow text-ink-faint about-skill-groups__label">
-                    {label}
-                  </p>
-                  <div className="about-skill-groups__tags">
-                    {items.map((s) => (
-                      <Tag key={s} variant="ghost">
-                        {s}
-                      </Tag>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            <div className="about-bio">
+              <p className="type-lead text-ink about-bio__measure">
+                I hold an MFA in Interactive Media and have spent nearly two
+                decades at the intersection of design and engineering — teaching
+                it at art school, building it at agencies, and scaling it across
+                eCommerce platforms used by millions of engineers worldwide.
+              </p>
+              <p className="type-body text-ink-muted about-bio__measure">
+                I&apos;ve built design systems, led UX teams, taught front-end
+                development at the post-secondary level, and shipped the code
+                myself. The work in this portfolio is the through-line.
+              </p>
             </div>
-          </div>
 
-          <div>
-            <h2 className="type-h2 text-ink">Experience</h2>
-            <div className="about-roles">
-              {ROLES.map(({ title, org, period, body }) => (
-                <div key={title}>
-                  <h3 className="type-h3 text-ink">{title}</h3>
-                  <p className="type-eyebrow text-water about-roles__meta">
-                    {org} &bull; {period}
-                  </p>
-                  <p className="type-body text-ink-muted about-roles__body">
-                    {body}
-                  </p>
+            <div className="about-details">
+              <div className="about-skills">
+                <h2 className="type-h2 text-ink">Skills &amp; Expertise</h2>
+                <div className="about-skill-groups">
+                  {SKILL_GROUPS.map(({ label, items }) => (
+                    <div key={label}>
+                      <p className="type-eyebrow text-ink-faint about-skill-groups__label">
+                        {label}
+                      </p>
+                      <div className="about-skill-groups__tags">
+                        {items.map((s) => (
+                          <Tag key={s} variant="ghost">
+                            {s}
+                          </Tag>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              <div className="about-experience">
+                <h2 className="type-h2 text-ink">Experience</h2>
+                <div className="about-roles">
+                  {ROLES.map(({ title, org, period, body }) => (
+                    <div key={title}>
+                      <h3 className="type-h3 text-ink">{title}</h3>
+                      <p className="type-eyebrow text-water about-roles__meta">
+                        {org} &bull; {period}
+                      </p>
+                      <p className="type-body text-ink-muted about-roles__body">
+                        {body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -136,20 +124,18 @@ export default function AboutPage() {
           </span>
           <div className="about-footer__social">
             <Button
-              variant="glass"
+              variant="solid"
               iconOnly="github"
               aria-label="GitHub"
               href={siteConfig.links.github}
-              size="sm"
             />
             <Button
-              variant="glass"
+              variant="solid"
               iconOnly="linkedin"
               aria-label="LinkedIn"
               href={siteConfig.links.linkedin}
-              size="sm"
             />
-            <EmailButton variant="glass" icon="mail" iconPos="right" size="sm">
+            <EmailButton variant="solid" icon="mail" iconPos="right">
               {siteConfig.email}
             </EmailButton>
           </div>

@@ -62,7 +62,7 @@
   --ink-muted: var(--color-brand-3-600);
   /* brand-3-500, not -400 — -400 is only 2.48:1 on --surface (fails WCAG AA).
      -500 holds 5.08:1 while staying visibly fainter than --ink-muted. */
-  --ink-faint: var(--color-brand-3-500);
+  --ink-faint: var(--color-brand-3-400);
   --line: var(--color-brand-3-200);
   --hairline: oklch(0.84 0.02 127 / 35%);
 
@@ -296,25 +296,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─────────────── View Transitions — hero image morph ─────────────────────
- * The hero image on / and the portrait on /about share the same
- * view-transition-name so the browser morphs the box geometry + cross-fades
- * the image content during route changes.                                   */
-::view-transition-group(hero-image) {
-  animation-duration: 700ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-::view-transition-old(hero-image),
-::view-transition-new(hero-image) {
-  animation-duration: 700ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-/* Page-level fade for non-shared elements */
+/* ─────────────── View Transitions — page-level fade ───────────────────────
+ * Generic cross-fade between routes. No shared-element morph for now. The
+ * new page holds briefly on its first frame before fading in — without this
+ * the cross-fade reads as an instant cut the moment the menu finishes
+ * closing, with nothing to settle into.                                     */
 ::view-transition-old(root) {
-  animation: 300ms cubic-bezier(0.22, 1, 0.36, 1) both fade-out-page;
+  animation: 220ms cubic-bezier(0.22, 1, 0.36, 1) both fade-out-page;
 }
 ::view-transition-new(root) {
-  animation: 400ms cubic-bezier(0.22, 1, 0.36, 1) both fade-in-page;
+  animation: 420ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both fade-in-page;
+}
+
+/* Topbar persists across routes (see .topbar's view-transition-name) — give
+ * it its own group but skip the UA's default 0.25s cross-fade so it reads
+ * as static rather than flashing out/in with the rest of the page. */
+::view-transition-group(topbar),
+::view-transition-old(topbar),
+::view-transition-new(topbar) {
+  animation: none;
 }
 @keyframes fade-out-page {
   to {

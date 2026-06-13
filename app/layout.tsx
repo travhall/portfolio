@@ -51,6 +51,19 @@ export default function RootLayout({
               __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`,
             }}
           />
+          {/*
+            Anti-FOUC for the hero float-in: marks <html> so the hero starts
+            in its pre-entrance (hidden) state before first paint — see
+            html[data-hero-pending] in layout.css. Without this, SSR paints
+            the settled hero, which then has to flash before HeroSection's
+            layout effect can hide it to start the animation.
+            'hero-entrance-done' must match ENTRANCE_KEY in HeroSection.tsx.
+          */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduce&&!sessionStorage.getItem('hero-entrance-done')){document.documentElement.setAttribute('data-hero-pending','');}}catch(e){}})();`,
+            }}
+          />
         </head>
         <body>
           <SmoothScroll>
