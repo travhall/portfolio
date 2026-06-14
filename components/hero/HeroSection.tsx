@@ -18,23 +18,18 @@
  * correct WebGL texture, and is called on mount, OS scheme change, and manual
  * toggle.
  *
- * Float-in entrance — once per session, `.hero-media` fades and slides up
- * into place from below its frame (GSAP), while the GL layer plays a synced
- * radial ripple that decays to nothing as it settles — the print rising
- * through the fixer bath. The pre-entrance (hidden) state is set in CSS via
- * the `data-hero-pending` attribute (see app/layout.tsx's inline script +
- * html[data-hero-pending] in layout.css), so SSR paints it directly with no
- * flash of the settled frame before this effect runs. This layout effect
- * then either plays the entrance (first visit) or instantly clears that
- * state (repeat visit / reduced motion).
+ * Pin — `.hero-section` is pinned to the top of the viewport for one
+ * viewport's worth of scroll via ScrollTrigger (synced to Lenis in
+ * SmoothScroll), then released so `.glass-veil`/`.work-panel` (higher
+ * z-index, normal flow) slide up over it. Replaces the previous
+ * `position: sticky` — same layered-scroll result, but driven through
+ * ScrollTrigger so the pin's progress is available for future scroll-driven
+ * effects.
  */
 
 import { useLayoutEffect, useRef } from "react";
-import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { HeroGL, getHeroSrc } from "@/lib/hero-gl";
-import { prefersReducedMotion } from "@/components/ui/ripple";
-
-const ENTRANCE_KEY = "hero-entrance-done";
 
 const LIGHT = "/images/hero-light.jpg";
 const DARK = "/images/hero-dark.jpg";
@@ -44,6 +39,7 @@ interface Props {
 }
 
 export function HeroSection({ intensity = 1.5 }: Props) {
+  const sectionRef = useRef<HTMLElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<HeroGL | null>(null);
@@ -85,36 +81,9 @@ export function HeroSection({ intensity = 1.5 }: Props) {
       attributeFilter: ["data-theme"],
     });
 
-    // Float-in entrance — once per session, settling from below with a
-    // synced GL ripple. Skipped (and marked done) under reduced motion or on
-    // repeat visits within the session — both cases instantly clear the
-    // CSS pre-entrance state set by the layout.tsx anti-FOUC script.
-    let entranceTween: gsap.core.Tween | null = null;
-    if (prefersReducedMotion() || sessionStorage.getItem(ENTRANCE_KEY)) {
-      sessionStorage.setItem(ENTRANCE_KEY, "1");
-      document.documentElement.removeAttribute("data-hero-pending");
-    } else {
-      gsap.set(media, { yPercent: 100, opacity: 0 });
-      entranceTween = gsap.to(media, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 1.6,
-        ease: "power3.out",
-        clearProps: "transform,opacity",
-        onUpdate() {
-          glRef.current?.setEntrance(1 - this.progress());
-        },
-        onComplete: () => {
-          sessionStorage.setItem(ENTRANCE_KEY, "1");
-          document.documentElement.removeAttribute("data-hero-pending");
-        },
-      });
-    }
-
     return () => {
       mq.removeEventListener("change", swapTexture);
       observer.disconnect();
-      entranceTween?.kill();
       // keepContext: forcing context loss here breaks React StrictMode's
       // double-invoke (mount -> cleanup -> mount) — the second mount reuses
       // this canvas, but a lost WebGL context returns null from
@@ -126,8 +95,27 @@ export function HeroSection({ intensity = 1.5 }: Props) {
     };
   }, [intensity]);
 
+  // Pin the hero in place (no spacer) once it reaches the top of the
+  // viewport, so .glass-veil and .work-panel — higher z-index, normal flow —
+  // scroll up and over it for the rest of the page.
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const pin = ScrollTrigger.create({
+      trigger: section,
+      start: "top top",
+      endTrigger: ".work-panel",
+      end: "bottom bottom",
+      pin: true,
+      pinSpacing: false,
+    });
+
+    return () => pin.kill();
+  }, []);
+
   return (
-    <section className="hero-section">
+    <section ref={sectionRef} className="hero-section">
       <div ref={mediaRef} className="hero-media">
         {/* CSS fallback — background-image driven by --hero-fallback-img,
             resolved by CSS before first paint. See globals.css.            */}

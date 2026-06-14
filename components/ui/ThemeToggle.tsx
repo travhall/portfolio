@@ -98,6 +98,7 @@ export function ThemeToggle({ className = "" }: Props) {
           key={mode}
           type="button"
           className={`theme-toggle__opt${theme === mode ? " is-active" : ""}`}
+          data-mode={mode}
           onClick={(e) => apply(mode, e)}
           aria-pressed={theme === mode}
           aria-label={LABELS[mode]}

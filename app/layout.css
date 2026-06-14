@@ -7,7 +7,8 @@
 
    Ported + rethought from the prototype's styles.css.
    The layered-scroll trick:
-     z-1: .hero-section  (sticky, top:0) — OGL canvas, stays pinned
+     z-1: .hero-section  (ScrollTrigger-pinned, see HeroSection.tsx) — OGL
+                         canvas, holds at the top of the viewport
      z-2: .glass-veil    (in normal flow) — rides up over the hero
      z-3: .work-panel    (in normal flow) — frosted panel, carries the work
    The topbar floats above everything at z-100. cSpell:ignore topbar
@@ -55,18 +56,23 @@
   max-width: var(--maxw);
   margin: 0 auto;
 }
+.intro-section__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(20px, 4vw, 40px);
+}
 .intro-section__statement {
   max-width: 30ch;
   text-wrap: balance;
 }
 
 /* ── HERO SECTION ────────────────────────────────────────────────────────── */
-/* Sticky container — image pins at the top while content scrolls over it.   */
+/* Pinned by ScrollTrigger (see HeroSection.tsx) — image holds at the top of
+   the viewport for one scroll-length while .glass-veil/.work-panel (higher
+   z-index, normal flow) slide up over it. */
 .hero-section {
-  position: sticky;
-  top: 2rem;
   z-index: 1;
-  min-height: 100vh;
   display: flex;
   align-items: flex-start;
   padding: var(--gut);
@@ -83,14 +89,6 @@
   border: 1px solid var(--line);
   border-radius: 3px;
   overflow: hidden;
-}
-/* Pre-entrance state for first-time visits this session — set via the
-   `data-hero-pending` attribute (app/layout.tsx inline script) so SSR paints
-   the hidden state directly, with no flash of the settled frame before
-   HeroSection's layout effect can take over. */
-html[data-hero-pending] .hero-media {
-  opacity: 0;
-  transform: translateY(100%);
 }
 /* CSS fallback — visible until WebGL is ready, hidden after.
    background-image (not <img>) so the correct light/dark variant resolves

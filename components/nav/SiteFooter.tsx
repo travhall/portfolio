@@ -11,7 +11,7 @@
  */
 
 import { usePathname } from "next/navigation";
-import { Link } from "next-view-transitions";
+// import { Link } from "next-view-transitions";
 import { Button } from "@/components/ui/Button";
 import { EmailButton } from "@/components/ui/EmailButton";
 import { useLenis } from "@/components/providers/SmoothScroll";

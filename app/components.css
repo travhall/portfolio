@@ -443,14 +443,15 @@
 }
 
 /* ── THEME TOGGLE ────────────────────────────────────────────────────────── */
-/* Elongated two-up switch: an unlabeled track with a darker "thumb" segment
-   marking the active side. --theme-toggle-thumb is defined per-theme in
-   globals.css so the thumb stays darker than the track in both modes.       */
+/* Elongated two-up switch: a neutral track with a darker "thumb" segment
+   marking the active side. --theme-toggle-thumb/-light/-dark are defined in
+   globals.css so the thumb stays darker than the track in both modes, and
+   hovering the inactive side previews that mode's own thumb color.        */
 .theme-toggle {
   display: inline-flex;
   gap: 2px;
   padding: 2px;
-  background: color-mix(in oklch, var(--glass-tint) 60%, transparent);
+  background: color-mix(in oklch, var(--theme-toggle-track) 60%, transparent);
   border: 1px solid var(--line);
   border-radius: 100px;
 }
@@ -467,8 +468,11 @@
   background: var(--theme-toggle-thumb);
   box-shadow: 0 1px 4px color-mix(in oklch, var(--ink) 10%, transparent);
 }
-.theme-toggle__opt:not(.is-active):hover {
-  background: color-mix(in oklch, var(--theme-toggle-thumb) 35%, transparent);
+.theme-toggle__opt[data-mode="light"]:not(.is-active):hover {
+  background: color-mix(in oklch, var(--theme-toggle-thumb-light) 35%, transparent);
+}
+.theme-toggle__opt[data-mode="dark"]:not(.is-active):hover {
+  background: color-mix(in oklch, var(--theme-toggle-thumb-dark) 35%, transparent);
 }
 
 /* ── EMAIL ACTION ────────────────────────────────────────────────────────── */
