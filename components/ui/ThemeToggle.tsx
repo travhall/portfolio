@@ -1,52 +1,47 @@
 "use client";
 
 /**
- * ThemeToggle — segmented pill control for Auto / Light / Dark.
+ * ThemeToggle — segmented pill control for Light / Dark.
  *
- * Writes a `data-theme` attribute on <html> (or removes it for "auto").
- * The CSS [data-theme] blocks in components.css pick that up immediately.
- * An active pill slides across the track so state is always visually clear —
- * no label cycling, no ambiguity about which mode is current.
+ * Defaults to the user's system color-scheme preference. Clicking a pill
+ * sets an explicit `data-theme` attribute on <html> (and mirrors it to
+ * localStorage) that overrides the system setting from then on. The CSS
+ * [data-theme] blocks in globals.css pick that up immediately.
  */
 
 import { useEffect, useState, type MouseEvent } from "react";
 import { triggerRipple } from "./ripple";
 
-const RIPPLE_TOGGLE = { strength: 9, size: 90, duration: 600 };
+const RIPPLE_TOGGLE = { strength: 9, size: 48, duration: 600 };
 
-type ThemeMode = "auto" | "light" | "dark";
+type Theme = "light" | "dark";
 
-const MODES: ThemeMode[] = ["auto", "light", "dark"];
-const LABELS: Record<ThemeMode, string> = {
-  auto: "Auto",
+const MODES: Theme[] = ["light", "dark"];
+const LABELS: Record<Theme, string> = {
   light: "Light",
   dark: "Dark",
 };
 
-function readTheme(): ThemeMode {
-  if (typeof document === "undefined") return "auto";
-  // The html element is the source of truth — the anti-FOUC script in layout
-  // already restored it from localStorage before React hydrated.
-  return (
-    (document.documentElement.getAttribute("data-theme") as ThemeMode) ?? "auto"
-  );
+function systemTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
-function applyTheme(mode: ThemeMode) {
-  if (mode === "auto") {
-    document.documentElement.removeAttribute("data-theme");
-    try {
-      localStorage.removeItem("theme");
-    } catch {
-      /* storage blocked */
-    }
-  } else {
-    document.documentElement.setAttribute("data-theme", mode);
-    try {
-      localStorage.setItem("theme", mode);
-    } catch {
-      /* storage blocked */
-    }
+function readTheme(): Theme {
+  if (typeof document === "undefined") return "light";
+  const explicit = document.documentElement.getAttribute("data-theme");
+  if (explicit === "light" || explicit === "dark") return explicit;
+  return systemTheme();
+}
+
+function applyTheme(mode: Theme) {
+  document.documentElement.setAttribute("data-theme", mode);
+  try {
+    localStorage.setItem("theme", mode);
+  } catch {
+    /* storage blocked */
   }
 }
 
@@ -55,7 +50,7 @@ interface Props {
 }
 
 export function ThemeToggle({ className = "" }: Props) {
-  const [theme, setTheme] = useState<ThemeMode>("auto");
+  const [theme, setTheme] = useState<Theme>("light");
 
   // Sync with whatever is on <html> on mount (handles SSR / pre-set themes),
   // and keep in sync with other ThemeToggle instances elsewhere on the page —
@@ -69,10 +64,24 @@ export function ThemeToggle({ className = "" }: Props) {
       attributeFilter: ["data-theme"],
     });
 
-    return () => observer.disconnect();
+    // Until the user makes an explicit choice, track the system preference
+    // so the toggle reflects reality if it changes (e.g. OS switches to
+    // dark mode at sunset).
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onSystemChange = () => {
+      if (!document.documentElement.hasAttribute("data-theme")) {
+        setTheme(readTheme());
+      }
+    };
+    media.addEventListener("change", onSystemChange);
+
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", onSystemChange);
+    };
   }, []);
 
-  function apply(mode: ThemeMode, e: MouseEvent<HTMLButtonElement>) {
+  function apply(mode: Theme, e: MouseEvent<HTMLButtonElement>) {
     if (mode !== theme) triggerRipple(e.currentTarget, e, RIPPLE_TOGGLE);
     setTheme(mode);
     applyTheme(mode);
@@ -91,9 +100,8 @@ export function ThemeToggle({ className = "" }: Props) {
           className={`theme-toggle__opt${theme === mode ? " is-active" : ""}`}
           onClick={(e) => apply(mode, e)}
           aria-pressed={theme === mode}
-        >
-          {LABELS[mode]}
-        </button>
+          aria-label={LABELS[mode]}
+        />
       ))}
     </div>
   );

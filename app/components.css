@@ -8,7 +8,7 @@
    This file is the *portable* design-system layer: every class here could
    be lifted into another project as-is. Page- and section-specific
    structure (topbar, hero, about page, menu overlay, etc.) lives in
-   layout.css.
+   layout.css. cSpell:ignore topbar
    ════════════════════════════════════════════════════════════════════════ */
 
 /* ───────────────────────────── TYPE UTILITIES ───────────────────────────
@@ -443,38 +443,32 @@
 }
 
 /* ── THEME TOGGLE ────────────────────────────────────────────────────────── */
-/* Segmented pill: three options side by side, active pill gets a surface
-   background so the current mode is always visible at a glance.             */
+/* Elongated two-up switch: an unlabeled track with a darker "thumb" segment
+   marking the active side. --theme-toggle-thumb is defined per-theme in
+   globals.css so the thumb stays darker than the track in both modes.       */
 .theme-toggle {
   display: inline-flex;
   gap: 2px;
-  padding: 3px;
+  padding: 2px;
   background: color-mix(in oklch, var(--glass-tint) 60%, transparent);
   border: 1px solid var(--line);
   border-radius: 100px;
 }
 .theme-toggle__opt {
-  padding: 5px 14px;
+  width: 30px;
+  height: 18px;
   border-radius: 100px;
-  font-size: 13px;
-  letter-spacing: var(--track-snug);
-  color: var(--ink-muted);
   background: transparent;
   border: none;
   cursor: pointer;
-  transition:
-    background 0.18s var(--ease),
-    color 0.18s var(--ease);
-  white-space: nowrap;
-  line-height: 1.4;
+  transition: background 0.18s var(--ease);
 }
 .theme-toggle__opt.is-active {
-  background: var(--surface);
-  color: var(--ink);
+  background: var(--theme-toggle-thumb);
   box-shadow: 0 1px 4px color-mix(in oklch, var(--ink) 10%, transparent);
 }
 .theme-toggle__opt:not(.is-active):hover {
-  color: var(--ink);
+  background: color-mix(in oklch, var(--theme-toggle-thumb) 35%, transparent);
 }
 
 /* ── EMAIL ACTION ────────────────────────────────────────────────────────── */
@@ -500,15 +494,8 @@
   padding: 6px;
   border-radius: var(--edge);
   white-space: nowrap;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklch, white 12%, transparent) 0%,
-      transparent 50%,
-      color-mix(in oklch, black 12%, transparent) 100%
-    ),
-    var(--ink);
-  border: 1px solid var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   box-shadow:
     inset 0 1px 0 0 color-mix(in oklch, white 40%, transparent),
     inset 0 -1px 1px 0 color-mix(in oklch, black 40%, transparent),
@@ -544,7 +531,7 @@
   font: inherit;
   font-size: 13px;
   letter-spacing: var(--track-snug);
-  color: var(--surface);
+  color: var(--ink);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;

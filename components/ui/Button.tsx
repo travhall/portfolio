@@ -17,7 +17,7 @@ import { triggerRipple } from "./ripple";
 //
 // Trailing arrows / downloads get a motion cue on hover automatically.
 // Click sends a subtle water-ripple out from the cursor point.
-const RIPPLE_SUBTLE = { strength: 12, size: 180, duration: 750 };
+export const RIPPLE_SUBTLE = { strength: 12, size: 180, duration: 750 };
 
 type Variant = "solid" | "glass" | "ghost" | "link";
 type Size = "sm" | "lg";

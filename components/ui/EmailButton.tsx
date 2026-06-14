@@ -8,8 +8,9 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Button, type Props as ButtonProps } from "./Button";
+import { Button, RIPPLE_SUBTLE, type Props as ButtonProps } from "./Button";
 import { Icon } from "./Icon";
+import { triggerRipple } from "./ripple";
 import { siteConfig } from "@/lib/site-config";
 
 type Props = Omit<Extract<ButtonProps, { href?: undefined }>, "onClick"> & {
@@ -80,7 +81,8 @@ export function EmailButton({
             className="email-action__option"
             role="menuitem"
             href={`mailto:${siteConfig.email}`}
-            onClick={() => {
+            onClick={(e) => {
+              triggerRipple(e.currentTarget, e, RIPPLE_SUBTLE);
               setOpen(false);
               onAction?.();
             }}
@@ -92,7 +94,10 @@ export function EmailButton({
             type="button"
             className="email-action__option"
             role="menuitem"
-            onClick={copyEmail}
+            onClick={(e) => {
+              triggerRipple(e.currentTarget, e, RIPPLE_SUBTLE);
+              copyEmail();
+            }}
           >
             <span>{copied ? "Copied!" : "Copy email"}</span>
             <Icon name={copied ? "check" : "copy"} />

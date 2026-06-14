@@ -10,7 +10,7 @@
      z-1: .hero-section  (sticky, top:0) — OGL canvas, stays pinned
      z-2: .glass-veil    (in normal flow) — rides up over the hero
      z-3: .work-panel    (in normal flow) — frosted panel, carries the work
-   The topbar floats above everything at z-100.
+   The topbar floats above everything at z-100. cSpell:ignore topbar
    ════════════════════════════════════════════════════════════════════════ */
 
 /* ── TOPBAR ──────────────────────────────────────────────────────────────── */
@@ -176,9 +176,11 @@ html[data-hero-pending] .hero-media {
   gap: clamp(40px, 6vw, 96px);
 }
 .about-media {
+  border-radius: 3px;
   display: flex;
   flex-direction: column;
   gap: clamp(24px, 3vw, 40px);
+  overflow: hidden;
 }
 /* 3:4 portrait — taller than the 4:5 card crop. This is the page's anchor
    image rather than a thumbnail, and rides as a sticky rail on desktop. */
@@ -310,7 +312,7 @@ html[data-hero-pending] .hero-media {
   }
 }
 
-/* ── FOOTER CTA + FOOTER ─────────────────────────────────────────────────── */
+/* ── FOOTER CTA (about page) ────────────────────────────────────────────── */
 .about-cta {
   border-top: 1px solid var(--line);
   max-width: var(--maxw);
@@ -322,7 +324,11 @@ html[data-hero-pending] .hero-media {
   flex-wrap: wrap;
   gap: 16px;
 }
-.about-footer {
+
+/* ── SITE FOOTER ─────────────────────────────────────────────────────────── */
+/* Global footer rendered once in the root layout, beneath every page's
+   content — copyright, quick nav, and social/contact actions. */
+.site-footer {
   border-top: 1px solid var(--line);
   max-width: var(--maxw);
   margin: 0 auto;
@@ -333,7 +339,19 @@ html[data-hero-pending] .hero-media {
   flex-wrap: wrap;
   gap: 12px;
 }
-.about-footer__social {
+.site-footer__nav {
+  display: flex;
+  gap: 24px;
+}
+.site-footer__link {
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: color var(--btn-dur) var(--ease);
+}
+.site-footer__link:hover {
+  color: var(--water);
+}
+.site-footer__social {
   display: flex;
   gap: 12px;
   align-items: center;

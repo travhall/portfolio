@@ -21,10 +21,11 @@
  *         order and the a11y tree). On open, focus moves to the first nav
  *         link and Tab/Shift+Tab is trapped within the overlay's links and
  *         theme toggle. The Topbar's menu button is the only open/close
- *         control and remains visible above the overlay throughout.
+ *         control and remains visible above the overlay throughout. cSpell:ignore Topbar
  */
 
 import { useEffect, useRef, type RefObject } from "react";
+import { usePathname } from "next/navigation";
 import { Link, useTransitionRouter } from "next-view-transitions";
 import { gsap } from "gsap";
 import { Button } from "@/components/ui/Button";
@@ -63,6 +64,7 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const lenis = useLenis();
   const router = useTransitionRouter();
+  const pathname = usePathname();
 
   // Set by a nav link's click — the close animation's onComplete navigates
   // here once the menu has fully exited, so the route transition starts
@@ -278,12 +280,14 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
                   // Wait for the close animation to finish before leaving
                   // the SPA — see pendingHrefRef and onComplete above.
                   pendingHrefRef.current = href;
-                } else {
+                } else if (href !== pathname) {
                   // Navigate immediately — the still-opaque overlay covers
                   // the page swap as it plays its own close animation, so
                   // the old page is never revealed underneath.
                   router.push(href);
                 }
+                // else: already on this page — just close the menu, no
+                // route transition/fade for a same-page "navigation".
                 onClose();
               }}
             >
@@ -297,21 +301,21 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
           <ThemeToggle />
           <div className="menu-overlay__actions">
             <Button
-              variant="solid"
+              variant="ghost"
               iconOnly="github"
               aria-label="GitHub"
               href={siteConfig.links.github}
               onClick={onClose}
             />
             <Button
-              variant="solid"
+              variant="ghost"
               iconOnly="linkedin"
               aria-label="LinkedIn"
               href={siteConfig.links.linkedin}
               onClick={onClose}
             />
             <Button
-              variant="solid"
+              variant="ghost"
               icon="download"
               iconPos="right"
               href={siteConfig.cv}
@@ -319,7 +323,7 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
             >
               Download CV
             </Button>
-            <EmailButton variant="solid" iconOnly="mail" aria-label="Email" />
+            <EmailButton variant="ghost" iconOnly="mail" aria-label="Email" />
           </div>
         </div>
       </div>

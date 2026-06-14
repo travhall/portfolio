@@ -3,6 +3,7 @@ import { Manrope, Geist_Mono } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Topbar } from "@/components/nav/Topbar";
+import { SiteFooter } from "@/components/nav/SiteFooter";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
@@ -69,6 +70,7 @@ export default function RootLayout({
           <SmoothScroll>
             <Topbar />
             {children}
+            <SiteFooter />
           </SmoothScroll>
         </body>
       </html>

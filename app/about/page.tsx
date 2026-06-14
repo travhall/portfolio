@@ -116,30 +116,6 @@ export default function AboutPage() {
             View my work
           </Button>
         </div>
-
-        {/* ── Footer ─────────────────────────────────────────────────────── */}
-        <footer className="about-footer">
-          <span className="type-small text-ink-faint">
-            © 2026 Travis Hall. All rights reserved.
-          </span>
-          <div className="about-footer__social">
-            <Button
-              variant="solid"
-              iconOnly="github"
-              aria-label="GitHub"
-              href={siteConfig.links.github}
-            />
-            <Button
-              variant="solid"
-              iconOnly="linkedin"
-              aria-label="LinkedIn"
-              href={siteConfig.links.linkedin}
-            />
-            <EmailButton variant="solid" icon="mail" iconPos="right">
-              {siteConfig.email}
-            </EmailButton>
-          </div>
-        </footer>
       </main>
     </>
   );
@@ -215,7 +191,7 @@ const ROLES = [
     title: "Visiting Artist / Faculty",
     org: "Minneapolis College of Art and Design",
     period: "August 2008 – August 2010",
-    body: "Taught digital media design and web development at both postbaccalaureate and undergraduate levels — covering digital image creation, audio/video production, and front-end technologies.",
+    body: "Taught digital media design and web development at both post-baccalaureate and undergraduate levels — covering digital image creation, audio/video production, and front-end technologies.",
   },
   {
     title: "Freelance Designer / Developer",
@@ -224,3 +200,5 @@ const ROLES = [
     body: "Independent practice spanning art direction, branding, wireframing, and bespoke site development. Clients have included McCann, Likeletter Projects, Morsekode, and playworkgroup.",
   },
 ];
+
+// cSpell:ignore WDGT, Cann, Likeletter, Morsekode, playworkgroup

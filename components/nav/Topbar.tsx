@@ -15,6 +15,7 @@
  */
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { usePathname } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { Button } from "@/components/ui/Button";
 import { MenuOverlay } from "./MenuOverlay";
@@ -27,6 +28,7 @@ export function Topbar() {
   const brandRef = useRef<HTMLAnchorElement>(null);
   const menuOriginRef = useRef({ x: 0, y: 0 });
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   // Wordmark fade on scroll — pinned fully visible while the menu is open
   // so it can act as the overlay's "back to top / home" anchor.
@@ -91,6 +93,9 @@ export function Topbar() {
           onClick={(e: MouseEvent<HTMLAnchorElement>) => {
             if (!prefersReducedMotion())
               triggerRipple(e.currentTarget, e, RIPPLE_BRAND);
+            // Already home — close the menu without re-running the route
+            // transition/fade for a same-page "navigation".
+            if (pathname === "/") e.preventDefault();
             close();
           }}
         >

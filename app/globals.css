@@ -73,6 +73,9 @@
   --water-deep: var(--color-brand-1-900);
   --glass-tint: var(--color-brand-1-100);
 
+  /* theme toggle thumb — must read darker than --glass-tint (the track) */
+  --theme-toggle-thumb: var(--color-brand-1-300);
+
   /* chemical */
   --chemical: var(--color-brand-2-500);
   --chemical-warm: var(--color-brand-2-200);
@@ -230,6 +233,7 @@
     color-scheme: dark;
 
     --hero-fallback-img: url("/images/hero-dark.jpg");
+    --theme-toggle-thumb: var(--surface);
   }
 }
 
@@ -254,6 +258,7 @@ html[data-theme="dark"] {
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: dark;
   --hero-fallback-img: url("/images/hero-dark.jpg");
+  --theme-toggle-thumb: var(--surface);
 }
 /* Explicit light: must re-declare every token so this selector (0,1,1)
  * overrides the dark @media block (0,1,0) when the OS is in dark mode.
@@ -279,6 +284,7 @@ html[data-theme="light"] {
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: light;
   --hero-fallback-img: url("/images/hero-light.jpg");
+  --theme-toggle-thumb: var(--color-brand-1-300);
 }
 
 html {
@@ -310,7 +316,7 @@ body {
 
 /* Topbar persists across routes (see .topbar's view-transition-name) — give
  * it its own group but skip the UA's default 0.25s cross-fade so it reads
- * as static rather than flashing out/in with the rest of the page. */
+ * as static rather than flashing out/in with the rest of the page. cSpell:ignore topbar */
 ::view-transition-group(topbar),
 ::view-transition-old(topbar),
 ::view-transition-new(topbar) {
