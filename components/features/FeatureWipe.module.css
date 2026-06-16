@@ -27,8 +27,11 @@
 /* ─── Section wrapper ──────────────────────────────────────────────────────── */
 
 .features {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
   position: relative;
   isolation: isolate;
+  z-index: 50;
 
   /*
    * Top + bottom padding = the dwell buffer. Scroll into the section before
@@ -81,8 +84,8 @@
   border-top: 1px solid var(--line);
 }
 
-.row:first-child {
-  border-top: none;
+.row:last-child {
+  border-bottom: 1px solid var(--line);
 }
 
 /* ─── Clip cell (text column — the wipe mask) ──────────────────────────────── */

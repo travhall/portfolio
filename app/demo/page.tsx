@@ -1,8 +1,20 @@
+import { HeroSection } from "@/components/hero/HeroSection";
+import { ScrollCue } from "@/components/hero/ScrollCue";
 import { FeatureWipe } from "@/components/features/FeatureWipe";
 
 export default function DemoPage() {
   return (
     <div>
+      {/* ── Intro ── statement text scrolls away before the hero pins ── */}
+      <section className="intro-section">
+        <div className="intro-section__inner">
+          <p className="type-statement text-ink intro-section__statement">
+            Creating thoughtful digital experiences through design &amp; code
+          </p>
+          <ScrollCue />
+        </div>
+      </section>
+      <HeroSection intensity={1.5} />
       <FeatureWipe
         features={[
           {
@@ -30,8 +42,8 @@ export default function DemoPage() {
             buttonUrl: "/work/moxie-beauty",
           },
           {
-            eyebrow: "Mobile App",
-            headline: "Nike Run Club Redesign",
+            eyebrow: "Redesign",
+            headline: "Anti-broadcasting",
             side: "left",
             imageSrc: "/images/hero-dark-alt.jpg",
             buttonText: "View Redesign",
