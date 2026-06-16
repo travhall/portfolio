@@ -19,6 +19,7 @@ import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+import { Link } from "next-view-transitions";
 import styles from "./FeatureWipe.module.css";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -29,6 +30,8 @@ export interface Feature {
   side: "left" | "right";
   imageSrc?: string;
   imageAlt?: string;
+  buttonText?: string;
+  buttonUrl?: string;
 }
 
 interface Props {
@@ -195,6 +198,17 @@ export function FeatureWipe({ features }: Props) {
             );
           }
 
+          // Button reveal
+          const buttonEl = textEl.querySelector(".fw-button");
+          if (buttonEl) {
+            tl.fromTo(
+              buttonEl,
+              { y: 20, opacity: 0 },
+              { y: 0, opacity: 1, ease: "power2.out", duration: fadeInDuration * 0.8 },
+              fadeInStart + fadeInDuration * 0.2
+            );
+          }
+
           // Fade Out (for all except the last item)
           if (i < N - 1) {
             const fadeOutStart = p_i + dist * 0.1;
@@ -294,6 +308,16 @@ export function FeatureWipe({ features }: Props) {
               >
                 {f.headline}
               </h2>
+              {f.buttonText && f.buttonUrl && (
+                <div
+                  className="fw-button"
+                  style={{ opacity: 0, pointerEvents: "auto", marginTop: "0.5rem" }}
+                >
+                  <Link href={f.buttonUrl} className="btn btn--ghost btn--sm">
+                    {f.buttonText}
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
