@@ -201,6 +201,7 @@ export class HeroGL {
 
   private _boundScroll!: () => void;
   private _boundResize!: () => void;
+  private resizeObserver: ResizeObserver | null = null;
 
   constructor(canvas: HTMLCanvasElement, opts: HeroGLOptions) {
     this.canvas = canvas;
@@ -254,6 +255,15 @@ export class HeroGL {
     this._boundResize = this._resize.bind(this);
     window.addEventListener('scroll', this._boundScroll, { passive: true });
     window.addEventListener('resize', this._boundResize);
+
+    // Tracks the container's box size directly — covers layout-driven resizes
+    // (e.g. a GSAP-tweened width during a pinned scroll) that don't fire a
+    // window 'resize' event.
+    const parent = this.canvas.parentElement;
+    if (parent) {
+      this.resizeObserver = new ResizeObserver(() => this._resize());
+      this.resizeObserver.observe(parent);
+    }
   }
 
   private _build() {
@@ -412,6 +422,8 @@ export class HeroGL {
     this.stop();
     window.removeEventListener('scroll', this._boundScroll);
     window.removeEventListener('resize', this._boundResize);
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     if (!keepContext) {
       // Force context loss to immediately free GPU memory on full teardown
       const ext = (this.renderer.gl as WebGLRenderingContext)

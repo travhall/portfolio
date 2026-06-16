@@ -28,6 +28,7 @@
  */
 
 import { useLayoutEffect, useRef } from "react";
+import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { HeroGL, getHeroSrc } from "@/lib/hero-gl";
 
@@ -97,21 +98,50 @@ export function HeroSection({ intensity = 1.5 }: Props) {
 
   // Pin the hero in place (no spacer) once it reaches the top of the
   // viewport, so .glass-veil and .work-panel — higher z-index, normal flow —
-  // scroll up and over it for the rest of the page.
+  // scroll up and over it for the rest of the page. While pinned (desktop
+  // only — mobile's .hero-media is already 100% wide), scrub the media from
+  // its resting 65% width up to a full-bleed 100%, in lockstep with Lenis's
+  // scroll position via ScrollTrigger.
   useLayoutEffect(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    const media = mediaRef.current;
+    if (!section || !media) return;
 
-    const pin = ScrollTrigger.create({
-      trigger: section,
-      start: "top top",
-      endTrigger: ".work-panel",
-      end: "bottom bottom",
-      pin: true,
-      pinSpacing: false,
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 1081px)", () => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          endTrigger: ".work-panel",
+          end: "bottom bottom",
+          pin: true,
+          pinSpacing: false,
+          scrub: true,
+        },
+      });
+
+      tl.fromTo(
+        media,
+        { width: "65%", borderRadius: "3px" },
+        { width: "100%", borderRadius: "0px", ease: "none" },
+        0,
+      );
     });
 
-    return () => pin.kill();
+    mm.add("(max-width: 1080px)", () => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        endTrigger: ".work-panel",
+        end: "bottom bottom",
+        pin: true,
+        pinSpacing: false,
+      });
+    });
+
+    return () => mm.revert();
   }, []);
 
   return (

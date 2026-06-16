@@ -34,7 +34,6 @@ export default function HomePage() {
             <span className="type-eyebrow text-ink-muted">Selected Work</span>
             <span className="type-eyebrow text-ink-faint">2026</span>
           </div>
-          {/* Project cards go here — placeholder until case-study content is designed */}
           <div className="work-panel__placeholder">
             <p className="type-lead text-ink-faint">Projects loading…</p>
           </div>
