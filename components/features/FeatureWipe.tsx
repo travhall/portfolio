@@ -94,6 +94,10 @@ export function FeatureWipe({ features }: Props) {
           if (eyebrowInner) {
             gsap.set(eyebrowInner, { yPercent: 100 });
           }
+          const buttonEl = textRefs.current[idx]?.querySelector(".fw-button");
+          if (buttonEl) {
+            gsap.set(buttonEl, { opacity: 0 });
+          }
         });
 
         // Scrubbed GSAP Timeline for the full feature block
@@ -311,7 +315,7 @@ export function FeatureWipe({ features }: Props) {
               {f.buttonText && f.buttonUrl && (
                 <div
                   className="fw-button"
-                  style={{ opacity: 0, pointerEvents: "auto", marginTop: "0.5rem" }}
+                  style={{ pointerEvents: "auto", marginTop: "0.5rem" }}
                 >
                   <Link href={f.buttonUrl} className="btn btn--ghost btn--sm">
                     {f.buttonText}
