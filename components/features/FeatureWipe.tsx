@@ -103,26 +103,64 @@ export function FeatureWipe({ features }: Props) {
           },
         });
 
+        const sectionEl = sectionRef.current;
+        if (!sectionEl) return;
+
+        const sectionH = sectionEl.offsetHeight;
+        const vh = window.innerHeight;
+
+        // Calculate scroll trigger distance
+        // start is when top of section is at 52% vh
+        // end is when bottom of section is at 50% vh
+        const totalScrollDistance = sectionH + vh * 0.02;
+
         const N = features.length;
-        const step = 1 / N;
+
+        // Calculate the normalized scroll progress point where each row is centered in the viewport
+        const centers = bandRefs.current.map((rowEl) => {
+          if (!rowEl) return 0;
+          const rowCenter = rowEl.offsetTop + rowEl.offsetHeight / 2;
+          return (rowCenter + vh * 0.02) / totalScrollDistance;
+        });
 
         for (let i = 0; i < N; i++) {
           const textEl = textRefs.current[i];
           if (!textEl) continue;
 
-          // Compute timing thresholds dynamically for N elements
-          const fadeInStart = i * step + 0.05;
-          const fadeInEnd = i * step + step * 0.45;
-          const fadeOutStart = (i + 1) * step - step * 0.15;
-          const fadeOutEnd = (i + 1) * step;
+          const p_i = centers[i];
+
+          // Calculate distance to adjacent centers to space transitions beautifully
+          let dist = 0.2; // default fallback
+          if (N > 1) {
+            if (i < N - 1) {
+              dist = centers[i + 1] - centers[i];
+            } else {
+              dist = centers[i] - centers[i - 1];
+            }
+          }
+
+          // Timing windows centered around p_i
+          let fadeInStart = p_i - dist * 0.4;
+          let fadeInEnd = p_i - dist * 0.1;
+
+          // For the very first item, start fading in immediately as we enter the section
+          if (i === 0) {
+            fadeInStart = 0.02;
+            fadeInEnd = p_i - dist * 0.1;
+          }
+
           const fadeInDuration = fadeInEnd - fadeInStart;
 
-          // Y-drift throughout this item's active window
+          // Y-drift range (drift starts halfway from previous and ends halfway to next)
+          const driftStart = i === 0 ? 0.0 : p_i - dist * 0.5;
+          const driftEnd = i === N - 1 ? 1.0 : p_i + dist * 0.5;
+
+          // Constant speed Y-drift throughout this item's active window
           tl.fromTo(
             textEl,
             { y: 80 },
-            { y: -80, ease: "none", duration: step },
-            i * step
+            { y: -80, ease: "none", duration: driftEnd - driftStart },
+            driftStart
           );
 
           // Fade In
@@ -159,7 +197,10 @@ export function FeatureWipe({ features }: Props) {
 
           // Fade Out (for all except the last item)
           if (i < N - 1) {
+            const fadeOutStart = p_i + dist * 0.1;
+            const fadeOutEnd = p_i + dist * 0.4;
             const fadeOutDuration = fadeOutEnd - fadeOutStart;
+
             tl.to(
               textEl,
               { autoAlpha: 0, ease: "power1.in", duration: fadeOutDuration },
