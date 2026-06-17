@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Geist_Mono } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
-import { Topbar } from "@/components/nav/Topbar";
+import { Topbar } from "@/components/nav/Topbar"; //cSpell:ignore Topbar
 import { SiteFooter } from "@/components/nav/SiteFooter";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";

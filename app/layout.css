@@ -327,7 +327,7 @@
 /* Global footer rendered once in the root layout, beneath every page's
    content — copyright, quick nav, and social/contact actions. */
 .site-footer {
-  border-top: 1px solid var(--line);
+  border: 1px solid var(--line);
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 28px var(--gut);

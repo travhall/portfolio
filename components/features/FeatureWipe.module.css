@@ -2,7 +2,7 @@
  * FeatureWipe.module.css
  *
  * Implements the godaylight.com USP section scroll mechanic — faithfully
- * re-engineered from their production source.
+ * re-engineered from their production source. cSpell:ignore godaylight 
  *
  * Architecture (desktop):
  *   • The <section> has large top + bottom padding — the "buffer dwell"
@@ -31,15 +31,15 @@
   border-top: 1px solid var(--line);
   position: relative;
   isolation: isolate;
-  z-index: 50;
+  z-index: 5;
 
   /*
    * Top + bottom padding = the dwell buffer. Scroll into the section before
    * the first row is visible; scroll past all rows before exiting.
    * ~32vh each gives a comfortable lead-in / lead-out.
    */
-  padding-top: 32vh;
-  padding-bottom: 32vh;
+  padding-top: 20vh;
+  padding-bottom: 20vh;
 }
 
 /*
@@ -149,6 +149,7 @@
   font-weight: var(--fw-light);
   line-height: var(--leading-tight);
   letter-spacing: var(--track-snug);
+  padding-bottom: 0.25em;
   color: var(--ink);
   max-width: 14ch;
   text-wrap: balance;
@@ -197,15 +198,10 @@
   /* Initial state for GSAP clip-reveal */
   clip-path: inset(20% 0% 20% 0%);
   transform: scale(1.4);
-
-  background: repeating-linear-gradient(
-    135deg,
-    var(--surface-dim) 0 14px,
-    var(--line) 14px 28px
-  );
 }
 
 .mediaInner img {
+  padding: 1rem;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -219,6 +215,10 @@
   .features::before,
   .features::after {
     display: block;
+  }
+
+  .mediaInner img {
+    padding: 0;
   }
 }
 
@@ -261,7 +261,7 @@
 
   .media {
     min-height: auto;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3/4;
     order: 2;
   }
 

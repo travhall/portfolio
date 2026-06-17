@@ -2,7 +2,7 @@
 
 /**
  * FeatureWipe — USP section scroll mechanic with clip-path wipe effects.
- * Faithful re-engineering of the godaylight.com feature section.
+ * Faithful re-engineering of the godaylight.com feature section. cSpell:ignore godaylight
  *
  * Key mechanic:
  *   - The <section> has large top + bottom padding acting as scroll dwell buffers.
@@ -90,7 +90,8 @@ export function FeatureWipe({ features }: Props) {
           if (childLines.length > 0) {
             gsap.set(childLines, { yPercent: 100 });
           }
-          const eyebrowInner = textRefs.current[idx]?.querySelector(".fw-eyebrow-inner");
+          const eyebrowInner =
+            textRefs.current[idx]?.querySelector(".fw-eyebrow-inner");
           if (eyebrowInner) {
             gsap.set(eyebrowInner, { yPercent: 100 });
           }
@@ -146,14 +147,16 @@ export function FeatureWipe({ features }: Props) {
             }
           }
 
-          // Timing windows centered around p_i
-          let fadeInStart = p_i - dist * 0.4;
-          let fadeInEnd = p_i - dist * 0.1;
+          // Timing windows centered around p_i.
+          // fadeIn completes well before the wipe seam hits center (p_i).
+          // fadeOut begins after the seam passes center.
+          let fadeInStart = p_i - dist * 0.45;
+          let fadeInEnd = p_i - dist * 0.2;
 
-          // For the very first item, start fading in immediately as we enter the section
+          // First item: start fading in immediately as we enter the section
           if (i === 0) {
             fadeInStart = 0.02;
-            fadeInEnd = p_i - dist * 0.1;
+            fadeInEnd = p_i - dist * 0.2;
           }
 
           const fadeInDuration = fadeInEnd - fadeInStart;
@@ -162,19 +165,19 @@ export function FeatureWipe({ features }: Props) {
           const driftStart = i === 0 ? 0.0 : p_i - dist * 0.5;
           const driftEnd = i === N - 1 ? 1.0 : p_i + dist * 0.5;
 
-          // Constant speed Y-drift throughout this item's active window
+          // Subtle Y-drift — small range so text feels pinned, not scrolling
           tl.fromTo(
             textEl,
-            { y: 80 },
-            { y: -80, ease: "none", duration: driftEnd - driftStart },
-            driftStart
+            { y: 24 },
+            { y: -24, ease: "none", duration: driftEnd - driftStart },
+            driftStart,
           );
 
           // Fade In
           tl.to(
             textEl,
             { autoAlpha: 1, ease: "power1.out", duration: fadeInDuration },
-            fadeInStart
+            fadeInStart,
           );
 
           // Eyebrow reveal
@@ -182,8 +185,12 @@ export function FeatureWipe({ features }: Props) {
           if (eyebrowInner) {
             tl.to(
               eyebrowInner,
-              { yPercent: 0, ease: "power2.out", duration: fadeInDuration * 0.8 },
-              fadeInStart
+              {
+                yPercent: 0,
+                ease: "power2.out",
+                duration: fadeInDuration * 0.8,
+              },
+              fadeInStart,
             );
           }
 
@@ -198,7 +205,7 @@ export function FeatureWipe({ features }: Props) {
                 duration: fadeInDuration * 0.8,
                 stagger: (fadeInDuration * 0.2) / childLines.length,
               },
-              fadeInStart
+              fadeInStart,
             );
           }
 
@@ -208,21 +215,26 @@ export function FeatureWipe({ features }: Props) {
             tl.fromTo(
               buttonEl,
               { y: 20, opacity: 0 },
-              { y: 0, opacity: 1, ease: "power2.out", duration: fadeInDuration * 0.8 },
-              fadeInStart + fadeInDuration * 0.2
+              {
+                y: 0,
+                opacity: 1,
+                ease: "power2.out",
+                duration: fadeInDuration * 0.8,
+              },
+              fadeInStart + fadeInDuration * 0.2,
             );
           }
 
           // Fade Out (for all except the last item)
           if (i < N - 1) {
-            const fadeOutStart = p_i + dist * 0.1;
-            const fadeOutEnd = p_i + dist * 0.4;
+            const fadeOutStart = p_i + dist * 0.2;
+            const fadeOutEnd = p_i + dist * 0.45;
             const fadeOutDuration = fadeOutEnd - fadeOutStart;
 
             tl.to(
               textEl,
               { autoAlpha: 0, ease: "power1.in", duration: fadeOutDuration },
-              fadeOutStart
+              fadeOutStart,
             );
           }
         }
@@ -249,7 +261,7 @@ export function FeatureWipe({ features }: Props) {
                 end: "top 40%",
                 scrub: true,
               },
-            }
+            },
           );
         });
       }, sectionRef);
@@ -317,7 +329,7 @@ export function FeatureWipe({ features }: Props) {
                   className="fw-button"
                   style={{ pointerEvents: "auto", marginTop: "0.5rem" }}
                 >
-                  <Link href={f.buttonUrl} className="btn btn--ghost btn--sm">
+                  <Link href={f.buttonUrl} className="btn btn--glass btn--sm">
                     {f.buttonText}
                   </Link>
                 </div>

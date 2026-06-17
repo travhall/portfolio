@@ -107,7 +107,7 @@ a {
      -500 holds 5.08:1 while staying visibly fainter than --ink-muted. */
   --ink-faint: var(--color-brand-3-400);
   --line: var(--color-brand-3-200);
-  --hairline: oklch(0.84 0.02 127 / 35%);
+  --hairline: var(--color-brand-3-100);
 
   /* water & glass */
   /* brand-1-600, not -500 — -500 is only 4.04:1 on --surface (fails WCAG AA
@@ -122,7 +122,9 @@ a {
      thumb (gold) must read darker than --theme-toggle-track; in dark mode
      the thumb (blue) must read *lighter* than the track for contrast. */
   --theme-toggle-thumb-light: var(--color-brand-2-500); /* gold "sun" */
-  --theme-toggle-thumb-dark: var(--color-brand-1-300); /* blue "moon" — light enough to stay visible on the dark track */
+  --theme-toggle-thumb-dark: var(
+    --color-brand-1-300
+  ); /* blue "moon" — light enough to stay visible on the dark track */
   --theme-toggle-thumb: var(--theme-toggle-thumb-light);
   --theme-toggle-track: var(--surface-dim);
 
@@ -256,8 +258,8 @@ a {
     --ink-faint: var(
       --color-brand-3-400
     ); /* oklch(0.71 0.03 127)                   */
-    --line: oklch(0.29 0.05 195.9 / 55%);
-    --hairline: oklch(0.84 0.02 127 / 10%);
+    --line: var(--color-brand-3-800);
+    --hairline: var(--color-brand-3-700);
 
     /* water & glass — lighter tones so they read against the dark bath */
     --water: var(
@@ -299,8 +301,8 @@ html[data-theme="dark"] {
   --ink: var(--color-brand-3-50);
   --ink-muted: var(--color-brand-3-300);
   --ink-faint: var(--color-brand-3-400);
-  --line: oklch(0.29 0.05 195.9 / 55%);
-  --hairline: oklch(0.84 0.02 127 / 10%);
+  --line: var(--color-brand-3-800);
+  --hairline: var(--color-brand-3-700);
   --water: var(--color-brand-1-300);
   --water-deep: var(--color-brand-1-200);
   --glass-tint: var(--color-brand-1-800);
@@ -323,7 +325,7 @@ html[data-theme="light"] {
   --ink-muted: var(--color-brand-3-600);
   --ink-faint: var(--color-brand-3-400);
   --line: var(--color-brand-3-200);
-  --hairline: oklch(0.84 0.02 127 / 35%);
+  --hairline: var(--color-brand-3-100);
   --water: var(--color-brand-1-500);
   --water-deep: var(--color-brand-1-900);
   --glass-tint: var(--color-brand-1-100);
