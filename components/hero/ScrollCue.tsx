@@ -1,24 +1,32 @@
 "use client";
 
 /**
- * ScrollCue — link in the intro statement that smooth-scrolls to the
- * featured work section via the shared Lenis instance.
+ * ScrollCue — smooth-scrolls to a target anchor via the shared Lenis instance.
+ *
+ * Props:
+ *   to      — CSS selector or element ID to scroll to (e.g. "#work")
+ *   label   — button label (default: "Scroll down")
  */
 
 import { Button } from "@/components/ui/Button";
 import { useLenis } from "@/components/providers/SmoothScroll";
 
-export function ScrollCue() {
+interface Props {
+  to: string;
+  label?: string;
+}
+
+export function ScrollCue({ to, label = "Scroll down" }: Props) {
   const lenis = useLenis();
 
   return (
     <Button
-      variant="link"
+      variant="solid"
       icon="arrow-down"
       iconPos="right"
-      onClick={() => lenis?.scrollTo("#work", { duration: 1.4 })}
+      onClick={() => lenis?.scrollTo(to, { duration: 1.4 })}
     >
-      View selected work
+      {label}
     </Button>
   );
 }

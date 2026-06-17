@@ -29,7 +29,7 @@
 }
 .type-h2 {
   font-size: var(--text-h2);
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-regular);
   letter-spacing: var(--track-snug);
   line-height: var(--leading-tight);
 }
@@ -227,20 +227,15 @@
   border-color: color-mix(in oklch, var(--ink) 88%, black);
 }
 
-/* —— surface: GLASS —— inherits the frosted material, fills with ink on hover.
-   Neutral frost: fill and edge derive from --surface/--hairline rather than
-   the brand-1 --glass-tint, so the button reads as clear glass over whatever
-   sits beneath it instead of carrying its own blue-teal cast. Label sits in
-   --ink, matching the ghost surface's resting color. */
+/* —— surface: GLASS —— neutral frost that reads clear over any backdrop.
+   --glass-fill is overridden to near-transparent so the button doesn't
+   carry the brand-1 blue-teal cast of the shared glass-surface defaults. */
 .btn--glass {
   --glass-fill: color-mix(in oklch, var(--surface) 2.5%, transparent);
-  color: var(--ink);
+  color: var(--water-deep);
 }
-.btn--glass.glass-surface:hover,
 .btn--glass:hover {
-  /* background: var(--ink); */
   --glass-fill: color-mix(in oklch, var(--ink) 65%, transparent);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   color: var(--surface);
   border-color: var(--ink);
   box-shadow:
@@ -248,15 +243,19 @@
     0 10px 24px -14px color-mix(in oklch, var(--ink) 40%, transparent);
 }
 
-/* —— surface: GHOST —— hairline outline, subtle tint on hover */
+/* —— surface: GHOST —— outline, subtle tint on hover.
+   Uses --border-control for the border and --ink-muted for text/icon at
+   rest — all three match so the control reads as one coherent muted register.
+   Hover steps everything up to full --ink. */
 .btn--ghost {
   background: transparent;
-  border-color: var(--hairline);
-  color: var(--ink);
+  border-color: var(--border-control);
+  color: var(--ink-muted);
 }
 .btn--ghost:hover {
   background: var(--btn-ghost-hover);
   border-color: var(--ink);
+  color: var(--ink);
 }
 
 /* —— surface: LINK —— text + animated underline, no chrome */
@@ -343,6 +342,9 @@
   color: var(--ink-muted);
   white-space: nowrap;
   border: 1px solid var(--surface-border, transparent);
+  transition:
+    color var(--tag-dur) var(--ease),
+    border-color var(--tag-dur) var(--ease);
 }
 .tag__icon {
   flex: none;
@@ -360,14 +362,20 @@
 /* —— surfaces —— */
 .tag--glass {
   --glass-fill: color-mix(in oklch, var(--surface) 2.5%, transparent);
-  color: var(--ink);
+  color: var(--water-deep);
 } /* + .glass-surface — matches .btn--glass */
 .tag--solid {
   background: var(--ink);
   color: var(--surface);
 }
+/* Mirrors .btn--ghost: --border-control border, --ink-muted text at rest,
+   steps to --ink on hover for consistent ghost register across controls. */
 .tag--ghost {
-  border-color: var(--hairline);
+  border-color: var(--border-control);
+  color: var(--ink-muted);
+}
+.tag--ghost:hover {
+  border-color: var(--ink);
   color: var(--ink);
 }
 
@@ -442,6 +450,34 @@
   }
 }
 
+/* ── SPLITTEXT LINE MASK ─────────────────────────────────────────────────── */
+/*
+ * Two-layer SplitText wipe reveal used in FeatureWipe (and available globally
+ * for any other scroll-reveal that needs the same mechanic):
+ *
+ * .line-mask  — outer wrapper, overflow:hidden. padding-bottom extends the
+ *               clip boundary below the line-height so descenders (g, p, y)
+ *               aren't cut off.
+ *
+ * .line-inner — inner wrapper, overflow:visible. The animated element
+ *               (yPercent 100 → 0). Visible so descenders in the padding
+ *               area of the mask aren't re-clipped.
+ *
+ * SplitText writes these directly to the DOM — must be global, not Modules.
+ */
+.line-mask {
+  overflow: hidden;
+  display: block;
+  line-height: inherit;
+  padding-bottom: 0.15em;
+}
+
+.line-inner {
+  display: block;
+  line-height: inherit;
+  overflow: visible;
+}
+
 /* ── THEME TOGGLE ────────────────────────────────────────────────────────── */
 /* Elongated two-up switch: a neutral track with a darker "thumb" segment
    marking the active side. --theme-toggle-thumb/-light/-dark are defined in
@@ -463,6 +499,10 @@
   border: none;
   cursor: pointer;
   transition: background 0.18s var(--ease);
+}
+.theme-toggle__opt:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
 .theme-toggle__opt.is-active {
   background: var(--theme-toggle-thumb);
@@ -542,7 +582,12 @@
   transition: background var(--btn-dur) var(--ease);
 }
 .email-action__option:hover {
-  background: color-mix(in oklch, var(--surface) 16%, transparent);
+  background: color-mix(in oklch, var(--ink) 6%, transparent);
+}
+.email-action__option:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+  border-radius: calc(var(--edge) - 6px);
 }
 .email-action__option svg {
   flex: none;

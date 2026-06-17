@@ -17,11 +17,11 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { usePathname } from "next/navigation";
 import { Link } from "next-view-transitions";
-import { Button } from "@/components/ui/Button";
 import { MenuOverlay } from "./MenuOverlay";
 import { prefersReducedMotion, triggerRipple } from "@/components/ui/ripple";
 
-const RIPPLE_BRAND = { strength: 9, size: 90, duration: 600 };
+const RIPPLE_BRAND  = { strength: 9, size: 90,  duration: 600 };
+const RIPPLE_TOGGLE = { strength: 8, size: 80,  duration: 550 };
 
 export function Topbar() {
   const headerRef = useRef<HTMLElement>(null);
@@ -101,20 +101,45 @@ export function Topbar() {
         >
           travishall.design
         </Link>
-        <Button
-          variant="solid"
-          size="sm"
+        <button
+          type="button"
           className="topbar__toggle"
           aria-label={isOpen ? "Close menu" : "Open menu"}
           aria-expanded={isOpen}
           aria-controls="site-menu"
           onClick={(e) => {
+            if (!prefersReducedMotion())
+              triggerRipple(e.currentTarget, e, RIPPLE_TOGGLE);
             menuOriginRef.current = { x: e.clientX, y: e.clientY };
             setIsOpen((o) => !o);
           }}
         >
-          {isOpen ? "close" : "menu"}
-        </Button>
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className={`topbar__toggle-icon${isOpen ? " is-open" : ""}`}
+          >
+            <path
+              className="topbar__toggle-line topbar__toggle-line--top"
+              d="M4 8h16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.6}
+              strokeLinecap="round"
+            />
+            <path
+              className="topbar__toggle-line topbar__toggle-line--bot"
+              d="M4 16h16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.6}
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="topbar__toggle-label">
+            {isOpen ? "close" : "menu"}
+          </span>
+        </button>
       </header>
 
       <MenuOverlay isOpen={isOpen} onClose={close} originRef={menuOriginRef} />

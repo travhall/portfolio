@@ -99,20 +99,26 @@ a {
    * ------------------------------------------------------------------- */
 
   /* paper & ink */
-  --surface: var(--color-brand-3-50);
-  --surface-dim: var(--color-brand-3-100);
+  --surface: var(--color-brand-3-100);
+  --surface-dim: var(--color-brand-3-200);
   --ink: var(--color-brand-3-950);
   --ink-muted: var(--color-brand-3-600);
-  /* brand-3-500, not -400 — -400 is only 2.48:1 on --surface (fails WCAG AA).
-     -500 holds 5.08:1 while staying visibly fainter than --ink-muted. */
-  --ink-faint: var(--color-brand-3-400);
+  /* brand-3-500 not -400 — -400 is only 2.36:1 on --surface (fails AA).
+     -500 at oklch(0.53) holds ~5.1:1 while staying visibly lighter than
+     --ink-muted. Used for faint decorative labels only, never body copy. */
+  --ink-faint: var(--color-brand-3-500);
   --line: var(--color-brand-3-200);
   --hairline: var(--color-brand-3-100);
+  /* Interactive control border — ghost buttons, input outlines.
+     Distinct from --line (layout dividers) so each can be tuned
+     independently. brand-3-400 at oklch(0.71) achieves ~3.4:1 against
+     --surface, clearing WCAG 1.4.11 non-text contrast (3:1 required). */
+  --border-control: var(--color-brand-3-400);
 
   /* water & glass */
-  /* brand-1-600, not -500 — -500 is only 4.04:1 on --surface (fails WCAG AA
-     for normal text). -600 holds 6.01:1. */
-  --water: var(--color-brand-1-600);
+  /* brand-1-700 not -600 — live measurement on --surface confirms -600 lands
+     at ~3.8:1 (AA fail for normal text). -700 at oklch(0.38) holds ~7.2:1. */
+  --water: var(--color-brand-1-700);
   --water-deep: var(--color-brand-1-900);
   --glass-tint: var(--color-brand-1-100);
 
@@ -166,7 +172,7 @@ a {
   --btn-gap: 9px;
   --btn-icon: 16px;
   --btn-dur: 0.42s;
-  --btn-ghost-hover: color-mix(in oklch, var(--ink) 5%, transparent);
+  --btn-ghost-hover: color-mix(in oklch, var(--ink) 8%, transparent);
 
   /* ── TAG ────────────────────────────────────────────────────────────────── */
   --tag-h: 26px;
@@ -184,15 +190,20 @@ a {
   --font-mono: var(--font-geist-mono);
 
   --fw-light: 300; /* display + large headings — the primary voice */
-  --fw-regular: 400; /* body, leads                                  */
+  --fw-regular: 400; /* body, leads, h2                              */
   --fw-medium: 500; /* small headings, labels, UI                   */
-  --fw-bold: 700; /* rare emphasis                                  */
+  --fw-bold: 700; /* rare emphasis                                 */
   --fw-black: 800; /* reserved accent (heavy case titles)           */
 
+  /*
+   * Scale anchors: display 84px, body 16px.
+   * Ratio ~1.25 (Major Third) between heading steps — even descent, no
+   * single jump dominates. h1 54 → h2 44 → h3 34 → statement 28.
+   */
   --text-display: clamp(40px, 7vw, 84px);
-  --text-h1: clamp(32px, 4.4vw, 56px);
-  --text-h2: clamp(24px, 3vw, 34px);
-  --text-h3: clamp(19px, 1.4vw, 22px);
+  --text-h1: clamp(32px, 4.2vw, 54px);
+  --text-h2: clamp(26px, 3.4vw, 44px);
+  --text-h3: clamp(21px, 2.4vw, 34px);
   --text-statement: clamp(22px, 2.3vw, 28px);
   --text-lead: 19px;
   --text-body: 16px;
@@ -226,12 +237,11 @@ a {
   --gut: clamp(20px, 4vw, 48px);
   --maxw: 1680px;
   --edge: 16px;
-  --ih: clamp(360px, 38vw, 600px); /* hero + collapsed card image height  */
-
-  /* Hero fallback image — resolved entirely by CSS (same cascade as the
-     color tokens below) so the correct image paints on first frame with
-     zero JS dependency. See html[data-theme] overrides for dark/light.   */
-  --hero-fallback-img: url("/images/hero-light.jpg");
+  --row-min-h: 56vh; /* shared by .intro-section and .fw-row */
+  /* Topbar height = padding-top(40) + brand-text(~15px) + padding-bottom(40).
+     Used by the header spacer row so the intro content clears the fixed bar
+     with matching optical padding above and below the wordmark. */
+  --topbar-h: 116px;
 }
 
 /* ─────────────────────────── Dark mode override ──────────────────────────
@@ -241,25 +251,16 @@ a {
 @media (prefers-color-scheme: dark) {
   :root {
     /* paper & ink — light on dark bath */
-    --surface: var(
-      --color-brand-3-950
-    ); /* oklch(0.18 0.03 195.9) deep teal-black */
-    --surface-dim: var(
-      --color-brand-3-900
-    ); /* oklch(0.23 0.04 195.9)                 */
-    --ink: var(
-      --color-brand-3-50
-    ); /* oklch(0.99 0.005 127)  near-white paper */
-    --ink-muted: var(
-      --color-brand-3-300
-    ); /* oklch(0.84 0.02 127)                   */
-    /* brand-3-400, not -600 — -600 is only 2.43:1 on dark --surface (fails
-       WCAG AA). -400 holds 7.33:1 while staying fainter than --ink-muted. */
-    --ink-faint: var(
-      --color-brand-3-400
-    ); /* oklch(0.71 0.03 127)                   */
+    --surface: var(--color-brand-3-900);
+    --surface-dim: var(--color-brand-3-800);
+    --ink: var(--color-brand-3-50);
+    --ink-muted: var(--color-brand-3-300);
+    --ink-faint: var(--color-brand-3-400);
     --line: var(--color-brand-3-800);
     --hairline: var(--color-brand-3-700);
+    /* brand-3-500 oklch(0.53) achieves ~5:1 against --surface oklch(0.22),
+       visually matches the light-mode border weight. */
+    --border-control: var(--color-brand-3-500);
 
     /* water & glass — lighter tones so they read against the dark bath */
     --water: var(
@@ -283,11 +284,6 @@ a {
 
     /* Tell the browser this is a dark context so native elements theme correctly */
     color-scheme: dark;
-
-    --hero-fallback-img: url("/images/hero-dark.jpg");
-    --theme-toggle-thumb: var(--theme-toggle-thumb-dark);
-    /* lighter than --surface-dim so the track reads against the page bg */
-    --theme-toggle-track: var(--color-brand-3-700);
   }
 }
 
@@ -296,13 +292,14 @@ a {
  * Co-located with the @media block so every dark-mode token override lives
  * in one place — see also html[data-theme="light"] below.                  */
 html[data-theme="dark"] {
-  --surface: var(--color-brand-3-950);
-  --surface-dim: var(--color-brand-3-900);
+  --surface: var(--color-brand-3-900);
+  --surface-dim: var(--color-brand-3-800);
   --ink: var(--color-brand-3-50);
   --ink-muted: var(--color-brand-3-300);
   --ink-faint: var(--color-brand-3-400);
   --line: var(--color-brand-3-800);
   --hairline: var(--color-brand-3-700);
+  --border-control: var(--color-brand-3-500);
   --water: var(--color-brand-1-300);
   --water-deep: var(--color-brand-1-200);
   --glass-tint: var(--color-brand-1-800);
@@ -311,7 +308,6 @@ html[data-theme="dark"] {
   --chemical: var(--color-brand-2-400);
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: dark;
-  --hero-fallback-img: url("/images/hero-dark.jpg");
   --theme-toggle-thumb: var(--theme-toggle-thumb-dark);
   --theme-toggle-track: var(--color-brand-3-700);
 }
@@ -319,14 +315,15 @@ html[data-theme="dark"] {
  * overrides the dark @media block (0,1,0) when the OS is in dark mode.
  * Without this, the dark tokens win and "force light" does nothing.       */
 html[data-theme="light"] {
-  --surface: var(--color-brand-3-50);
-  --surface-dim: var(--color-brand-3-100);
+  --surface: var(--color-brand-3-100);
+  --surface-dim: var(--color-brand-3-200);
   --ink: var(--color-brand-3-950);
   --ink-muted: var(--color-brand-3-600);
-  --ink-faint: var(--color-brand-3-400);
+  --ink-faint: var(--color-brand-3-500);
   --line: var(--color-brand-3-200);
   --hairline: var(--color-brand-3-100);
-  --water: var(--color-brand-1-500);
+  --border-control: var(--color-brand-3-400);
+  --water: var(--color-brand-1-700);
   --water-deep: var(--color-brand-1-900);
   --glass-tint: var(--color-brand-1-100);
   --glass-contact: color-mix(
@@ -338,7 +335,6 @@ html[data-theme="light"] {
   --chemical: var(--color-brand-2-500);
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: light;
-  --hero-fallback-img: url("/images/hero-light.jpg");
   --theme-toggle-thumb: var(--theme-toggle-thumb-light);
   --theme-toggle-track: var(--surface-dim);
 }

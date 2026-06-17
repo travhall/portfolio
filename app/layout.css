@@ -1,17 +1,9 @@
-/* ═══════════════════════════════ LAYOUT ═════════════════════════════════
+/* ════════════════════════════════════════════════════════════════════════
    layout.css — page shells and section-specific structure for the
-   portfolio site: topbar, hero scroll-stack, about page, menu overlay.
+   portfolio site: topbar, intro, feature wipe, about page, menu overlay.
    Not portable — these classes assume this site's content and routes.
    Built on the design-system primitives in components.css and the tokens
-   in globals.css.
-
-   Ported + rethought from the prototype's styles.css.
-   The layered-scroll trick:
-     z-1: .hero-section  (ScrollTrigger-pinned, see HeroSection.tsx) — OGL
-                         canvas, holds at the top of the viewport
-     z-2: .glass-veil    (in normal flow) — rides up over the hero
-     z-3: .work-panel    (in normal flow) — frosted panel, carries the work
-   The topbar floats above everything at z-100. cSpell:ignore topbar
+   in globals.css. cSpell:ignore topbar
    ════════════════════════════════════════════════════════════════════════ */
 
 /* ── TOPBAR ──────────────────────────────────────────────────────────────── */
@@ -25,8 +17,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 40px var(--gut);
-  max-width: var(--maxw);
-  margin: 0 auto;
+  /* max-width: var(--maxw);
+  margin: 0 auto; */
   pointer-events: none;
   /* Persistent across routes — give it its own view-transition group so the
      root cross-fade (::view-transition-old/new(root)) skips it entirely.
@@ -46,117 +38,444 @@
   transition: opacity 0.2s var(--ease);
 }
 
-/* ── INTRO ───────────────────────────────────────────────────────────────── */
-/* Statement scrolls away normally before the hero pins. */
-.intro-section {
-  display: flex;
+/* ── Menu toggle ── */
+/*
+ * Plain <button> — no btn surface classes. Sized to a 36px tap target,
+ * icon centred. The SVG lines animate to an X on open via CSS transforms
+ * anchored to each line's own bounding box (transform-box: fill-box).
+ *
+ * Transition: top line slides to vertical centre + rotates 45°,
+ *             bottom line slides to vertical centre + rotates −45°.
+ *             Together they form an X without any icon swap.
+ */
+.topbar__toggle {
+  display: inline-flex;
   align-items: center;
-  padding: clamp(120px, 18vh, 320px) var(--gut) 0;
-  min-height: 64vh;
-  max-width: var(--maxw);
-  margin: 0 auto;
+  gap: 8px;
+  height: 36px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: opacity 0.2s var(--ease);
 }
+.topbar__toggle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.topbar__toggle:hover {
+  opacity: 0.6;
+}
+
+.topbar__toggle-icon {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: block;
+  overflow: visible;
+}
+
+.topbar__toggle-label {
+  font-size: var(--text-eyebrow);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-wide);
+  line-height: 1;
+  /* Fixed width prevents layout shift when label swaps menu ↔ close */
+  min-width: 3.5ch;
+}
+
+.topbar__toggle-line {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 0.32s var(--ease),
+    opacity 0.2s var(--ease);
+}
+
+/* Open state — rotate each line around its own centre to form an X */
+.topbar__toggle-icon.is-open .topbar__toggle-line--top {
+  transform: translateY(4px) rotate(45deg);
+}
+.topbar__toggle-icon.is-open .topbar__toggle-line--bot {
+  transform: translateY(-4px) rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar__toggle-line {
+    transition: none;
+  }
+}
+
+/* ── HEADER SPACER ───────────────────────────────────────────────────────── */
+/*
+ * Empty row that mirrors the topbar's visual footprint — same grid columns,
+ * same hairlines, height exactly matching the fixed topbar (40px padding +
+ * brand text + 40px padding = --topbar-h). This creates the visual effect
+ * the wireframe specifies: the wordmark appears to sit inside a grid cell
+ * rather than floating over empty space.
+ * No content — purely structural rhythm.
+ */
+.header-spacer {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  height: var(--topbar-h);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    width: 0;
+    pointer-events: none;
+  }
+  &::before { left: 25%;  border-right: 1px solid var(--line); }
+  &::after  { right: 25%; border-left:  1px solid var(--line); }
+}
+
+@media (max-width: 899px) {
+  .header-spacer {
+    grid-template-columns: 1fr;
+  }
+  .header-spacer::before,
+  .header-spacer::after {
+    display: none;
+  }
+}
+
+/* ── INTRO ───────────────────────────────────────────────────────────────── */
+/*
+ * One row in the same grid system as .fw-section — same column widths,
+ * same min-height token, same hairlines. Reads as a natural first entry
+ * in the vertical sequence of project rows below it.
+ * Horizontal padding only; content is vertically centred by the grid.
+ * The fixed topbar floats above with no background — no clearance needed.
+ */
+.intro-section {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  min-height: var(--row-min-h);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+
+  /* Hairlines at 25% / 75% — continuous with .fw-section::before/after */
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    width: 0;
+    pointer-events: none;
+  }
+  &::before {
+    left: 25%;
+    border-right: 1px solid var(--line);
+  }
+  &::after {
+    right: 25%;
+    border-left: 1px solid var(--line);
+  }
+}
+
 .intro-section__inner {
+  grid-column: 2 / 3;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: clamp(20px, 4vw, 40px);
+  gap: clamp(16px, 3vh, 28px);
+  padding-inline: clamp(24px, 4vw, 48px);
 }
+
 .intro-section__statement {
-  max-width: 30ch;
+  max-width: 26ch;
   text-wrap: balance;
 }
 
-/* ── HERO SECTION ────────────────────────────────────────────────────────── */
-/* Pinned by ScrollTrigger (see HeroSection.tsx) — image holds at the top of
-   the viewport for one scroll-length while .glass-veil/.work-panel (higher
-   z-index, normal flow) slide up over it. */
-.hero-section {
-  z-index: 1;
-  display: flex;
-  align-items: flex-start;
-  padding: var(--gut);
-  max-width: var(--maxw);
-  margin: 0 auto;
-}
-/* The image frame: 65% wide, fixed height token, landscape on desktop.
-   The mobile breakpoint switches to portrait aspect-ratio.                 */
-.hero-media {
-  aspect-ratio: 16 / 9;
-  position: relative;
-  width: 65%;
-  height: var(--ih);
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  overflow: hidden;
-}
-/* CSS fallback — visible until WebGL is ready, hidden after.
-   background-image (not <img>) so the correct light/dark variant resolves
-   from --hero-fallback-img at first paint, before any JS runs.             */
-.hero-media__fallback {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background-image: var(--hero-fallback-img);
-  background-size: cover;
-  background-position: center;
-  transition: opacity 0.5s var(--ease);
-}
-/* WebGL canvas — fades in once shader is ready                               */
-.hero-media__gl {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 0.5s var(--ease);
-}
-.hero-media.is-gl .hero-media__fallback {
-  opacity: 0;
-  pointer-events: none;
-}
-.hero-media.is-gl .hero-media__gl {
-  opacity: 1;
+/* Mobile: single column, drop hairlines, full-bleed padding */
+@media (max-width: 899px) {
+  .intro-section {
+    grid-template-columns: 1fr;
+  }
+  .intro-section::before,
+  .intro-section::after {
+    display: none;
+  }
+  .intro-section__inner {
+    grid-column: 1;
+    padding-inline: var(--gut);
+  }
 }
 
-/* ── GLASS VEIL ──────────────────────────────────────────────────────────── */
-/* Rides up over the pinned hero image in normal scroll flow. The backdrop
-   blur + faint white tint creates the "image distorting under glass" look
-   as the chromatic-aberration parallax shader plays beneath.                */
-.glass-veil {
+/* ── FEATURE WIPE ────────────────────────────────────────────────────────────
+   Scroll-driven work section. Four structural layers:
+     1. .fw-section     — outer wrapper; container, dwell padding, hairlines
+     2. .fw-row         — natural-height grid row; image col sets the height
+     3. .fw-clip-cell   — text column; clip-path clips the fixed text to cell
+     4. .fw-text-fixed  — position:fixed viewport-centred text overlay
+   Typography (.fw-eyebrow, .fw-headline) is scoped to .fw-section so it
+   doesn't bleed into other sections.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/*
+ * Local layout token — row min-height is shared between .fw-row and
+ * .fw-media so they stay in sync without repeating the value.
+ * Not in globals.css because it's specific to this section.
+ */
+.fw-section {
+  --fw-row-min-h: var(--row-min-h);
+
+  container-type: inline-size;
+  container-name: fw-section;
+
+  background: var(--surface);
   position: relative;
-  z-index: 2;
-  min-height: 70vh;
-  background: color-mix(in oklch, var(--glass-tint) 8%, transparent);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  isolation: isolate;
+
+  /*
+   * Dwell buffers — scroll into the section before the first row is
+   * visible; scroll past all rows before exiting. 20vh each gives a
+   * comfortable lead-in / lead-out without excessive page length.
+   */
+  padding-block: 20vh;
+  /* max-width: var(--maxw);
+  margin: 0 auto;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line); */
+}
+
+/*
+ * Vertical hairlines framing the centre text column zone.
+ * 25% / 75% matches the 1fr-2fr-1fr grid column boundaries.
+ * Shown only at the desktop column breakpoint (≥ 900px inline).
+ */
+.fw-section::before,
+.fw-section::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.fw-section::before {
+  left: 25%;
+  border-right: 1px solid var(--line);
+}
+
+.fw-section::after {
+  right: 25%;
+  border-left: 1px solid var(--line);
+}
+
+/* ─── Row ── */
+.fw-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: 1fr;
+  min-height: var(--fw-row-min-h);
   border-top: 1px solid var(--line);
+}
+
+.fw-row:last-child {
   border-bottom: 1px solid var(--line);
 }
 
-/* ── WORK PANEL ──────────────────────────────────────────────────────────── */
-/* Frosted panel that carries the project cards and all subsequent content.   */
-.work-panel {
+/* ─── Clip cell (text column — the wipe mask) ── */
+/*
+ * The clip-path on this scrolling ancestor is the wipe mechanic:
+ * the position:fixed text inside is paint-clipped to this cell's
+ * bounding box as it scrolls past, making it appear to live inside
+ * the row rather than fixed to the viewport.
+ *
+ * overflow: clip is used (not overflow: hidden) because hidden would
+ * create a scroll container, breaking the fixed-position child.
+ * clip-path: inset(0) reinforces the clip at the paint layer for
+ * Chrome and Safari compatibility.
+ */
+.fw-clip-cell {
+  grid-column: 2 / 3;
+  grid-row: 1;
   position: relative;
-  z-index: 3;
-  background: color-mix(in oklch, var(--surface) 90%, transparent);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  border-top: 1px solid var(--line);
-  overflow-x: clip;
+  overflow: clip;
+  clip-path: inset(0);
+  z-index: 2;
 }
-.work-panel__header {
+
+/* ─── Image / media column ── */
+.fw-media {
+  grid-row: 1;
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  min-height: var(--fw-row-min-h);
+}
+
+/* Side placement — set by data-side on the row */
+.fw-row--right .fw-media {
+  grid-column: 3 / 4;
+}
+.fw-row--left .fw-media {
+  grid-column: 1 / 2;
+}
+
+/*
+ * Inner wrapper is oversized (top: -12%, height: 124%) so GSAP's
+ * clip-reveal (inset 20%→0%) and parallax have room to move without
+ * revealing background behind the image edges.
+ * GSAP sets the initial clip-path and scale; CSS owns the geometry.
+ */
+.fw-media__inner {
+  position: absolute;
+  inset-inline: 0;
+  top: -12%;
+  height: 124%;
+  will-change: transform;
+
+  /* Initial GSAP clip-reveal state — JS animates these to 0% / 1.0 */
+  clip-path: inset(20% 0% 20% 0%);
+  transform: scale(1.4);
+}
+
+/* Both <img> and <canvas> (OGL) fill the inner wrapper identically */
+.fw-media__inner img,
+.fw-media__inner canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ─── Fixed text overlay ── */
+/*
+ * All .fw-text-fixed instances in a section simultaneously occupy the same
+ * fixed viewport-centred position. GSAP drives autoAlpha + y per item;
+ * only one is visible at a time.
+ * pointer-events:none lets clicks pass through to the page;
+ * the .fw-button child overrides this so buttons stay interactive.
+ */
+.fw-text-fixed {
+  position: fixed;
+  inset: 0;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: clamp(96px, 12vw, 168px) var(--gut) 22px;
-  border-bottom: 1px solid var(--hairline);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  text-align: center;
+  padding-inline: clamp(1.5rem, 4vw, 3rem);
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+  pointer-events: none;
 }
-.work-panel__placeholder {
-  min-height: 200vh;
-  padding: clamp(60px, 8vw, 120px) var(--gut);
+
+/* ─── FeatureWipe layout modifiers ── */
+/*
+ * .headline-constrain — layout-only modifier applied on top of .type-h1.
+ *   Constrains the headline to a readable measure, balances wrapping,
+ *   and adds optical padding so descenders don't crowd the button below.
+ *   Font properties live in .type-h1 (components.css).
+ */
+.headline-constrain {
+  max-width: 14ch;
+  text-wrap: balance;
+  margin: 0;
+  padding-bottom: 0.2em;
+}
+
+/* ── FEATURE WIPE — mobile / reduced-motion ─────────────────────────────── */
+/*
+ * Container query on .fw-section (declared above) drives the layout
+ * switch instead of a viewport media query — more robust when this
+ * section is embedded in varied page contexts.
+ *
+ * Below 900px inline-size: rows stack as flex columns, fixed positioning
+ * and clip-path are disabled, and GSAP-driven opacity is overridden.
+ *
+ * prefers-reduced-motion is a media query because it reflects a system
+ * preference, not a layout context — the two are combined via @media.
+ */
+@container fw-section (max-width: 899px) {
+  .fw-section {
+    padding-block: 0;
+  }
+
+  .fw-section::before,
+  .fw-section::after {
+    display: none;
+  }
+
+  .fw-row {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .fw-clip-cell {
+    overflow: visible;
+    clip-path: none;
+    order: 1;
+  }
+
+  .fw-text-fixed {
+    position: static;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    padding: 3.5rem var(--gut) 2rem;
+    align-items: flex-start;
+    text-align: left;
+    pointer-events: auto;
+    gap: 0.875rem;
+  }
+
+  /* type-h1 at mobile — tighten the fluid range */
+  .headline-constrain {
+    font-size: clamp(1.75rem, 6vw, 2.5rem);
+    padding-bottom: 1rem;
+  }
+
+  .fw-media {
+    min-height: auto;
+    aspect-ratio: 3 / 4;
+    order: 2;
+  }
+
+  .fw-row--right .fw-media,
+  .fw-row--left .fw-media {
+    grid-column: unset;
+  }
+
+  .fw-media__inner {
+    position: static;
+    inset-inline: unset;
+    top: unset;
+    height: 100%;
+    clip-path: none !important;
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fw-text-fixed {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    pointer-events: auto;
+  }
+
+  .fw-media__inner {
+    clip-path: none !important;
+    transform: none !important;
+  }
 }
 
 /* ── ABOUT LAYOUT ────────────────────────────────────────────────────────── */
@@ -189,9 +508,6 @@
   overflow: hidden;
   border: 1px solid var(--line);
 }
-/* CSS fallback — visible until WebGL is ready, hidden after. Mirrors
-   .hero-media__fallback/__gl so the portrait shares the hero's
-   chromatic-aberration parallax shader (see AboutPortrait.tsx). */
 .about-portrait__fallback {
   position: absolute;
   inset: 0;
@@ -235,7 +551,6 @@
 .about-bio__measure {
   max-width: 54ch;
 }
-/* Social + CV button row — sits under the portrait on desktop */
 .about-actions {
   display: flex;
   flex-wrap: wrap;
@@ -260,11 +575,6 @@
 }
 
 /* ── SKILLS & EXPERIENCE ─────────────────────────────────────────────────── */
-/* A container query, not a viewport one: whether skills/experience sit
-   side-by-side depends on how wide .about-content actually is, which varies
-   once the desktop layout above gives it a flexible share of the page — a
-   narrow content column should stack even on a wide screen. Experience leads
-   in both layouts (most recent/relevant first). */
 .about-details {
   container-type: inline-size;
   display: flex;
@@ -324,12 +634,10 @@
 }
 
 /* ── SITE FOOTER ─────────────────────────────────────────────────────────── */
-/* Global footer rendered once in the root layout, beneath every page's
-   content — copyright, quick nav, and social/contact actions. */
 .site-footer {
   border: 1px solid var(--line);
-  max-width: var(--maxw);
-  margin: 0 auto;
+  /* max-width: var(--maxw);
+  margin: 0 auto; */
   padding: 28px var(--gut);
   display: flex;
   justify-content: space-between;
@@ -356,8 +664,6 @@
 }
 
 /* ── MENU OVERLAY ────────────────────────────────────────────────────────── */
-/* Full-screen glass takeover. clip-path is driven by GSAP; CSS only sets the
-   final resting state and material properties.                               */
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -366,19 +672,12 @@
   -webkit-backdrop-filter: blur(32px) saturate(1.2);
   backdrop-filter: blur(32px) saturate(1.2);
   border-bottom: 1px solid var(--line);
-  /* Hidden at rest — GSAP fades/scales/blurs this in to reveal, out to hide  */
   opacity: 0;
   will-change: opacity, transform, filter;
   overflow: hidden;
-  /* Prevent interaction while hidden */
   pointer-events: none;
-  /* Smooth the background when the theme toggle switches modes               */
   transition: background-color 0.25s var(--ease);
 }
-
-/* Inner content layer — separate element so the open/close water-ripple
-   (its own `filter: url(#...)`) doesn't fight GSAP's `filter: blur()` on
-   the outer .menu-overlay above.                                           */
 .menu-overlay__surface {
   display: flex;
   flex-direction: column;
@@ -390,8 +689,6 @@
   margin: 0 auto;
   will-change: filter;
 }
-
-/* Nav links — large, airy, spaced                                            */
 .menu-overlay__nav {
   flex: 1;
   display: flex;
@@ -416,8 +713,6 @@
 .menu-overlay__link:hover {
   color: var(--water);
 }
-
-/* Bottom row — theme toggle + quick links (social + CV)                     */
 .menu-overlay__bottom {
   display: flex;
   flex-wrap: wrap;
@@ -435,15 +730,6 @@
 }
 
 /* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
-@media (max-width: 1080px) {
-  .hero-media {
-    width: 100%;
-    height: auto;
-    margin-left: 0;
-    aspect-ratio: 3 / 4;
-  }
-}
-
 @media (min-width: 1800px) {
   .menu-overlay__surface {
     padding: var(--gut) 0 clamp(48px, 4vw, 96px);

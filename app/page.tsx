@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { HeroSection } from "@/components/hero/HeroSection";
 import { ScrollCue } from "@/components/hero/ScrollCue";
+import { FeatureWipe } from "@/components/features/FeatureWipe";
 
 export const metadata: Metadata = {
   title: "Travis Hall — Design & Code",
@@ -10,35 +10,68 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <>
-      <main className="page-root">
-        {/* ── Intro ── statement text scrolls away before the hero pins ── */}
-        <section className="intro-section">
-          <div className="intro-section__inner">
-            <p className="type-statement text-ink intro-section__statement">
-              Creating thoughtful digital experiences through design &amp; code
-            </p>
-            <ScrollCue />
-          </div>
-        </section>
+    <main>
+      {/* ── Header spacer ─────────────────────────────────────────────────
+          Empty row matching the topbar's visual footprint (--topbar-h).
+          Gives the wordmark a grid cell to sit in rather than floating
+          over a content edge. Same column grid + hairlines as all rows.
+      ──────────────────────────────────────────────────────────────────── */}
+      <div className="header-spacer" aria-hidden="true" />
 
-        {/* ── Hero ── OGL parallax image, sticky top:0 ──────────────────── */}
-        <HeroSection intensity={1.5} />
-
-        {/* ── Glass veil ── rides over the pinned hero as you scroll ─────── */}
-        <div className="glass-veil" aria-hidden="true" />
-
-        {/* ── Work panel ── project cards and all subsequent content ──────── */}
-        <div className="work-panel" id="work">
-          <div className="work-panel__header">
-            <span className="type-eyebrow text-ink-muted">Selected Work</span>
-            <span className="type-eyebrow text-ink-faint">2026</span>
-          </div>
-          <div className="work-panel__placeholder">
-            <p className="type-lead text-ink-faint">Projects loading…</p>
-          </div>
+      {/* ── Intro ─────────────────────────────────────────────────────────
+          Full-viewport panel. Same 3-column grid as FeatureWipe so the
+          column hairlines read as one continuous vertical system.
+          Content sits in the centre two columns, weight in the lower third.
+      ──────────────────────────────────────────────────────────────────── */}
+      <section className="intro-section">
+        <div className="intro-section__inner">
+          <h1 className="type-h1 text-ink intro-section__statement">
+            Creating thoughtful digital experiences through design &amp; code
+          </h1>
+          <ScrollCue to="#work" label="View selected work" />
         </div>
-      </main>
-    </>
+      </section>
+
+      {/* ── Work ──────────────────────────────────────────────────────────
+          Scroll-driven project feature section.
+      ──────────────────────────────────────────────────────────────────── */}
+      <FeatureWipe
+        id="work"
+        features={[
+          {
+            eyebrow: "Featured Project",
+            headline: "Wylie Dog Design System",
+            side: "right",
+            imageSrc: "/images/work-img-wyliedog-light.jpg",
+            buttonText: "View Case Study",
+            buttonUrl: "/work/wylie-dog",
+          },
+          {
+            eyebrow: "New Site",
+            headline: "El Camino Skate Shop",
+            side: "left",
+            imageSrc: "/images/work-img-elcamino-light.jpg",
+            buttonText: "Visit Skate Shop",
+            buttonUrl: "/work/el-camino",
+          },
+          {
+            eyebrow: "New Site",
+            headline: "Moxie Beauty",
+            side: "right",
+            imageSrc: "/images/work-img-moxie-light.jpg",
+            buttonText: "View Case Study",
+            buttonUrl: "/work/moxie-beauty",
+          },
+          {
+            eyebrow: "Redesign",
+            headline: "Anti-broadcasting",
+            side: "left",
+            imageSrc: "/images/work-img-antibroadcasting-light.jpg",
+            buttonText: "View Redesign",
+            buttonUrl: "/work/antibroadcasting",
+          },
+        ]}
+      />
+    </main>
   );
 }

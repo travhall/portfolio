@@ -17,7 +17,7 @@ const SWATCH_GROUPS = [
   {
     name: "Paper & ink",
     note: "brand-3 · sage-neutral — the airy base register",
-    tokens: ["surface", "surface-dim", "ink-faint", "ink-muted", "ink", "line", "hairline"],
+    tokens: ["surface", "surface-dim", "ink-faint", "ink-muted", "ink", "line", "hairline", "border-control"],
   },
   {
     name: "Water & glass",
@@ -64,14 +64,14 @@ const COLOR_PAIRINGS = [
     bgVar: "--surface",
     sample: "Projects loading…",
     sampleClassName: "type-eyebrow",
-    context: "Faint labels — .text-ink-faint on --surface",
+    context: "Faint labels — .text-ink-faint on --surface (brand-3-500, decorative only)",
   },
   {
     fgVar: "--water",
     bgVar: "--surface",
     sample: "Hover / active link accent",
     sampleClassName: "type-body",
-    context: "Accent — .text-water on --surface",
+    context: "Accent — .text-water on --surface (brand-1-700)",
   },
   {
     fgVar: "--water-deep",
@@ -90,15 +90,17 @@ const COLOR_PAIRINGS = [
 ];
 
 const TYPE_ROWS = [
-  { cls: "type-display", label: "Display", token: "--text-display · light 300" },
-  { cls: "type-h1", label: "Heading 1", token: "--text-h1 · light 300" },
-  { cls: "type-h2", label: "Heading 2", token: "--text-h2 · medium 500" },
-  { cls: "type-h3", label: "Heading 3", token: "--text-h3 · medium 500" },
+  { cls: "type-display",   label: "Display",   token: "--text-display · light 300" },
+  { cls: "type-h1",        label: "Heading 1", token: "--text-h1 · light 300" },
+  { cls: "type-h2",        label: "Heading 2", token: "--text-h2 · regular 400" },
+  { cls: "type-h3",        label: "Heading 3", token: "--text-h3 · medium 500" },
   { cls: "type-statement", label: "Statement", token: "--text-statement · regular 400" },
-  { cls: "type-lead", label: "Lead", token: "--text-lead · regular 400" },
-  { cls: "type-body", label: "Body", token: "--text-body · regular 400" },
-  { cls: "type-small", label: "Small", token: "--text-small · regular 400" },
-  { cls: "type-eyebrow", label: "Eyebrow", token: "--text-eyebrow · medium 500" },
+  { cls: "type-lead",      label: "Lead",      token: "--text-lead · regular 400" },
+  { cls: "type-body",      label: "Body",      token: "--text-body · regular 400" },
+  { cls: "type-small",     label: "Small",     token: "--text-small · regular 400" },
+  { cls: "type-caption",   label: "Caption",   token: "--text-caption · medium 500" },
+  { cls: "type-eyebrow",   label: "Eyebrow",   token: "--text-eyebrow · medium 500, uppercase" },
+  { cls: "type-micro",     label: "Micro",     token: "--text-micro · medium 500" },
 ];
 
 function Section({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {

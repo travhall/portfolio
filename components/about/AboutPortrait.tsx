@@ -1,28 +1,28 @@
 "use client";
 
 /**
- * AboutPortrait — the about page's anchor portrait, sharing the hero's
- * chromatic-aberration parallax shader (see lib/hero-gl.ts). A single
+ * AboutPortrait — the about page's anchor portrait, sharing the
+ * chromatic-aberration parallax shader (see lib/media-gl.ts). A single
  * image, no light/dark variants — unlike HeroSection there's no texture
  * swap on theme change.
  */
 
 import { useLayoutEffect, useRef } from "react";
-import { HeroGL } from "@/lib/hero-gl";
+import { MediaGL } from "@/lib/media-gl";
 
 const SRC = "/images/about-img.jpg";
 
 export function AboutPortrait() {
-  const mediaRef = useRef<HTMLDivElement>(null);
+  const mediaRef  = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const glRef = useRef<HeroGL | null>(null);
+  const glRef     = useRef<MediaGL | null>(null);
 
   useLayoutEffect(() => {
-    const media = mediaRef.current;
+    const media  = mediaRef.current;
     const canvas = canvasRef.current;
     if (!media || !canvas) return;
 
-    glRef.current = new HeroGL(canvas, {
+    glRef.current = new MediaGL(canvas, {
       src: SRC,
       effect: "parallax",
       intensity: 1.5,
