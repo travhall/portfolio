@@ -293,7 +293,7 @@ export function FeatureWipe({ features, id }: Props) {
 
           gsap.fromTo(
             mediaInner,
-            { clipPath: "inset(12% 0% 12% 0%)" },
+            { clipPath: "inset(0% 0% 20% 0%)" },
             {
               clipPath: "inset(0% 0% 0% 0%)",
               ease: "power1.out",
