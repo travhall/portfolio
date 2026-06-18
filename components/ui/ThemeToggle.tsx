@@ -1,24 +1,20 @@
 "use client";
 
 /**
- * ThemeToggle — single ghost button showing the current theme as a label.
- * Clicking cycles light → dark → light. The label animates out/in with a
- * vertical slide matching the topbar menu toggle label treatment.
+ * ThemeToggle — single ghost button cycling light ↔ dark.
  *
- * Uses the sparkle icon from the site's 17-icon set as a visual anchor —
- * it reads as ambient light/energy, appropriate for a theme control without
- * requiring sun/moon glyphs that fall outside the established icon language.
+ * The SunMoonIcon animates imperatively (via ref) before React re-renders
+ * so the transition runs from the current visual state, not the post-swap
+ * snapshot. The text label slides up/down independently.
  */
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
-import { Icon } from "./Icon";
+import { SunMoonIcon, type SunMoonHandle } from "./SunMoonIcon";
 import { triggerRipple, prefersReducedMotion } from "./ripple";
 
 const RIPPLE_THEME = { strength: 7, size: 60, duration: 500 };
 
 type Theme = "light" | "dark";
-
-const LABELS: Record<Theme, string> = { light: "Light", dark: "Dark" };
 
 function systemTheme(): Theme {
   if (typeof window === "undefined") return "light";
@@ -40,9 +36,10 @@ function applyTheme(mode: Theme) {
 interface Props { className?: string; }
 
 export function ThemeToggle({ className = "" }: Props) {
-  const [theme, setTheme]   = useState<Theme>("light");
+  const [theme, setTheme]     = useState<Theme>("light");
   const [animDir, setAnimDir] = useState<"in" | "out" | null>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
+  const labelRef  = useRef<HTMLSpanElement>(null);
+  const iconRef   = useRef<SunMoonHandle>(null);
 
   useEffect(() => {
     setTheme(readTheme());
@@ -61,8 +58,12 @@ export function ThemeToggle({ className = "" }: Props) {
 
   function toggle(e: MouseEvent<HTMLButtonElement>) {
     const next: Theme = theme === "light" ? "dark" : "light";
-    if (!prefersReducedMotion() && labelRef.current) {
-      // Slide out current label, then swap and slide in
+    const reduced = prefersReducedMotion();
+
+    // Fire icon morph immediately — runs from current DOM state
+    if (!reduced) iconRef.current?.animate(next === "dark");
+
+    if (!reduced && labelRef.current) {
       setAnimDir("out");
       setTimeout(() => {
         setTheme(next);
@@ -74,7 +75,8 @@ export function ThemeToggle({ className = "" }: Props) {
       setTheme(next);
       applyTheme(next);
     }
-    if (!prefersReducedMotion()) triggerRipple(e.currentTarget, e, RIPPLE_THEME);
+
+    if (!reduced) triggerRipple(e.currentTarget, e, RIPPLE_THEME);
   }
 
   return (
@@ -85,7 +87,7 @@ export function ThemeToggle({ className = "" }: Props) {
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
       aria-pressed={theme === "dark"}
     >
-      <Icon name="sparkle" size={14} className="theme-toggle__icon" />
+      <SunMoonIcon ref={iconRef} dark={theme === "dark"} size={16} />
       <span
         ref={labelRef}
         className={[
@@ -95,7 +97,7 @@ export function ThemeToggle({ className = "" }: Props) {
         ].filter(Boolean).join(" ")}
         aria-hidden="true"
       >
-        {LABELS[theme]}
+        {theme === "light" ? "Light" : "Dark"}
       </span>
     </button>
   );

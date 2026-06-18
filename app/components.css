@@ -521,7 +521,6 @@
 
 .theme-toggle__icon {
   flex: none;
-  opacity: 0.7;
   transition: opacity var(--btn-dur) var(--ease);
 }
 .theme-toggle:hover .theme-toggle__icon {
