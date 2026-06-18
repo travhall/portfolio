@@ -1,32 +1,28 @@
 "use client";
 
 /**
- * ThemeToggle — segmented pill control for Light / Dark.
+ * ThemeToggle — single ghost button showing the current theme as a label.
+ * Clicking cycles light → dark → light. The label animates out/in with a
+ * vertical slide matching the topbar menu toggle label treatment.
  *
- * Defaults to the user's system color-scheme preference. Clicking a pill
- * sets an explicit `data-theme` attribute on <html> (and mirrors it to
- * localStorage) that overrides the system setting from then on. The CSS
- * [data-theme] blocks in globals.css pick that up immediately.
+ * Uses the sparkle icon from the site's 17-icon set as a visual anchor —
+ * it reads as ambient light/energy, appropriate for a theme control without
+ * requiring sun/moon glyphs that fall outside the established icon language.
  */
 
-import { useEffect, useState, type MouseEvent } from "react";
-import { triggerRipple } from "./ripple";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { Icon } from "./Icon";
+import { triggerRipple, prefersReducedMotion } from "./ripple";
 
-const RIPPLE_TOGGLE = { strength: 9, size: 48, duration: 600 };
+const RIPPLE_THEME = { strength: 7, size: 60, duration: 500 };
 
 type Theme = "light" | "dark";
 
-const MODES: Theme[] = ["light", "dark"];
-const LABELS: Record<Theme, string> = {
-  light: "Light",
-  dark: "Dark",
-};
+const LABELS: Record<Theme, string> = { light: "Light", dark: "Dark" };
 
 function systemTheme(): Theme {
   if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 function readTheme(): Theme {
@@ -38,72 +34,69 @@ function readTheme(): Theme {
 
 function applyTheme(mode: Theme) {
   document.documentElement.setAttribute("data-theme", mode);
-  try {
-    localStorage.setItem("theme", mode);
-  } catch {
-    /* storage blocked */
-  }
+  try { localStorage.setItem("theme", mode); } catch { /* blocked */ }
 }
 
-interface Props {
-  className?: string;
-}
+interface Props { className?: string; }
 
 export function ThemeToggle({ className = "" }: Props) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme]   = useState<Theme>("light");
+  const [animDir, setAnimDir] = useState<"in" | "out" | null>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
 
-  // Sync with whatever is on <html> on mount (handles SSR / pre-set themes),
-  // and keep in sync with other ThemeToggle instances elsewhere on the page —
-  // any of them can change data-theme on <html>, so watch for that.
   useEffect(() => {
     setTheme(readTheme());
-
     const observer = new MutationObserver(() => setTheme(readTheme()));
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
     });
-
-    // Until the user makes an explicit choice, track the system preference
-    // so the toggle reflects reality if it changes (e.g. OS switches to
-    // dark mode at sunset).
     const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onSystemChange = () => {
-      if (!document.documentElement.hasAttribute("data-theme")) {
-        setTheme(readTheme());
-      }
+    const onSystem = () => {
+      if (!document.documentElement.hasAttribute("data-theme")) setTheme(readTheme());
     };
-    media.addEventListener("change", onSystemChange);
-
-    return () => {
-      observer.disconnect();
-      media.removeEventListener("change", onSystemChange);
-    };
+    media.addEventListener("change", onSystem);
+    return () => { observer.disconnect(); media.removeEventListener("change", onSystem); };
   }, []);
 
-  function apply(mode: Theme, e: MouseEvent<HTMLButtonElement>) {
-    if (mode !== theme) triggerRipple(e.currentTarget, e, RIPPLE_TOGGLE);
-    setTheme(mode);
-    applyTheme(mode);
+  function toggle(e: MouseEvent<HTMLButtonElement>) {
+    const next: Theme = theme === "light" ? "dark" : "light";
+    if (!prefersReducedMotion() && labelRef.current) {
+      // Slide out current label, then swap and slide in
+      setAnimDir("out");
+      setTimeout(() => {
+        setTheme(next);
+        applyTheme(next);
+        setAnimDir("in");
+        setTimeout(() => setAnimDir(null), 280);
+      }, 160);
+    } else {
+      setTheme(next);
+      applyTheme(next);
+    }
+    if (!prefersReducedMotion()) triggerRipple(e.currentTarget, e, RIPPLE_THEME);
   }
 
   return (
-    <div
+    <button
+      type="button"
       className={`theme-toggle ${className}`.trim()}
-      role="group"
-      aria-label="Color theme"
+      onClick={toggle}
+      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      aria-pressed={theme === "dark"}
     >
-      {MODES.map((mode) => (
-        <button
-          key={mode}
-          type="button"
-          className={`theme-toggle__opt${theme === mode ? " is-active" : ""}`}
-          data-mode={mode}
-          onClick={(e) => apply(mode, e)}
-          aria-pressed={theme === mode}
-          aria-label={LABELS[mode]}
-        />
-      ))}
-    </div>
+      <Icon name="sparkle" size={14} className="theme-toggle__icon" />
+      <span
+        ref={labelRef}
+        className={[
+          "theme-toggle__label",
+          animDir === "out" ? "is-exiting" : "",
+          animDir === "in"  ? "is-entering" : "",
+        ].filter(Boolean).join(" ")}
+        aria-hidden="true"
+      >
+        {LABELS[theme]}
+      </span>
+    </button>
   );
 }

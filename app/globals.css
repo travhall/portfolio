@@ -122,18 +122,6 @@ a {
   --water-deep: var(--color-brand-1-900);
   --glass-tint: var(--color-brand-1-100);
 
-  /* theme toggle thumb — constant per-mode colors (used for hover previews
-     of the *other* mode, regardless of which theme is currently active),
-     plus the active thumb color for the current theme. In light mode the
-     thumb (gold) must read darker than --theme-toggle-track; in dark mode
-     the thumb (blue) must read *lighter* than the track for contrast. */
-  --theme-toggle-thumb-light: var(--color-brand-2-500); /* gold "sun" */
-  --theme-toggle-thumb-dark: var(
-    --color-brand-1-300
-  ); /* blue "moon" — light enough to stay visible on the dark track */
-  --theme-toggle-thumb: var(--theme-toggle-thumb-light);
-  --theme-toggle-track: var(--surface-dim);
-
   /* chemical */
   --chemical: var(--color-brand-2-500);
   --chemical-warm: var(--color-brand-2-200);
@@ -282,7 +270,6 @@ a {
     --chemical: var(--color-brand-2-400); /* oklch(0.79 0.16 80)    */
     --chemical-warm: var(--color-brand-2-200); /* oklch(0.93 0.065 80)   */
 
-    /* Tell the browser this is a dark context so native elements theme correctly */
     color-scheme: dark;
   }
 }
@@ -308,12 +295,7 @@ html[data-theme="dark"] {
   --chemical: var(--color-brand-2-400);
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: dark;
-  --theme-toggle-thumb: var(--theme-toggle-thumb-dark);
-  --theme-toggle-track: var(--color-brand-3-700);
 }
-/* Explicit light: must re-declare every token so this selector (0,1,1)
- * overrides the dark @media block (0,1,0) when the OS is in dark mode.
- * Without this, the dark tokens win and "force light" does nothing.       */
 html[data-theme="light"] {
   --surface: var(--color-brand-3-100);
   --surface-dim: var(--color-brand-3-200);
@@ -335,8 +317,6 @@ html[data-theme="light"] {
   --chemical: var(--color-brand-2-500);
   --chemical-warm: var(--color-brand-2-200);
   color-scheme: light;
-  --theme-toggle-thumb: var(--theme-toggle-thumb-light);
-  --theme-toggle-track: var(--surface-dim);
 }
 
 html {

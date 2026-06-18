@@ -479,40 +479,95 @@
 }
 
 /* ── THEME TOGGLE ────────────────────────────────────────────────────────── */
-/* Elongated two-up switch: a neutral track with a darker "thumb" segment
-   marking the active side. --theme-toggle-thumb/-light/-dark are defined in
-   globals.css so the thumb stays darker than the track in both modes, and
-   hovering the inactive side previews that mode's own thumb color.        */
+/*
+ * Single ghost button — sparkle icon + text label ("Light" / "Dark").
+ * Matches the topbar menu toggle in height, gap, and type register.
+ * The label clips to a fixed width so the button doesn't shift size
+ * between "Light" (5ch) and "Dark" (4ch).
+ *
+ * Label animation: on toggle the current label slides up and fades (is-exiting),
+ * then the new label slides up from below and fades in (is-entering).
+ * overflow:hidden on .theme-toggle__label clips the travel.
+ */
 .theme-toggle {
   display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  background: color-mix(in oklch, var(--theme-toggle-track) 60%, transparent);
-  border: 1px solid var(--line);
-  border-radius: 100px;
-}
-.theme-toggle__opt {
-  width: 30px;
-  height: 18px;
-  border-radius: 100px;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 10px 0 8px;
+  border: 1px solid var(--border-control);
+  border-radius: 999px;
   background: transparent;
-  border: none;
+  color: var(--ink-muted);
   cursor: pointer;
-  transition: background 0.18s var(--ease);
+  font-size: var(--text-eyebrow);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-wide);
+  /* text-transform: uppercase; */
+  /* line-height: 1; */
+  transition:
+    color var(--btn-dur) var(--ease),
+    border-color var(--btn-dur) var(--ease),
+    background var(--btn-dur) var(--ease);
 }
-.theme-toggle__opt:focus-visible {
+.theme-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.theme-toggle:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
-.theme-toggle__opt.is-active {
-  background: var(--theme-toggle-thumb);
-  box-shadow: 0 1px 4px color-mix(in oklch, var(--ink) 10%, transparent);
+
+.theme-toggle__icon {
+  flex: none;
+  opacity: 0.7;
+  transition: opacity var(--btn-dur) var(--ease);
 }
-.theme-toggle__opt[data-mode="light"]:not(.is-active):hover {
-  background: color-mix(in oklch, var(--theme-toggle-thumb-light) 35%, transparent);
+.theme-toggle:hover .theme-toggle__icon {
+  opacity: 1;
 }
-.theme-toggle__opt[data-mode="dark"]:not(.is-active):hover {
-  background: color-mix(in oklch, var(--theme-toggle-thumb-dark) 35%, transparent);
+
+.theme-toggle__label {
+  /* Fixed width prevents button resizing between "Light" and "Dark" */
+  display: inline-block;
+  min-width: 3.2ch;
+  overflow: hidden;
+  /* Clip the slide animation without creating a scroll container */
+  height: 1.25em;
+  line-height: 1.25em;
+  vertical-align: middle;
+}
+
+.theme-toggle__label.is-exiting {
+  animation: theme-label-out 0.16s var(--ease) forwards;
+}
+.theme-toggle__label.is-entering {
+  animation: theme-label-in 0.28s var(--ease) forwards;
+}
+
+@keyframes theme-label-out {
+  to {
+    opacity: 0;
+    transform: translateY(-60%);
+  }
+}
+@keyframes theme-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(60%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__label.is-exiting,
+  .theme-toggle__label.is-entering {
+    animation: none;
+  }
 }
 
 /* ── EMAIL ACTION ────────────────────────────────────────────────────────── */
