@@ -68,6 +68,7 @@ export function FeatureWipe({ features, id }: Props) {
     let ctx: gsap.Context;
     let splits: SplitText[] = [];
     let childSplits: SplitText[] = [];
+    let glTriggers: ReturnType<typeof ScrollTrigger.create>[] = [];
     let currentWidth = window.innerWidth;
 
     // ── GL lifecycle ────────────────────────────────────────────────────────
@@ -81,6 +82,10 @@ export function FeatureWipe({ features, id }: Props) {
     // u_vel  ← instantaneous scroll speed, eased by HeroGL's internal spring
     // u_scroll ← 0→1 as the row travels through the viewport
     function initGL() {
+      // Kill stale GL triggers before creating new ones — they're created
+      // outside gsap.context() so ctx.revert() won't reach them.
+      glTriggers.forEach((t) => t?.kill());
+      glTriggers = [];
       disposeGL();
 
       features.forEach((f, i) => {
@@ -98,7 +103,7 @@ export function FeatureWipe({ features, id }: Props) {
 
         let lastY = window.scrollY;
 
-        ScrollTrigger.create({
+        const trigger = ScrollTrigger.create({
           trigger: rowEl,
           start: "top bottom",
           end: "bottom top",
@@ -112,6 +117,7 @@ export function FeatureWipe({ features, id }: Props) {
             gl.setScrollState(vel, self.progress);
           },
         });
+        glTriggers.push(trigger);
       });
     }
 
@@ -316,6 +322,7 @@ export function FeatureWipe({ features, id }: Props) {
     return () => {
       clearTimeout(resizeTimeout);
       window.removeEventListener("resize", handleResize);
+      glTriggers.forEach((t) => t?.kill());
       if (ctx) ctx.revert();
       splits.forEach((s) => s.revert());
       childSplits.forEach((s) => s.revert());

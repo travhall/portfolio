@@ -50,7 +50,27 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
 
+    // ScrollTrigger measures element positions before Lenis is active (in
+    // useLayoutEffect). Refresh here so all trigger start/end points are
+    // recalculated with Lenis driving scroll.
+    ScrollTrigger.refresh();
+
+    // Re-sync Lenis's scroll limit after all subresources (images, fonts)
+    // have loaded and the final document height is known. Without this,
+    // Lenis can cap scrolling at an earlier position if layout settled
+    // after the instance was created.
+    const handleLoad = () => {
+      instance.resize();
+      ScrollTrigger.refresh();
+    };
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      window.addEventListener('load', handleLoad);
+    }
+
     return () => {
+      window.removeEventListener('load', handleLoad);
       gsap.ticker.remove(tick);
       instance.destroy();
     };
