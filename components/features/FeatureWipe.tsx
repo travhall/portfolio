@@ -218,16 +218,8 @@ export function FeatureWipe({ features, id }: Props) {
             driftStart,
           );
 
-          // Container: fade in
-          tl.to(
-            textEl,
-            {
-              autoAlpha: 1,
-              ease: "power1.out",
-              duration: fadeInDuration,
-            },
-            fadeInStart,
-          );
+          // Snap container visible instantly — char cascade is the headline reveal
+          tl.set(textEl, { autoAlpha: 1 }, fadeInStart);
 
           // Eyebrow: slide in from left, ahead of the headline
           const eyebrowInner = textEl.querySelector(".eyebrow-inner");

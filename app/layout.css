@@ -114,7 +114,7 @@
  * same hairlines, height exactly matching the fixed topbar (40px padding +
  * brand text + 40px padding = --topbar-h). This creates the visual effect
  * the wireframe specifies: the wordmark appears to sit inside a grid cell
- * rather than floating over empty space.
+ * rather than floating over empty space. cSpell:ignore wordmark
  * No content — purely structural rhythm.
  */
 .header-spacer {
