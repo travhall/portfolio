@@ -13,102 +13,108 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <>
-      <main>
-        {/* ── About: portrait rail + content column ────────────────────── */}
-        <section className="about-layout">
-          {/* Portrait + actions — sticky left rail on desktop */}
-          <div className="about-media">
-            <AboutPortrait />
+    <main>
+      <div className="header-spacer" aria-hidden="true" />
 
-            <div className="about-actions">
-              <Button
-                variant="ghost"
-                iconOnly="github"
-                aria-label="GitHub"
-                href={siteConfig.links.github}
-              />
-              <Button
-                variant="ghost"
-                iconOnly="linkedin"
-                aria-label="LinkedIn"
-                href={siteConfig.links.linkedin}
-              />
-              <EmailButton variant="ghost" iconOnly="mail" aria-label="Email" />
-              <Button
-                variant="ghost"
-                icon="download"
-                iconPos="right"
-                href={siteConfig.cv}
-              >
-                Download my CV
-              </Button>
-            </div>
+      <section className="about-body">
+        {/* Left column — sticky portrait + social actions below */}
+        <div className="about-rail">
+          <AboutPortrait />
+          <div className="about-rail__actions">
+            <Button
+              variant="ghost"
+              iconOnly="github"
+              aria-label="GitHub"
+              href={siteConfig.links.github}
+            />
+            <Button
+              variant="ghost"
+              iconOnly="linkedin"
+              aria-label="LinkedIn"
+              href={siteConfig.links.linkedin}
+            />
+            <EmailButton variant="ghost" iconOnly="mail" aria-label="Email" />
+            <Button
+              variant="ghost"
+              icon="download"
+              iconPos="right"
+              href={siteConfig.cv}
+            >
+              Download CV
+            </Button>
+          </div>
+        </div>
+
+        {/* Centre column */}
+        <div className="about-content">
+          <h1 className="type-h1 text-ink">
+            Hi, I'm Travis & I make things people use.
+          </h1>
+
+          <div className="about-bio">
+            <p className="type-lead text-ink">
+              Two decades in, still doing both — design and code, depending on
+              what the problem needs. Agencies, art school, and a global
+              eCommerce platform along the way. MFA, if that matters to you.
+            </p>
+            <p className="type-body text-ink-muted">
+              The short version: I've built the systems, led the teams, and
+              written the production code. Sometimes all three on the same
+              project.
+            </p>
           </div>
 
-          {/* Bio, skills, experience — single column */}
-          <div className="about-content">
-            <h1 className="type-h1 text-ink about-title">
-              Hi, I&apos;m Travis &amp; I make things people use.
-            </h1>
-
-            <div className="about-bio">
-              <p className="type-lead text-ink about-bio__measure">
-                I hold an MFA in Interactive Media and have spent nearly two
-                decades at the intersection of design and engineering — teaching
-                it at art school, building it at agencies, and scaling it across
-                eCommerce platforms used by millions of engineers worldwide.
-              </p>
-              <p className="type-body text-ink-muted about-bio__measure">
-                I&apos;ve built design systems, led UX teams, taught front-end
-                development at the post-secondary level, and shipped the code
-                myself. The work in this portfolio is the through-line.
-              </p>
+          <div className="about-details">
+            <div className="about-experience">
+              {/* type-h3 for section labels — they're navigational, not page titles */}
+              <h2 className="type-h3 text-ink about-section-heading">
+                Experience
+              </h2>
+              <div className="about-roles">
+                {ROLES.map(({ title, org, period, body }) => (
+                  <div key={title}>
+                    {/* type-statement for role titles — sits between h3 and lead,
+                        regular weight keeps the résumé register light */}
+                    <h3 className="type-statement text-ink">{title}</h3>
+                    <p className="type-eyebrow text-water about-role__meta">
+                      {org} &bull; {period}
+                    </p>
+                    <p className="type-body text-ink-muted about-role__body">
+                      {body}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="about-details">
-              <div className="about-skills">
-                <h2 className="type-h2 text-ink">Skills &amp; Expertise</h2>
-                <div className="about-skill-groups">
-                  {SKILL_GROUPS.map(({ label, items }) => (
-                    <div key={label}>
-                      <p className="type-eyebrow text-ink-faint about-skill-groups__label">
-                        {label}
-                      </p>
-                      <div className="about-skill-groups__tags">
-                        {items.map((s) => (
-                          <Tag key={s} variant="ghost">
-                            {s}
-                          </Tag>
-                        ))}
-                      </div>
+            <div className="about-skills">
+              <h2 className="type-h3 text-ink about-section-heading">
+                Skills &amp; Expertise
+              </h2>
+              <div className="about-skill-groups">
+                {SKILL_GROUPS.map(({ label, items }) => (
+                  <div key={label}>
+                    <p className="type-eyebrow text-ink-faint about-skill-groups__label">
+                      {label}
+                    </p>
+                    <div className="about-skill-groups__tags">
+                      {items.map((s) => (
+                        <Tag key={s} variant="ghost">
+                          {s}
+                        </Tag>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="about-experience">
-                <h2 className="type-h2 text-ink">Experience</h2>
-                <div className="about-roles">
-                  {ROLES.map(({ title, org, period, body }) => (
-                    <div key={title}>
-                      <h3 className="type-h3 text-ink">{title}</h3>
-                      <p className="type-eyebrow text-water about-roles__meta">
-                        {org} &bull; {period}
-                      </p>
-                      <p className="type-body text-ink-muted about-roles__body">
-                        {body}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── Footer CTA ──────────────────────────────────────────────────── */}
-        <div className="about-cta">
+      {/* CTA — full width, outside about-body */}
+      <div className="about-cta">
+        <div className="about-cta__inner">
           <p className="type-lead text-ink-muted">
             If you&apos;ve made it this far, the work is probably worth a look.
           </p>
@@ -116,8 +122,8 @@ export default function AboutPage() {
             View my work
           </Button>
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 }
 
@@ -201,4 +207,4 @@ const ROLES = [
   },
 ];
 
-// cSpell:ignore WDGT, Cann, Likeletter, Morsekode, playworkgroup
+// cSpell:ignore WDGT Likeletter Morsekode playworkgroup

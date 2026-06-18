@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ScrollCue } from "@/components/hero/ScrollCue";
+import { ScrollCue } from "@/components/nav/ScrollCue";
 import { FeatureWipe } from "@/components/features/FeatureWipe";
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default function HomePage() {
       <section className="intro-section">
         <div className="intro-section__inner">
           <h1 className="type-h1 text-ink intro-section__statement">
-            Creating thoughtful digital experiences through design &amp; code
+            Most things on the internet are fine. I try to do better.
           </h1>
           <ScrollCue to="#work" label="View selected work" />
         </div>

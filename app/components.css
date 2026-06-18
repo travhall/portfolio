@@ -26,18 +26,21 @@
   font-weight: var(--fw-light);
   letter-spacing: var(--track-snug);
   line-height: var(--leading-h1);
+  text-wrap: balance;
 }
 .type-h2 {
   font-size: var(--text-h2);
   font-weight: var(--fw-regular);
   letter-spacing: var(--track-snug);
   line-height: var(--leading-tight);
+  text-wrap: balance;
 }
 .type-h3 {
   font-size: var(--text-h3);
   font-weight: var(--fw-medium);
   letter-spacing: var(--track-normal);
   line-height: var(--leading-h3);
+  text-wrap: balance;
 }
 .type-statement {
   font-size: var(--text-statement);
@@ -232,7 +235,6 @@
    carry the brand-1 blue-teal cast of the shared glass-surface defaults. */
 .btn--glass {
   --glass-fill: color-mix(in oklch, var(--surface) 2.5%, transparent);
-  color: var(--water-deep);
 }
 .btn--glass:hover {
   --glass-fill: color-mix(in oklch, var(--ink) 65%, transparent);

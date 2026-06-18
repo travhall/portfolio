@@ -213,7 +213,7 @@ a {
   --leading-body: 1.6;
   /* role-specific stops — named so every line-height in the type scale
      traces back to a token, even where the value is a one-off */
-  --leading-h1: 1.04;
+  --leading-h1: 1.12;
   --leading-h3: 1.25;
   --leading-statement: 1.18;
   --leading-eyebrow: 1.2;
@@ -332,6 +332,12 @@ body {
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+p {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  text-wrap: pretty;
 }
 
 /* ─────────────── View Transitions — page-level fade ───────────────────────

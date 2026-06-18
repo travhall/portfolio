@@ -21,7 +21,7 @@ export function ScrollCue({ to, label = "Scroll down" }: Props) {
 
   return (
     <Button
-      variant="solid"
+      variant="glass"
       icon="arrow-down"
       iconPos="right"
       onClick={() => lenis?.scrollTo(to, { duration: 1.4 })}

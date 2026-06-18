@@ -361,7 +361,7 @@ export function FeatureWipe({ features, id }: Props) {
               </h2>
               {f.buttonText && f.buttonUrl && (
                 <div className="fw-button" style={{ pointerEvents: "auto" }}>
-                  <Button href={f.buttonUrl} variant="ghost" size="sm">
+                  <Button href={f.buttonUrl} variant="solid" size="sm">
                     {f.buttonText}
                   </Button>
                 </div>
