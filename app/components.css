@@ -454,24 +454,29 @@
 
 /* ── SPLITTEXT LINE MASK ─────────────────────────────────────────────────── */
 /*
- * Two-layer SplitText wipe reveal used in FeatureWipe (and available globally
- * for any other scroll-reveal that needs the same mechanic):
+ * SplitText classes used in FeatureWipe (global — SplitText writes to the DOM):
  *
- * .line-mask  — outer wrapper, overflow:hidden. padding-bottom extends the
- *               clip boundary below the line-height so descenders (g, p, y)
- *               aren't cut off.
+ * .line-mask  — per-line block wrapper, overflow:hidden clips children that
+ *               are translated below the line boundary. padding-bottom gives
+ *               descenders (g, p, y) room so they aren't clipped.
  *
- * .line-inner — inner wrapper, overflow:visible. The animated element
- *               (yPercent 100 → 0). Visible so descenders in the padding
- *               area of the mask aren't re-clipped.
+ * .char-inner — per-character inline-block child, animated with yPercent 105→0.
+ *               Starts below the .line-mask clip boundary; rises into view
+ *               as the scrubbed timeline advances.
  *
- * SplitText writes these directly to the DOM — must be global, not Modules.
+ * .line-inner — legacy two-layer variant (kept for any other scroll-reveals
+ *               that still use the line-only mechanic).
  */
 .line-mask {
   overflow: hidden;
   display: block;
   line-height: inherit;
   padding-bottom: 0.15em;
+}
+
+.char-inner {
+  display: inline-block;
+  will-change: transform;
 }
 
 .line-inner {

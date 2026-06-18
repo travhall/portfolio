@@ -67,7 +67,7 @@ export function FeatureWipe({ features, id }: Props) {
   useLayoutEffect(() => {
     let ctx: gsap.Context;
     let splits: SplitText[] = [];
-    let childSplits: SplitText[] = [];
+    let perFeatureChars: Element[][] = [];
     let glTriggers: ReturnType<typeof ScrollTrigger.create>[] = [];
     let currentWidth = window.innerWidth;
 
@@ -125,9 +125,8 @@ export function FeatureWipe({ features, id }: Props) {
     function init() {
       if (ctx) ctx.revert();
       splits.forEach((s) => s.revert());
-      childSplits.forEach((s) => s.revert());
       splits = [];
-      childSplits = [];
+      perFeatureChars = [];
 
       const isDesktop = window.innerWidth >= 900;
 
@@ -137,31 +136,31 @@ export function FeatureWipe({ features, id }: Props) {
       if (!isDesktop) return;
 
       ctx = gsap.context(() => {
-        // SplitText on headlines
+        // SplitText on headlines — lines as overflow:hidden masks, chars as
+        // the animated children. Structure: .line-mask > .char-inner[]
         headlineRefs.current.forEach((headlineEl) => {
-          if (!headlineEl) return;
-          // Inner split: the element that animates (yPercent 100 → 0).
-          // overflow:visible so descenders aren't clipped by the line div itself.
-          const childSplit = new SplitText(headlineEl, {
-            type: "lines",
-            linesClass: "line-inner",
-          });
-          const parentSplit = new SplitText(headlineEl, {
-            type: "lines",
+          if (!headlineEl) {
+            perFeatureChars.push([]);
+            return;
+          }
+          const split = new SplitText(headlineEl, {
+            type: "lines,chars",
             linesClass: "line-mask",
+            charsClass: "char-inner",
           });
-          splits.push(parentSplit);
-          childSplits.push(childSplit);
+          splits.push(split);
+          perFeatureChars.push(split.chars as unknown as Element[]);
         });
 
-        // Initial states
+        // Initial states — chars rise from below clip mask,
+        // eyebrow slides from left, button fades up
         gsap.set(textRefs.current, { autoAlpha: 0, y: 80 });
         headlineRefs.current.forEach((_, idx) => {
-          const childLines = childSplits[idx]?.lines || [];
-          if (childLines.length > 0) gsap.set(childLines, { yPercent: 100 });
+          const chars = perFeatureChars[idx] || [];
+          if (chars.length > 0) gsap.set(chars, { yPercent: 105 });
           const eyebrowInner =
             textRefs.current[idx]?.querySelector(".eyebrow-inner");
-          if (eyebrowInner) gsap.set(eyebrowInner, { yPercent: 100 });
+          if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 0, x: -14 });
           const buttonEl = textRefs.current[idx]?.querySelector(".fw-button");
           if (buttonEl) gsap.set(buttonEl, { opacity: 0 });
         });
@@ -205,11 +204,8 @@ export function FeatureWipe({ features, id }: Props) {
           }
           dist = Math.max(dist, 0.05); // guard against collapsed windows
 
-          let fadeInStart = p_i - dist * 0.45;
-          let fadeInEnd = p_i - dist * 0.2;
-          if (i === 0) {
-            fadeInStart = 0.02;
-          }
+          const fadeInStart = Math.max(0.01, p_i - dist * 0.45);
+          const fadeInEnd = p_i - dist * 0.2;
           const fadeInDuration = fadeInEnd - fadeInStart;
 
           const driftStart = i === 0 ? 0.0 : p_i - dist * 0.5;
@@ -222,34 +218,42 @@ export function FeatureWipe({ features, id }: Props) {
             driftStart,
           );
 
+          // Container: fade in
           tl.to(
             textEl,
-            { autoAlpha: 1, ease: "power1.out", duration: fadeInDuration },
+            {
+              autoAlpha: 1,
+              ease: "power1.out",
+              duration: fadeInDuration,
+            },
             fadeInStart,
           );
 
+          // Eyebrow: slide in from left, ahead of the headline
           const eyebrowInner = textEl.querySelector(".eyebrow-inner");
           if (eyebrowInner) {
             tl.to(
               eyebrowInner,
               {
-                yPercent: 0,
+                opacity: 1,
+                x: 0,
                 ease: "power2.out",
-                duration: fadeInDuration * 0.8,
+                duration: fadeInDuration * 0.5,
               },
               fadeInStart,
             );
           }
 
-          const childLines = childSplits[i]?.lines || [];
-          if (childLines.length > 0) {
+          // Headline: chars cascade up from clip with a distributed stagger
+          const chars = perFeatureChars[i] || [];
+          if (chars.length > 0) {
             tl.to(
-              childLines,
+              chars,
               {
                 yPercent: 0,
                 ease: "power2.out",
-                duration: fadeInDuration * 0.8,
-                stagger: (fadeInDuration * 0.2) / childLines.length,
+                duration: fadeInDuration * 0.6,
+                stagger: { amount: fadeInDuration * 0.3 },
               },
               fadeInStart,
             );
@@ -276,7 +280,12 @@ export function FeatureWipe({ features, id }: Props) {
             const fadeOutDuration = fadeOutEnd - fadeOutStart;
             tl.to(
               textEl,
-              { autoAlpha: 0, ease: "power1.in", duration: fadeOutDuration },
+              {
+                autoAlpha: 0,
+                filter: "blur(8px)",
+                ease: "power1.in",
+                duration: fadeOutDuration,
+              },
               fadeOutStart,
             );
           }
@@ -325,7 +334,6 @@ export function FeatureWipe({ features, id }: Props) {
       glTriggers.forEach((t) => t?.kill());
       if (ctx) ctx.revert();
       splits.forEach((s) => s.revert());
-      childSplits.forEach((s) => s.revert());
       disposeGL();
     };
   }, [features]);
