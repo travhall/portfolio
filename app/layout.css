@@ -399,8 +399,16 @@
 /* ─── Fixed text overlay ── */
 /*
  * All .fw-text-fixed instances in a section simultaneously occupy the same
- * fixed viewport-centred position. GSAP drives autoAlpha + y per item;
- * only one is visible at a time.
+ * fixed viewport-centred position. GSAP drives opacity + y per item; only
+ * one reads as visible at a time — but visual occlusion for the inactive
+ * ones is done entirely by .fw-clip-cell's off-screen clip-path ancestor
+ * (see above), not by hiding this element itself. Deliberately NOT
+ * visibility:hidden / display:none: those would also remove each row's
+ * .fw-button from the focus order and the accessibility tree, leaving
+ * keyboard and screen-reader users only able to reach whichever single
+ * row happened to be scrolled into its "active" window — see the
+ * onFocus scroll-into-view handler in FeatureWipe.tsx that depends on
+ * this element staying focusable while off-screen.
  * pointer-events:none lets clicks pass through to the page;
  * the .fw-button child overrides this so buttons stay interactive.
  */
@@ -415,7 +423,6 @@
   text-align: center;
   padding-inline: clamp(1.5rem, 4vw, 3rem);
   opacity: 0;
-  visibility: hidden;
   will-change: transform, opacity;
   pointer-events: none;
 }

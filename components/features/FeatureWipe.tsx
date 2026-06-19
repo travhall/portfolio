@@ -11,8 +11,13 @@
  *   - A clip-path mask on the scrolling parent (.clipCell) paint-clips the fixed
  *     text to its own bounding box, creating a beautiful wipe reveal as the row
  *     scrolls past.
- *   - A single GSAP ScrollTrigger timeline coordinates the autoAlpha, Y drift,
- *     and line-by-line SplitText reveals across all items.
+ *   - A single GSAP ScrollTrigger timeline coordinates opacity, Y drift, and
+ *     line-by-line SplitText reveals across all items. Opacity only, not
+ *     autoAlpha — every row's button must stay in the focus order and
+ *     accessibility tree even while visually faded, so Tab can reach all of
+ *     them; pointer-events is toggled separately to keep clicks exclusive
+ *     to whichever row is actually visible (see onFocus below for how
+ *     keyboard focus pulls an off-screen row into view via Lenis).
  *   - Each image column is an OGL canvas running the same chromatic-aberration
  *     parallax shader as the hero, driven per-row by its own ScrollTrigger.
  */
@@ -23,6 +28,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Button } from "@/components/ui/Button";
 import { MediaGL } from "@/lib/media-gl";
+import { prefersReducedMotion } from "@/components/ui/ripple";
+import { useLenis } from "@/components/providers/SmoothScroll";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -48,6 +55,7 @@ interface Props {
 }
 
 export function FeatureWipe({ features, id }: Props) {
+  const lenis = useLenis();
   const sectionRef = useRef<HTMLElement>(null);
   const bandRefs = useRef<(HTMLDivElement | null)[]>([]);
   const textRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -55,6 +63,13 @@ export function FeatureWipe({ features, id }: Props) {
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]); // GL canvases
   const headlineRefs = useRef<(HTMLHeadingElement | null)[]>([]);
   const glInstancesRef = useRef<(MediaGL | null)[]>([]); // one per feature
+
+  // Scroll-progress target for each row's "fully revealed" window (centers[i]
+  // below) plus the main timeline's ScrollTrigger, so the onFocus handler can
+  // scroll to the exact page position the timeline considers "active" for
+  // that row — not just "row roughly in viewport", which can land mid-fade.
+  const centersRef = useRef<number[]>([]);
+  const mainTriggerRef = useRef<ScrollTrigger | null>(null);
 
   // Keep arrays matching current features length
   bandRefs.current = bandRefs.current.slice(0, features.length);
@@ -135,7 +150,13 @@ export function FeatureWipe({ features, id }: Props) {
       // Always init GL regardless of breakpoint — images show on mobile too
       initGL();
 
-      if (!isDesktop) return;
+      if (!isDesktop) {
+        // Mobile layout forces .fw-text-fixed visible via CSS (no scrubbed
+        // timeline at all), so there's no scroll-progress target to reuse.
+        centersRef.current = [];
+        mainTriggerRef.current = null;
+        return;
+      }
 
       ctx = gsap.context(() => {
         // SplitText on headlines — lines as overflow:hidden masks, chars as
@@ -156,7 +177,16 @@ export function FeatureWipe({ features, id }: Props) {
 
         // Initial states — chars rise from below clip mask,
         // eyebrow slides from left, button fades up
-        gsap.set(textRefs.current, { autoAlpha: 0, y: 80 });
+        // opacity only — not autoAlpha. autoAlpha also toggles visibility,
+        // which would pull every row but the active one out of the focus
+        // order and the accessibility tree. Visual occlusion of inactive
+        // rows is handled entirely by .fw-clip-cell's off-screen clip-path.
+        //
+        // pointer-events is still toggled explicitly (set alongside opacity
+        // below, not here on .fw-button) — every row shares the same fixed,
+        // viewport-centred screen position, so without this only the
+        // topmost-in-DOM row's button would ever receive clicks/taps.
+        gsap.set(textRefs.current, { opacity: 0, y: 80, pointerEvents: "none" });
         headlineRefs.current.forEach((_, idx) => {
           const chars = perFeatureChars[idx] || [];
           if (chars.length > 0) gsap.set(chars, { yPercent: 105 });
@@ -190,6 +220,8 @@ export function FeatureWipe({ features, id }: Props) {
           const rowCenter = rowEl.offsetTop + rowEl.offsetHeight / 2;
           return (rowCenter + vh * 0.02) / totalScrollDistance;
         });
+        centersRef.current = centers;
+        mainTriggerRef.current = tl.scrollTrigger ?? null;
 
         for (let i = 0; i < N; i++) {
           const textEl = textRefs.current[i];
@@ -221,7 +253,7 @@ export function FeatureWipe({ features, id }: Props) {
           );
 
           // Snap container visible instantly — char cascade is the headline reveal
-          tl.set(textEl, { autoAlpha: 1 }, fadeInStart);
+          tl.set(textEl, { opacity: 1, pointerEvents: "auto" }, fadeInStart);
 
           // Eyebrow: slide in from left, ahead of the headline
           const eyebrowInner = textEl.querySelector(".eyebrow-inner");
@@ -272,10 +304,11 @@ export function FeatureWipe({ features, id }: Props) {
             const fadeOutStart = p_i + dist * 0.2;
             const fadeOutEnd = p_i + dist * 0.45;
             const fadeOutDuration = fadeOutEnd - fadeOutStart;
+            tl.set(textEl, { pointerEvents: "none" }, fadeOutStart);
             tl.to(
               textEl,
               {
-                autoAlpha: 0,
+                opacity: 0,
                 filter: "blur(8px)",
                 ease: "power1.in",
                 duration: fadeOutDuration,
@@ -369,8 +402,53 @@ export function FeatureWipe({ features, id }: Props) {
                 {f.headline}
               </h2>
               {f.buttonText && f.buttonUrl && (
-                <div className="fw-button" style={{ pointerEvents: "auto" }}>
-                  <Button href={f.buttonUrl} variant="solid" size="sm">
+                <div className="fw-button">
+                  <Button
+                    href={f.buttonUrl}
+                    variant="solid"
+                    size="sm"
+                    aria-label={`${f.buttonText} — ${f.headline}`}
+                    onFocus={() => {
+                      // Tab can land here while the row is still off-screen
+                      // (it stays in the focus order on purpose — see the
+                      // .fw-text-fixed comment in layout.css). Pull the row
+                      // into view so the scroll-scrubbed timeline reveals it
+                      // and pointer-events line up with what's focused.
+                      //
+                      // Must go through Lenis, not native scrollIntoView —
+                      // Lenis owns the page's scroll position and ScrollTrigger
+                      // only re-syncs on Lenis's own 'scroll' event, so a
+                      // native scroll call here would move window.scrollY
+                      // without ever notifying ScrollTrigger, leaving the row
+                      // permanently invisible despite being "in view".
+                      //
+                      // Scrolling the row's top/center into the viewport
+                      // isn't precise enough either — the timeline's "fully
+                      // revealed, no blur" window is centered on centers[i]
+                      // (a fraction of the trigger's own scroll range), which
+                      // doesn't line up with the row's geometric top or
+                      // center. Convert that progress fraction to an actual
+                      // page scroll position via the trigger's start/end.
+                      const rowEl = bandRefs.current[i];
+                      if (!rowEl) return;
+                      const trigger = mainTriggerRef.current;
+                      const p = centersRef.current[i];
+                      const target =
+                        trigger && p !== undefined
+                          ? trigger.start + p * (trigger.end - trigger.start)
+                          : rowEl;
+                      if (lenis) {
+                        lenis.scrollTo(target, {
+                          duration: prefersReducedMotion() ? 0 : 1.2,
+                        });
+                      } else {
+                        rowEl.scrollIntoView({
+                          behavior: prefersReducedMotion() ? "auto" : "smooth",
+                          block: "center",
+                        });
+                      }
+                    }}
+                  >
                     {f.buttonText}
                   </Button>
                 </div>
