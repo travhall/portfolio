@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <main>
+    <main id="main-content">
       {/* ── Header spacer ─────────────────────────────────────────────────
           Empty row matching the topbar's visual footprint (--topbar-h).
           Gives the wordmark a grid cell to sit in rather than floating
-          over a content edge. Same column grid + hairlines as all rows.
+          over a content edge. Same column grid + hairlines as all rows. cSpell:ignore topbar wordmark elcamino
       ──────────────────────────────────────────────────────────────────── */}
       <div className="header-spacer" aria-hidden="true" />
 

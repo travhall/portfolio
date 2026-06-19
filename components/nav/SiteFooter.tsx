@@ -11,16 +11,10 @@
  */
 
 import { usePathname } from "next/navigation";
-// import { Link } from "next-view-transitions";
 import { Button } from "@/components/ui/Button";
 import { EmailButton } from "@/components/ui/EmailButton";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { siteConfig } from "@/lib/site-config";
-
-// const FOOTER_LINKS = [
-//   { label: "Work", href: "/" },
-//   { label: "About", href: "/about" },
-// ];
 
 export function SiteFooter() {
   const pathname = usePathname();
@@ -29,28 +23,6 @@ export function SiteFooter() {
 
   return (
     <footer className="site-footer">
-      <span className="type-small text-ink-faint">
-        © {year} {siteConfig.name}. All rights reserved.
-      </span>
-
-      {/* <nav className="site-footer__nav" aria-label="Footer">
-        {FOOTER_LINKS.map(({ label, href }) => (
-          <Link
-            key={label}
-            href={href}
-            className="site-footer__link type-small"
-            onClick={(e) => {
-              if (href === pathname) {
-                e.preventDefault();
-                lenis?.scrollTo(0, { duration: 1.2 });
-              }
-            }}
-          >
-            {label}
-          </Link>
-        ))}
-      </nav> */}
-
       <div className="site-footer__social">
         <Button
           variant="ghost"
@@ -68,6 +40,10 @@ export function SiteFooter() {
           {siteConfig.email}
         </EmailButton>
       </div>
+
+      <span className="type-small text-ink-faint">
+        © {year} {siteConfig.name}. All rights reserved.
+      </span>
     </footer>
   );
 }

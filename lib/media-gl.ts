@@ -18,6 +18,11 @@
  * idle GPU cost.
  */
 
+function reducedMotion(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type MediaEffect = 'parallax' | 'gooey';
@@ -312,9 +317,14 @@ export class MediaGL {
   private _measure() {
     const y  = window.scrollY ?? 0;
     const dy = y - this.lastY;
-    this.lastY   = y;
-    this.velT    = Math.max(-1, Math.min(1, dy / 60));
-    this.scrollT = Math.max(0, Math.min(1, y / (window.innerHeight * 1.4)));
+    this.lastY = y;
+    if (reducedMotion()) {
+      this.velT    = 0;
+      this.scrollT = 0.5;
+    } else {
+      this.velT    = Math.max(-1, Math.min(1, dy / 60));
+      this.scrollT = Math.max(0, Math.min(1, y / (window.innerHeight * 1.4)));
+    }
     this.start();
   }
 
@@ -363,6 +373,16 @@ export class MediaGL {
   // ── Public API ─────────────────────────────────────────────────────────────
 
   setScrollState(vel: number, scroll: number) {
+    // prefers-reduced-motion: hold the shader at its neutral, distortion-free
+    // state — no chromatic-aberration/parallax reaction to scroll velocity —
+    // rather than just easing it slower. 0.5 is the scroll midpoint where the
+    // parallax UV offset term cancels to zero (see FRAG_PARALLAX above).
+    if (reducedMotion()) {
+      this.velT    = 0;
+      this.scrollT = 0.5;
+      this.start();
+      return;
+    }
     // Feed velocity into the spring target so the easing in _tick applies
     this.velT    = Math.max(-1, Math.min(1, vel));
     this.scrollT = Math.max(0,  Math.min(1, scroll));

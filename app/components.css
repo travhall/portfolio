@@ -178,7 +178,7 @@
   transform: translateY(1px);
 }
 .btn:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 .btn[disabled],
@@ -417,7 +417,7 @@
   color: var(--surface);
 }
 .tag__x:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
 }
 .tag--solid .tag__x:hover {
@@ -522,7 +522,7 @@
   border-color: var(--ink);
 }
 .theme-toggle:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -646,7 +646,7 @@
   background: color-mix(in oklch, var(--ink) 6%, transparent);
 }
 .email-action__option:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
   border-radius: calc(var(--edge) - 6px);
 }

@@ -126,6 +126,14 @@ a {
   --chemical: var(--color-brand-2-500);
   --chemical-warm: var(--color-brand-2-200);
 
+  /* Focus ring — aliased to --water rather than --ink so keyboard focus
+     reads as a brand accent, not just "outline mode". --water already
+     clears 3:1 non-text contrast against --surface in both themes (see
+     comment above and the dark-mode/data-theme overrides below), so this
+     needs no separate measurement — it inherits whichever --water value
+     the active theme defines. */
+  --focus-ring: var(--water);
+
   color-scheme: light;
 
   /* ---------------------------------------------------------------------
@@ -228,7 +236,7 @@ a {
   --row-min-h: 56vh; /* shared by .intro-section and .fw-row */
   /* Topbar height = padding-top(40) + brand-text(~15px) + padding-bottom(40).
      Used by the header spacer row so the intro content clears the fixed bar
-     with matching optical padding above and below the wordmark. */
+     with matching optical padding above and below the wordmark. cSpell:ignore wordmark */
   --topbar-h: 116px;
 }
 

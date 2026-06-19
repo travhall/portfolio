@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <main>
+    <main id="main-content">
       <div className="header-spacer" aria-hidden="true" />
 
       <section className="about-body">
@@ -47,11 +47,11 @@ export default function AboutPage() {
 
         {/* Centre column */}
         <div className="about-content">
-          <h1 className="type-h1 text-ink">
-            Hi, I'm Travis & I make things people use.
-          </h1>
-
           <div className="about-bio">
+            <h1 className="type-h1 text-ink">
+              Hi, I'm Travis & I make things people use.
+            </h1>
+
             <p className="type-lead text-ink">
               Two decades in, still doing both — design and code, depending on
               what the problem needs. Agencies, art school, and a global
@@ -74,7 +74,7 @@ export default function AboutPage() {
                 {ROLES.map(({ title, org, period, body }) => (
                   <div key={title}>
                     {/* type-statement for role titles — sits between h3 and lead,
-                        regular weight keeps the résumé register light */}
+                        regular weight keeps the résumé register light cSpell:ignore résumé Cann */}
                     <h3 className="type-statement text-ink">{title}</h3>
                     <p className="type-eyebrow text-water about-role__meta">
                       {org} &bull; {period}

@@ -76,6 +76,7 @@ export function FeatureWipe({ features, id }: Props) {
     function disposeGL() {
       glInstancesRef.current.forEach((gl) => gl?.dispose());
       glInstancesRef.current = features.map(() => null);
+      mediaRefs.current.forEach((el) => el?.classList.remove("is-gl"));
     }
 
     // Instantiate one HeroGL per canvas, driven by a per-row ScrollTrigger.
@@ -98,6 +99,7 @@ export function FeatureWipe({ features, id }: Props) {
           effect: "parallax",
           intensity: IMG_INTENSITY,
           externalScroll: true, // disable internal _measure(), ScrollTrigger drives it
+          onReady: () => mediaRefs.current[i]?.classList.add("is-gl"),
         });
         glInstancesRef.current[i] = gl;
 
@@ -384,12 +386,18 @@ export function FeatureWipe({ features, id }: Props) {
               className="fw-media__inner"
             >
               {f.imageSrc ? (
-                <canvas
-                  ref={(el) => {
-                    canvasRefs.current[i] = el;
-                  }}
-                  aria-hidden="true"
-                />
+                <>
+                  {/* Plain <img> fallback — visible until the GL canvas
+                      reports ready (onReady above), and the only thing
+                      that renders at all with JS/WebGL unavailable. */}
+                  <img src={f.imageSrc} alt={f.imageAlt ?? ""} />
+                  <canvas
+                    ref={(el) => {
+                      canvasRefs.current[i] = el;
+                    }}
+                    aria-hidden="true"
+                  />
+                </>
               ) : null}
             </div>
           </div>

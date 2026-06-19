@@ -84,6 +84,13 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
 
     if (tlRef.current) tlRef.current.kill();
 
+    // Re-baseline scroll to enabled before deciding whether to re-lock it.
+    // Without this, killing an in-flight close animation (e.g. the menu is
+    // toggled open→closed→open in quick succession) skips the close
+    // timeline's onComplete — which is the only other place that calls
+    // lenis.start() — leaving scrolling permanently stopped.
+    lenis?.start();
+
     if (isOpen) {
       lenis?.stop();
 

@@ -22,6 +22,7 @@ import {
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { prefersReducedMotion } from '@/components/ui/ripple';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,6 +37,12 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
+    // Custom inertial scrolling is a motion effect, not just a convenience —
+    // skip it entirely for prefers-reduced-motion and fall back to native
+    // (instant) scrolling. ScrollTrigger still works without Lenis driving
+    // it; it just reads window.scrollY directly.
+    if (prefersReducedMotion()) return;
+
     const instance = new Lenis({
       duration:    1.2,
       easing:      (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),

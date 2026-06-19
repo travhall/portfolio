@@ -75,11 +75,9 @@ export function EmailButton({
       {open && (
         <div
           className={`email-action__panel email-action__panel--${panelPlacement}`}
-          role="menu"
         >
           <a
             className="email-action__option"
-            role="menuitem"
             href={`mailto:${siteConfig.email}`}
             onClick={(e) => {
               triggerRipple(e.currentTarget, e, RIPPLE_SUBTLE);
@@ -93,7 +91,6 @@ export function EmailButton({
           <button
             type="button"
             className="email-action__option"
-            role="menuitem"
             onClick={(e) => {
               triggerRipple(e.currentTarget, e, RIPPLE_SUBTLE);
               copyEmail();
