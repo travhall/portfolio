@@ -1,12 +1,8 @@
-import type { Metadata } from "next";
 import { ScrollCue } from "@/components/nav/ScrollCue";
 import { FeatureWipe } from "@/components/features/FeatureWipe";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Travis Hall — Design & Code",
-  description:
-    "Portfolio of Travis Hall — senior UX designer and front-end developer creating thoughtful digital experiences.",
-};
+export const metadata = createMetadata({ path: "/" });
 
 export default function HomePage() {
   return (

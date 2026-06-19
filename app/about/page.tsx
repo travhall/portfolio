@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import { AboutPortrait } from "@/components/about/AboutPortrait";
 import { Button } from "@/components/ui/Button";
 import { EmailButton } from "@/components/ui/EmailButton";
 import { Tag } from "@/components/ui/Tag";
 import { siteConfig } from "@/lib/site-config";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "About — Travis Hall",
+export const metadata = createMetadata({
+  title: "About",
   description:
     "Travis Hall — senior UX designer, front-end developer, educator. MFA in Interactive Media. Two decades at the intersection of design and engineering.",
-};
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

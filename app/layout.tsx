@@ -23,10 +23,37 @@ const siteUrl = new URL(siteConfig.url);
 export const metadata: Metadata = {
   metadataBase: siteUrl,
   title: {
-    template: `%s — ${siteUrl.host}`,
+    template: `%s — ${siteConfig.host}`,
     default: siteConfig.title,
   },
   description: siteConfig.description,
+  keywords: [...siteConfig.keywords],
+  authors: [{ name: siteConfig.name, url: siteConfig.url }],
+  openGraph: {
+    title: siteConfig.title,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    locale: siteConfig.locale,
+    type: "website",
+    images: [siteConfig.ogImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
+  },
+};
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  email: siteConfig.email,
+  jobTitle: "Senior UX Designer & Front-End Developer",
+  sameAs: [siteConfig.links.github, siteConfig.links.linkedin],
 };
 
 export default function RootLayout({
@@ -51,6 +78,10 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{
               __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`,
             }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
           />
         </head>
         <body>

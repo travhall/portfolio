@@ -19,6 +19,7 @@ import { usePathname } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { MenuOverlay } from "./MenuOverlay";
 import { prefersReducedMotion, triggerRipple } from "@/components/ui/ripple";
+import { siteConfig } from "@/lib/site-config";
 
 const RIPPLE_BRAND  = { strength: 9, size: 90,  duration: 600 };
 const RIPPLE_TOGGLE = { strength: 8, size: 80,  duration: 550 };
@@ -99,7 +100,7 @@ export function Topbar() {
             close();
           }}
         >
-          travishall.design
+          {siteConfig.host}
         </Link>
         <button
           type="button"

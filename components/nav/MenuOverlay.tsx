@@ -45,7 +45,7 @@ interface Props {
 const NAV_LINKS = [
   { label: "Work", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "mailto:travis@travishall.design" },
+  { label: "Contact", href: `mailto:${siteConfig.email}` },
 ];
 
 // Same water-ripple technique as buttons (components/ui/ripple.ts), scaled
