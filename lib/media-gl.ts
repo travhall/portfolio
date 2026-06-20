@@ -128,7 +128,7 @@ void main(){
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function coverRatio(cw: number, ch: number, iw: number, ih: number): [number, number] {
+export function coverRatio(cw: number, ch: number, iw: number, ih: number): [number, number] {
   const cAR = cw / ch, iAR = iw / ih;
   return [Math.min(cAR / iAR, 1), Math.min(iAR / cAR, 1)];
 }

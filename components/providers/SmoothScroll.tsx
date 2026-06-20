@@ -19,6 +19,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { usePathname } from 'next/navigation';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -35,6 +36,24 @@ export function useLenis(): Lenis | null {
 
 export function SmoothScroll({ children }: { children: ReactNode }) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
+  const pathname = usePathname();
+
+  // SmoothScroll is a root-layout singleton — it mounts once and survives
+  // every client-side route change, so the Lenis instance below is created
+  // exactly once. Lenis's own autoResize (a debounced ResizeObserver on
+  // document.documentElement) doesn't reliably catch the height change when
+  // navigating between routes of very different length: its cached
+  // dimensions can stay pinned to the shorter page, hard-capping the scroll
+  // limit on the page you land on next. Re-sync explicitly on every
+  // pathname change, after the new route's content has painted.
+  useEffect(() => {
+    if (!lenis) return;
+    const id = requestAnimationFrame(() => {
+      lenis.resize();
+      ScrollTrigger.refresh();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [lenis, pathname]);
 
   useEffect(() => {
     // Custom inertial scrolling is a motion effect, not just a convenience —

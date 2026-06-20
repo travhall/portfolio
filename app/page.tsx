@@ -1,6 +1,7 @@
 import { ScrollCue } from "@/components/nav/ScrollCue";
 import { FeatureWipe } from "@/components/features/FeatureWipe";
 import { createMetadata } from "@/lib/metadata";
+import { caseStudies } from "@/lib/case-studies";
 
 export const metadata = createMetadata({ path: "/" });
 
@@ -31,43 +32,7 @@ export default function HomePage() {
       {/* ── Work ──────────────────────────────────────────────────────────
           Scroll-driven project feature section.
       ──────────────────────────────────────────────────────────────────── */}
-      <FeatureWipe
-        id="work"
-        features={[
-          {
-            eyebrow: "Featured Project",
-            headline: "Wylie Dog Design System",
-            side: "right",
-            imageSrc: "/images/photo-wyliedog.jpg",
-            buttonText: "View Case Study",
-            buttonUrl: "/work/wylie-dog",
-          },
-          {
-            eyebrow: "New Site",
-            headline: "El Camino Skate Shop",
-            side: "left",
-            imageSrc: "/images/photo-elcamino.jpg",
-            buttonText: "Visit Skate Shop",
-            buttonUrl: "/work/el-camino",
-          },
-          {
-            eyebrow: "New Site",
-            headline: "Moxie Beauty",
-            side: "right",
-            imageSrc: "/images/photo-moxie.jpg",
-            buttonText: "View Case Study",
-            buttonUrl: "/work/moxie-beauty",
-          },
-          {
-            eyebrow: "Redesign",
-            headline: "Anti-broadcasting",
-            side: "left",
-            imageSrc: "/images/photo-antibroadcasting.jpg",
-            buttonText: "View Redesign",
-            buttonUrl: "/work/antibroadcasting",
-          },
-        ]}
-      />
+      <FeatureWipe id="work" features={caseStudies} />
     </main>
   );
 }

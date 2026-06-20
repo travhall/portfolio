@@ -22,7 +22,7 @@
  *     parallax shader as the hero, driven per-row by its own ScrollTrigger.
  */
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -30,6 +30,9 @@ import { Button } from "@/components/ui/Button";
 import { MediaGL } from "@/lib/media-gl";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { useLenis } from "@/components/providers/SmoothScroll";
+import { useTheme } from "@/lib/use-theme";
+import type { CaseStudy } from "@/lib/case-studies";
+import { MagneticDots, supportsHoverPointer } from "@/lib/magnetic-dots";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -39,30 +42,36 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 // at rest.
 const IMG_INTENSITY = 1.8;
 
-export interface Feature {
-  eyebrow: string;
-  headline: string;
-  side: "left" | "right";
-  imageSrc?: string;
-  imageAlt?: string;
-  buttonText?: string;
-  buttonUrl?: string;
+function imageFor(f: CaseStudy, theme: "light" | "dark") {
+  return theme === "dark" && f.imageDark ? f.imageDark : f.image;
+}
+
+function brandColorFor(f: CaseStudy, theme: "light" | "dark") {
+  if (theme === "dark") return f.brandDark ?? f.brandLight;
+  return f.brandLight;
+}
+
+function dotsImageFor(f: CaseStudy, theme: "light" | "dark") {
+  return theme === "dark" && f.dotsImageDark ? f.dotsImageDark : f.dotsImage;
 }
 
 interface Props {
-  features: Feature[];
+  features: CaseStudy[];
   id?: string;
 }
 
 export function FeatureWipe({ features, id }: Props) {
   const lenis = useLenis();
+  const theme = useTheme();
   const sectionRef = useRef<HTMLElement>(null);
   const bandRefs = useRef<(HTMLDivElement | null)[]>([]);
   const textRefs = useRef<(HTMLDivElement | null)[]>([]);
   const mediaRefs = useRef<(HTMLDivElement | null)[]>([]); // .mediaInner wrappers
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]); // GL canvases
+  const dotsCanvasRefs = useRef<(HTMLCanvasElement | null)[]>([]); // magnetic-dots overlay canvases
   const headlineRefs = useRef<(HTMLHeadingElement | null)[]>([]);
   const glInstancesRef = useRef<(MediaGL | null)[]>([]); // one per feature
+  const dotsInstancesRef = useRef<(MagneticDots | null)[]>([]); // one per feature
 
   // Scroll-progress target for each row's "fully revealed" window (centers[i]
   // below) plus the main timeline's ScrollTrigger, so the onFocus handler can
@@ -76,8 +85,10 @@ export function FeatureWipe({ features, id }: Props) {
   textRefs.current = textRefs.current.slice(0, features.length);
   mediaRefs.current = mediaRefs.current.slice(0, features.length);
   canvasRefs.current = canvasRefs.current.slice(0, features.length);
+  dotsCanvasRefs.current = dotsCanvasRefs.current.slice(0, features.length);
   headlineRefs.current = headlineRefs.current.slice(0, features.length);
   glInstancesRef.current = glInstancesRef.current.slice(0, features.length);
+  dotsInstancesRef.current = dotsInstancesRef.current.slice(0, features.length);
 
   useLayoutEffect(() => {
     let ctx: gsap.Context;
@@ -107,10 +118,11 @@ export function FeatureWipe({ features, id }: Props) {
       features.forEach((f, i) => {
         const canvas = canvasRefs.current[i];
         const rowEl = bandRefs.current[i];
-        if (!canvas || !f.imageSrc || !rowEl) return;
+        const src = imageFor(f, theme);
+        if (!canvas || !src || !rowEl) return;
 
         const gl = new MediaGL(canvas, {
-          src: f.imageSrc,
+          src,
           effect: "parallax",
           intensity: IMG_INTENSITY,
           externalScroll: true, // disable internal _measure(), ScrollTrigger drives it
@@ -138,6 +150,59 @@ export function FeatureWipe({ features, id }: Props) {
       });
     }
 
+    // ── Magnetic dots lifecycle ─────────────────────────────────────────────
+    // Pointer-driven hover effect — skipped entirely on touch/coarse-pointer
+    // devices (see supportsHoverPointer), so it never attaches listeners or
+    // spins up a canvas where there's no mouse to react to.
+    let dotsCleanups: (() => void)[] = [];
+
+    function disposeDots() {
+      dotsCleanups.forEach((fn) => fn());
+      dotsCleanups = [];
+      dotsInstancesRef.current.forEach((d) => d?.dispose());
+      dotsInstancesRef.current = features.map(() => null);
+    }
+
+    function initDots() {
+      disposeDots();
+      if (!supportsHoverPointer()) return;
+
+      features.forEach((f, i) => {
+        const canvas = dotsCanvasRefs.current[i];
+        const rowEl = bandRefs.current[i];
+        const src = dotsImageFor(f, theme);
+        if (!canvas || !rowEl || !src) return;
+
+        const dots = new MagneticDots(canvas, { src });
+        dotsInstancesRef.current[i] = dots;
+
+        // Tracked across the whole row (not just the photo) — the dots
+        // canvas is a full-row backdrop sitting behind both the photo and
+        // text columns, so hovering anywhere on the row should drive it.
+        const onMove = (e: PointerEvent) => {
+          const r = rowEl.getBoundingClientRect();
+          dots.setPointer(
+            (e.clientX - r.left) / r.width,
+            (e.clientY - r.top) / r.height,
+          );
+        };
+        const onEnter = (e: PointerEvent) => {
+          onMove(e);
+          dots.enter();
+        };
+        const onLeave = () => dots.leave();
+
+        rowEl.addEventListener("pointerenter", onEnter);
+        rowEl.addEventListener("pointermove", onMove);
+        rowEl.addEventListener("pointerleave", onLeave);
+        dotsCleanups.push(() => {
+          rowEl.removeEventListener("pointerenter", onEnter);
+          rowEl.removeEventListener("pointermove", onMove);
+          rowEl.removeEventListener("pointerleave", onLeave);
+        });
+      });
+    }
+
     // ── Main init ───────────────────────────────────────────────────────────
     function init() {
       if (ctx) ctx.revert();
@@ -149,6 +214,7 @@ export function FeatureWipe({ features, id }: Props) {
 
       // Always init GL regardless of breakpoint — images show on mobile too
       initGL();
+      initDots();
 
       if (!isDesktop) {
         // Mobile layout forces .fw-text-fixed visible via CSS (no scrubbed
@@ -362,19 +428,39 @@ export function FeatureWipe({ features, id }: Props) {
       if (ctx) ctx.revert();
       splits.forEach((s) => s.revert());
       disposeGL();
+      disposeDots();
     };
-  }, [features]);
+  }, [features, theme]);
 
   return (
     <section ref={sectionRef} className="fw-section" id={id}>
-      {features.map((f, i) => (
+      {features.map((f, i) => {
+        const brandColor = brandColorFor(f, theme);
+        return (
         <div
-          key={i}
+          key={f.slug}
           ref={(el) => {
             bandRefs.current[i] = el;
           }}
           className={`fw-row fw-row--${f.side}`}
+          style={
+            brandColor
+              ? ({ "--row-brand": brandColor } as CSSProperties)
+              : undefined
+          }
         >
+          {/* Magnetic-dots hover backdrop — fills the whole row, behind the
+              photo and text columns. Hidden (alpha 0) until the cursor
+              enters; see lib/magnetic-dots.ts. Not rendered at all on
+              touch/coarse-pointer devices (initDots no-ops). */}
+          <canvas
+            ref={(el) => {
+              dotsCanvasRefs.current[i] = el;
+            }}
+            className="fw-dots-canvas"
+            aria-hidden="true"
+          />
+
           <div className="fw-clip-cell">
             <div
               ref={(el) => {
@@ -401,10 +487,10 @@ export function FeatureWipe({ features, id }: Props) {
               >
                 {f.headline}
               </h2>
-              {f.buttonText && f.buttonUrl && (
+              {f.buttonText && (
                 <div className="fw-button">
                   <Button
-                    href={f.buttonUrl}
+                    href={`/work/${f.slug}`}
                     variant="solid"
                     size="sm"
                     aria-label={`${f.buttonText} — ${f.headline}`}
@@ -463,24 +549,21 @@ export function FeatureWipe({ features, id }: Props) {
               }}
               className="fw-media__inner"
             >
-              {f.imageSrc ? (
-                <>
-                  {/* Plain <img> fallback — visible until the GL canvas
-                      reports ready (onReady above), and the only thing
-                      that renders at all with JS/WebGL unavailable. */}
-                  <img src={f.imageSrc} alt={f.imageAlt ?? ""} />
-                  <canvas
-                    ref={(el) => {
-                      canvasRefs.current[i] = el;
-                    }}
-                    aria-hidden="true"
-                  />
-                </>
-              ) : null}
+              {/* Plain <img> fallback — visible until the GL canvas
+                  reports ready (onReady above), and the only thing
+                  that renders at all with JS/WebGL unavailable. */}
+              <img src={imageFor(f, theme)} alt={f.imageAlt ?? ""} />
+              <canvas
+                ref={(el) => {
+                  canvasRefs.current[i] = el;
+                }}
+                aria-hidden="true"
+              />
             </div>
           </div>
         </div>
-      ))}
+        );
+      })}
     </section>
   );
 }

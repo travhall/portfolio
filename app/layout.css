@@ -314,6 +314,33 @@
   grid-template-rows: 1fr;
   min-height: var(--fw-row-min-h);
   border-top: 1px solid var(--line);
+  position: relative; /* anchors .fw-dots-canvas, the full-row backdrop layer */
+  /* --row-brand is set inline per-row from case study data (lib/case-studies.ts),
+     already resolved to the light/dark variant. Reserved for hover/focus only —
+     other hover effects will layer on top later — so the resting state always
+     matches the page surface. */
+  background: var(--surface);
+  transition: background var(--btn-dur) var(--ease);
+}
+
+.fw-row:hover,
+.fw-row:focus-within {
+  background: color-mix(in oklch, var(--row-brand, transparent) 8%, var(--surface));
+}
+
+/* Magnetic-dots hover backdrop — fills the whole row, behind the photo
+ * (.fw-media, z-index 1) and text (.fw-clip-cell, z-index 2) columns, in
+ * the same panel the brand-color hover tint above lives in. Starts fully
+ * transparent (the shader's alpha channel handles reveal on hover, see
+ * lib/magnetic-dots.ts); --dots-blend left configurable for later
+ * experiments with how it composites over --row-brand beneath it. */
+.fw-dots-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: var(--dots-blend, normal);
 }
 
 .fw-row:last-child {

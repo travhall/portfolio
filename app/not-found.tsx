@@ -12,7 +12,7 @@ export default function NotFound() {
             This page doesn&apos;t exist.
           </h1>
           <p className="type-lead text-ink-muted">
-            The link may be broken, or the page hasn&apos;t been built yet.
+            The link may be broken, or the page may have moved.
           </p>
           <Button variant="solid" icon="arrow-right" iconPos="right" href="/">
             Back to work
@@ -24,3 +24,5 @@ export default function NotFound() {
     </main>
   );
 }
+
+// cSpell:ignore doesn
