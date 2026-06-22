@@ -3,9 +3,16 @@
  *
  * Renders a procedural duotone halftone of a source image — flat ink color
  * on flat paper color, dot size driven by the source's per-cell brightness
- * — hidden until the cursor enters, then fades in and warps the whole dot
- * grid toward the pointer: a localized magnetic pull plus an organic noise
- * ripple that animates continuously while hovered.
+ * — that warps the whole dot grid toward the pointer once it's moving: a
+ * localized magnetic pull plus an organic noise ripple, both motion-gated
+ * (zero at a still cursor) so the grid stays crisp at rest.
+ *
+ * Show/hide is owned entirely by CSS (.fw-dots-canvas opacity, the same
+ * transition as the photo it sits behind — see layout.css), not by this
+ * class. They used to be two independent fades (a CSS one for the photo,
+ * a JS-eased one for this canvas) that could drift out of sync and expose
+ * the bare page background for a frame or two; sharing one CSS transition
+ * makes that impossible. enter()/leave() now only gate the render loop.
  *
  * Deliberately a flat duotone rather than the photo's real colors: a busy
  * photographic background sitting behind headline/button text was a real
@@ -58,8 +65,6 @@ export interface MagneticDotsConfig {
   rippleSpeed: number;
   /** Pointer-follow easing per frame (0–1) — higher tracks faster. */
   mouseEase: number;
-  /** Reveal fade in/out easing per frame (0–1). */
-  revealEase: number;
   /** Pull/warp magnitude is driven entirely by this — 0 at a still cursor
    *  (grid stays undistorted), scaling up with pointer speed. There's no
    *  always-on baseline distortion from proximity alone anymore. */
@@ -98,7 +103,6 @@ export const DEFAULT_MAGNETIC_DOTS_CONFIG: MagneticDotsConfig = {
   rippleFreq: 5,
   rippleSpeed: 0.3,
   mouseEase: 0.12,
-  revealEase: 0.1,
   velocityBoost: 1.8,
   velocityScale: 4,
   velocityDecay: 6,
@@ -132,7 +136,7 @@ const FRAG_SRC =
   `#version 300 es
 precision mediump float;
 uniform sampler2D u_map;
-uniform float u_time,u_reveal,u_radius,u_strength,u_rippleAmp,u_rippleFreq,u_rippleSpeed,u_vel,u_velocityBoost,u_cellSize,u_dotMax,u_contrast,u_colorWeight;
+uniform float u_time,u_radius,u_strength,u_rippleAmp,u_rippleFreq,u_rippleSpeed,u_vel,u_velocityBoost,u_cellSize,u_dotMax,u_contrast,u_colorWeight;
 uniform vec2 u_mouse,u_ratio,u_canvasRatio;
 uniform vec3 u_inkColor,u_paperColor;
 in vec2 v_uv;
@@ -188,7 +192,7 @@ void main(){
   float dotMask = 1.0 - smoothstep(dotRadius - 0.06, dotRadius, distInCell);
 
   vec3 duotone = mix(u_paperColor, u_inkColor, dotMask);
-  fragColor = vec4(duotone, u_reveal);
+  fragColor = vec4(duotone, 1.0);
 }`;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -234,7 +238,6 @@ export class MagneticDots {
   private tex!: WebGLTexture;
 
   private uTime!: WebGLUniformLocation;
-  private uReveal!: WebGLUniformLocation;
   private uRadius!: WebGLUniformLocation;
   private uStrength!: WebGLUniformLocation;
   private uRippleAmp!: WebGLUniformLocation;
@@ -263,8 +266,6 @@ export class MagneticDots {
 
   private mouse: [number, number] = [0.5, 0.5];
   private mouseTarget: [number, number] = [0.5, 0.5];
-  private reveal = 0;
-  private revealTarget = 0;
   private hovered = false;
 
   // Pointer speed signal — raw samples come from setPointer() (one per
@@ -322,7 +323,6 @@ export class MagneticDots {
 
     this.prog = createProgram(gl, VERT_SRC, FRAG_SRC);
     this.uTime = gl.getUniformLocation(this.prog, "u_time")!;
-    this.uReveal = gl.getUniformLocation(this.prog, "u_reveal")!;
     this.uRadius = gl.getUniformLocation(this.prog, "u_radius")!;
     this.uStrength = gl.getUniformLocation(this.prog, "u_strength")!;
     this.uRippleAmp = gl.getUniformLocation(this.prog, "u_rippleAmp")!;
@@ -430,7 +430,6 @@ export class MagneticDots {
     const [rx, ry] = coverRatio(w, h, this.imgW, this.imgH);
     const [crx, cry] = coverRatio(w, h, 1, 1);
     gl.uniform1f(this.uTime, this.time);
-    gl.uniform1f(this.uReveal, this.reveal);
     gl.uniform1f(this.uRadius, this.opts.radius);
     gl.uniform1f(this.uStrength, this.opts.strength);
     gl.uniform1f(this.uRippleAmp, reducedMotion() ? 0 : this.opts.rippleAmp);
@@ -477,16 +476,17 @@ export class MagneticDots {
     this.start();
   }
 
+  /** Visibility is owned entirely by CSS now (.fw-dots-canvas opacity, same
+   *  transition as the photo it sits behind) — this only gates the render
+   *  loop / motion warp, not any fade of its own. */
   enter() {
     this.hovered = true;
-    this.revealTarget = 1;
     this.start();
   }
 
   leave() {
     this.hovered = false;
-    this.revealTarget = 0;
-    this.start();
+    this.stop();
   }
 
   start() {
@@ -512,18 +512,16 @@ export class MagneticDots {
       (this.mouseTarget[0] - this.mouse[0]) * this.opts.mouseEase;
     this.mouse[1] +=
       (this.mouseTarget[1] - this.mouse[1]) * this.opts.mouseEase;
-    this.reveal += (this.revealTarget - this.reveal) * this.opts.revealEase;
 
     // velRaw decays on its own (no continuous pointermove keeps re-arming
-    // it), then vel eases toward it — same spring shape as mouse/reveal
-    // above, so a held-still cursor settles back to a calm warp.
+    // it), then vel eases toward it — same spring shape as mouse above, so
+    // a held-still cursor settles back to a calm warp.
     this.velRaw *= Math.exp(-dt * this.opts.velocityDecay);
     this.vel += (this.velRaw - this.vel) * Math.min(1, dt * 9);
 
     this._renderOnce();
 
     const settling =
-      Math.abs(this.reveal - this.revealTarget) > 0.001 ||
       Math.abs(this.mouse[0] - this.mouseTarget[0]) > 0.0005 ||
       Math.abs(this.mouse[1] - this.mouseTarget[1]) > 0.0005 ||
       this.vel > 0.001;

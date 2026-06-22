@@ -345,6 +345,17 @@
   height: 100%;
   pointer-events: none;
   mix-blend-mode: var(--dots-blend, normal);
+  /* Same property/duration/easing/trigger as .fw-media's opacity fade below
+     — sharing one CSS transition (rather than this canvas fading in via its
+     own JS-eased alpha) guarantees the two move in lockstep, so the bare
+     page background never gets exposed for a frame between them. */
+  opacity: 0;
+  transition: opacity var(--btn-dur) var(--ease);
+}
+
+.fw-row:hover .fw-dots-canvas,
+.fw-row:focus-within .fw-dots-canvas {
+  opacity: 1;
 }
 
 .fw-row:last-child {
