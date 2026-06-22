@@ -627,7 +627,7 @@
   grid-row: 1;
   position: sticky;
   padding: 0;
-  top: 48px;
+  top: 116px;
   min-height: var(--row-min-h);
   overflow: hidden;
   display: flex;
@@ -653,10 +653,21 @@
 .about-portrait__fallback {
   position: absolute;
   inset: 0;
-  background-image: url("/images/about-img.jpg");
+  background-image: url("/images/about-img-light.jpg");
   background-size: cover;
   background-position: center top;
   transition: opacity 0.5s var(--ease);
+}
+@media (prefers-color-scheme: dark) {
+  .about-portrait__fallback {
+    background-image: url("/images/about-img-dark.jpg");
+  }
+}
+html[data-theme="dark"] .about-portrait__fallback {
+  background-image: url("/images/about-img-dark.jpg");
+}
+html[data-theme="light"] .about-portrait__fallback {
+  background-image: url("/images/about-img-light.jpg");
 }
 .about-portrait__gl {
   position: absolute;

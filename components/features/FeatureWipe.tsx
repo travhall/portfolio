@@ -169,6 +169,10 @@ export function FeatureWipe({ features, id }: Props) {
             // so chromatic aberration reads clearly at normal scroll speeds
             const vel = Math.max(-1, Math.min(1, dy / 30));
             gl.setScrollState(vel, self.progress);
+            // Same scroll-velocity signal also drives the dots canvas's
+            // chromatic-aberration fringe — only visible while it's also
+            // hovered (CSS opacity), so this is harmless the rest of the time.
+            dotsInstancesRef.current[i]?.setScrollState(vel);
           },
         });
         glTriggers.push(trigger);
@@ -508,7 +512,7 @@ export function FeatureWipe({ features, id }: Props) {
                 ref={(el) => {
                   textRefs.current[i] = el;
                 }}
-                className="fw-text-fixed"
+                className="fw-text-fixed glass-surface"
               >
                 <p
                   className="type-eyebrow text-ink-muted"

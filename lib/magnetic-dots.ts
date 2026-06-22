@@ -90,6 +90,18 @@ export interface MagneticDotsConfig {
    *  misses saturated-but-bright elements (e.g. a brand-colored button on
    *  a light page); full color distance picks those up too. */
   colorWeight: number;
+  /** Per-frame decay of the scroll-velocity signal once scrolling stops —
+   *  mirrors velocityDecay but for setScrollState() rather than the pointer. */
+  scrollVelDecay: number;
+  /** Vertical offset (canvas-aspect-corrected units) used to sample the dot
+   *  mask twice for the scroll-chromatic-aberration fringe, scaled by scroll
+   *  speed — the cheap version of the effect: a colored fringe from the
+   *  difference of two offset samples, not three fully-recomputed channels.
+   *  Must stay well below cellSize, or the two samples land in unrelated
+   *  cells and produce noise instead of a coherent fringe. */
+  aberrSpread: number;
+  /** Color intensity of that fringe. */
+  aberrStrength: number;
 }
 
 export const DEFAULT_MAGNETIC_DOTS_CONFIG: MagneticDotsConfig = {
@@ -112,6 +124,14 @@ export const DEFAULT_MAGNETIC_DOTS_CONFIG: MagneticDotsConfig = {
   dotMax: 0.48,
   contrast: 1.7,
   colorWeight: 0.6,
+  scrollVelDecay: 6,
+  // Must stay well below cellSize (0.0055) — at the old 0.006 the two offset
+  // samples landed in unrelated, non-adjacent cells instead of perturbing
+  // near the same one, producing noise that didn't scale predictably with
+  // scroll speed instead of a recognizable fringe. ~18% of cellSize keeps
+  // both samples within/near the same cell.
+  aberrSpread: 0.01,
+  aberrStrength: 1.9,
 };
 
 export interface MagneticDotsOptions extends Partial<MagneticDotsConfig> {
@@ -136,7 +156,7 @@ const FRAG_SRC =
   `#version 300 es
 precision mediump float;
 uniform sampler2D u_map;
-uniform float u_time,u_radius,u_strength,u_rippleAmp,u_rippleFreq,u_rippleSpeed,u_vel,u_velocityBoost,u_cellSize,u_dotMax,u_contrast,u_colorWeight;
+uniform float u_time,u_radius,u_strength,u_rippleAmp,u_rippleFreq,u_rippleSpeed,u_vel,u_velocityBoost,u_cellSize,u_dotMax,u_contrast,u_colorWeight,u_scrollVel,u_aberrSpread,u_aberrStrength;
 uniform vec2 u_mouse,u_ratio,u_canvasRatio;
 uniform vec3 u_inkColor,u_paperColor;
 in vec2 v_uv;
@@ -146,6 +166,21 @@ float luminance(vec3 c){return dot(c, vec3(0.299, 0.587, 0.114));}
 ` +
   NOISE +
   `
+// Halftone dot mask at an arbitrary (already-warped) position — pulled out
+// into its own function so the scroll-aberration fringe below can sample it
+// twice more at small offsets, instead of duplicating this whole block.
+float dotMaskAt(vec2 pos){
+  vec2 p = pos * u_canvasRatio / u_cellSize;
+  vec2 cellIdx = floor(p);
+  vec2 cellCenterUv = ((cellIdx + 0.5) * u_cellSize) / u_canvasRatio;
+  vec3 cellColor = texture(u_map, cover(cellCenterUv)).rgb;
+  float diffLum = abs(luminance(cellColor) - luminance(u_paperColor));
+  float diffColor = length(cellColor - u_paperColor) * 0.5774; // /sqrt(3), normalizes max RGB-cube distance to 1
+  float diff = clamp(mix(diffLum, diffColor, u_colorWeight) * u_contrast, 0.0, 1.0);
+  float dotRadius = diff * u_dotMax;
+  float distInCell = length(p - (cellIdx + 0.5));
+  return 1.0 - smoothstep(dotRadius - 0.06, dotRadius, distInCell);
+}
 void main(){
   vec2 uv = v_uv;
 
@@ -180,18 +215,24 @@ void main(){
   // color — blending brightness contrast with full color distance, so a
   // saturated brand-colored button that's bright (and so nearly invisible
   // in a brightness-only halftone) still shows up against a light page.
-  vec2 p = warped * u_canvasRatio / u_cellSize;
-  vec2 cellIdx = floor(p);
-  vec2 cellCenterUv = ((cellIdx + 0.5) * u_cellSize) / u_canvasRatio;
-  vec3 cellColor = texture(u_map, cover(cellCenterUv)).rgb;
-  float diffLum = abs(luminance(cellColor) - luminance(u_paperColor));
-  float diffColor = length(cellColor - u_paperColor) * 0.5774; // /sqrt(3), normalizes max RGB-cube distance to 1
-  float diff = clamp(mix(diffLum, diffColor, u_colorWeight) * u_contrast, 0.0, 1.0);
-  float dotRadius = diff * u_dotMax;
-  float distInCell = length(p - (cellIdx + 0.5));
-  float dotMask = 1.0 - smoothstep(dotRadius - 0.06, dotRadius, distInCell);
-
+  float dotMask = dotMaskAt(warped);
   vec3 duotone = mix(u_paperColor, u_inkColor, dotMask);
+
+  // Scroll chromatic aberration — cheap version: sample the mask twice more
+  // at small vertical offsets (scaled by scroll speed) and use the
+  // difference as a red/cyan fringe added on top, rather than fully
+  // recomputing all three RGB channels. Only visible while also hovered,
+  // since that's the only time this canvas itself is visible (CSS opacity). cSpell:ignore aberr GLSL mediump snoise
+  // sqrt curve, not linear — realistic scroll speed rarely pushes u_scrollVel
+  // past ~0.2-0.3 (vs the 1.0 ceiling), so a linear scale left the effect
+  // visible only during an almost-impossible full-speed fling. sqrt boosts
+  // the low end disproportionately (sqrt(0.2)=0.45) while still topping out
+  // at 1.0 for genuinely fast scrolling.
+  float scrollMag = sqrt(clamp(abs(u_scrollVel), 0.0, 1.0));
+  vec2 aberrOff = vec2(0.0, u_aberrSpread * scrollMag);
+  float fringe = dotMaskAt(warped + aberrOff) - dotMaskAt(warped - aberrOff);
+  duotone += vec3(fringe, 0.0, -fringe) * u_aberrStrength;
+
   fragColor = vec4(duotone, 1.0);
 }`;
 
@@ -255,6 +296,9 @@ export class MagneticDots {
   private uColorWeight!: WebGLUniformLocation;
   private uInkColor!: WebGLUniformLocation;
   private uPaperColor!: WebGLUniformLocation;
+  private uScrollVel!: WebGLUniformLocation;
+  private uAberrSpread!: WebGLUniformLocation;
+  private uAberrStrength!: WebGLUniformLocation;
 
   private ready = false;
   private disposed = false;
@@ -275,6 +319,13 @@ export class MagneticDots {
   private vel = 0;
   private lastPointerSample: [number, number] | null = null;
   private lastPointerTime = 0;
+
+  // Scroll-velocity signal for the chromatic-aberration fringe — same
+  // raw-then-eased-decay shape as pointer vel above, fed by setScrollState()
+  // (called from FeatureWipe's existing per-row ScrollTrigger, the same one
+  // that already drives the photo's MediaGL chromatic aberration).
+  private scrollVelRaw = 0;
+  private scrollVel = 0;
 
   private resizeObserver: ResizeObserver | null = null;
   private _boundResize!: () => void;
@@ -338,6 +389,9 @@ export class MagneticDots {
     this.uDotMax = gl.getUniformLocation(this.prog, "u_dotMax")!;
     this.uContrast = gl.getUniformLocation(this.prog, "u_contrast")!;
     this.uColorWeight = gl.getUniformLocation(this.prog, "u_colorWeight")!;
+    this.uScrollVel = gl.getUniformLocation(this.prog, "u_scrollVel")!;
+    this.uAberrSpread = gl.getUniformLocation(this.prog, "u_aberrSpread")!;
+    this.uAberrStrength = gl.getUniformLocation(this.prog, "u_aberrStrength")!;
     this.uInkColor = gl.getUniformLocation(this.prog, "u_inkColor")!;
     this.uPaperColor = gl.getUniformLocation(this.prog, "u_paperColor")!;
 
@@ -444,6 +498,9 @@ export class MagneticDots {
     gl.uniform1f(this.uDotMax, this.opts.dotMax);
     gl.uniform1f(this.uContrast, this.opts.contrast);
     gl.uniform1f(this.uColorWeight, this.opts.colorWeight);
+    gl.uniform1f(this.uScrollVel, reducedMotion() ? 0 : this.scrollVel);
+    gl.uniform1f(this.uAberrSpread, this.opts.aberrSpread);
+    gl.uniform1f(this.uAberrStrength, this.opts.aberrStrength);
     gl.uniform3f(this.uInkColor, ...this.opts.inkColor);
     gl.uniform3f(this.uPaperColor, ...this.opts.paperColor);
     gl.uniform1i(this.uMap, 0);
@@ -474,6 +531,16 @@ export class MagneticDots {
 
     this.mouseTarget = target;
     this.start();
+  }
+
+  /** vel is the same -1..1 scroll-speed signal FeatureWipe already computes
+   *  per row for the photo's MediaGL.setScrollState() — just fed here too.
+   *  Deliberately does NOT call start(): scroll alone shouldn't spin up the
+   *  render loop while not hovered (the canvas is invisible then anyway via
+   *  CSS opacity), so this only updates the target the next hover-driven
+   *  tick will ease toward. */
+  setScrollState(vel: number) {
+    this.scrollVelRaw = Math.max(-1, Math.min(1, vel));
   }
 
   /** Visibility is owned entirely by CSS now (.fw-dots-canvas opacity, same
@@ -518,6 +585,12 @@ export class MagneticDots {
     // a held-still cursor settles back to a calm warp.
     this.velRaw *= Math.exp(-dt * this.opts.velocityDecay);
     this.vel += (this.velRaw - this.vel) * Math.min(1, dt * 9);
+
+    // Same shape again for scroll velocity — decays toward 0 once
+    // ScrollTrigger stops calling setScrollState (i.e. scrolling stopped).
+    this.scrollVelRaw *= Math.exp(-dt * this.opts.scrollVelDecay);
+    this.scrollVel +=
+      (this.scrollVelRaw - this.scrollVel) * Math.min(1, dt * 9);
 
     this._renderOnce();
 
