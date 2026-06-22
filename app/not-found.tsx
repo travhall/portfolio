@@ -15,7 +15,7 @@ export default function NotFound() {
             The link may be broken, or the page may have moved.
           </p>
           <Button variant="solid" icon="arrow-right" iconPos="right" href="/">
-            Back to work
+            Let&apos;s get you back home
           </Button>
         </div>
       </section>

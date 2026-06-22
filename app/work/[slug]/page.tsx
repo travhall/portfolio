@@ -31,7 +31,13 @@ export default async function CaseStudyPage({ params }: Props) {
     <main id="main-content">
       <div className="header-spacer" aria-hidden="true" />
 
-      <section style={{ maxWidth: "var(--maxw)", margin: "0 auto", padding: "0 var(--gut)" }}>
+      <section
+        style={{
+          maxWidth: "var(--maxw)",
+          margin: "0 auto",
+          padding: "0 var(--gut)",
+        }}
+      >
         <p className="type-eyebrow text-ink-muted">{study.eyebrow}</p>
         <h1 className="type-h1 text-ink">{study.headline}</h1>
 
@@ -42,7 +48,7 @@ export default async function CaseStudyPage({ params }: Props) {
         />
 
         <Button variant="ghost" href="/">
-          Back to work
+          Let&apos;s get you back home
         </Button>
       </section>
     </main>

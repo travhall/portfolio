@@ -32,7 +32,11 @@ import { prefersReducedMotion } from "@/components/ui/ripple";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { useTheme } from "@/lib/use-theme";
 import type { CaseStudy } from "@/lib/case-studies";
-import { MagneticDots, supportsHoverPointer, type RGB } from "@/lib/magnetic-dots";
+import {
+  MagneticDots,
+  supportsHoverPointer,
+  type RGB,
+} from "@/lib/magnetic-dots";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -52,7 +56,9 @@ function brandColorFor(f: CaseStudy, theme: "light" | "dark") {
 }
 
 function revealImageFor(f: CaseStudy, theme: "light" | "dark") {
-  return theme === "dark" && f.revealImageDark ? f.revealImageDark : f.revealImage;
+  return theme === "dark" && f.revealImageDark
+    ? f.revealImageDark
+    : f.revealImage;
 }
 
 // Resolves any CSS color (oklch(), var(--token), etc.) to 0–1 RGB by letting
@@ -284,7 +290,11 @@ export function FeatureWipe({ features, id }: Props) {
         // below, not here on .fw-button) — every row shares the same fixed,
         // viewport-centred screen position, so without this only the
         // topmost-in-DOM row's button would ever receive clicks/taps.
-        gsap.set(textRefs.current, { opacity: 0, y: 80, pointerEvents: "none" });
+        gsap.set(textRefs.current, {
+          opacity: 0,
+          y: 80,
+          pointerEvents: "none",
+        });
         headlineRefs.current.forEach((_, idx) => {
           const chars = perFeatureChars[idx] || [];
           if (chars.length > 0) gsap.set(chars, { yPercent: 105 });
@@ -469,131 +479,133 @@ export function FeatureWipe({ features, id }: Props) {
       {features.map((f, i) => {
         const brandColor = brandColorFor(f, theme);
         return (
-        <div
-          key={f.slug}
-          ref={(el) => {
-            bandRefs.current[i] = el;
-          }}
-          className={`fw-row fw-row--${f.side}`}
-          style={
-            brandColor
-              ? ({ "--row-brand": brandColor } as CSSProperties)
-              : undefined
-          }
-        >
-          {/* Magnetic-dots hover backdrop — fills the whole row, behind the
+          <div
+            key={f.slug}
+            ref={(el) => {
+              bandRefs.current[i] = el;
+            }}
+            className={`fw-row fw-row--${f.side}`}
+            style={
+              brandColor
+                ? ({ "--row-brand": brandColor } as CSSProperties)
+                : undefined
+            }
+          >
+            {/* Magnetic-dots hover backdrop — fills the whole row, behind the
               photo and text columns. Hidden (alpha 0) until the cursor
               enters; see lib/magnetic-dots.ts. Not rendered at all on
               touch/coarse-pointer devices (initDots no-ops). */}
-          <canvas
-            ref={(el) => {
-              dotsCanvasRefs.current[i] = el;
-            }}
-            className="fw-dots-canvas"
-            aria-hidden="true"
-          />
-
-          <div className="fw-clip-cell">
-            <div
+            <canvas
               ref={(el) => {
-                textRefs.current[i] = el;
+                dotsCanvasRefs.current[i] = el;
               }}
-              className="fw-text-fixed"
-            >
-              <p
-                className="type-eyebrow text-ink-muted"
-                style={{ overflow: "hidden", margin: 0 }}
-              >
-                <span
-                  className="eyebrow-inner"
-                  style={{ display: "inline-block", willChange: "transform" }}
-                >
-                  {f.eyebrow}
-                </span>
-              </p>
-              <h2
+              className="fw-dots-canvas"
+              aria-hidden="true"
+            />
+
+            <div className="fw-clip-cell">
+              <div
                 ref={(el) => {
-                  headlineRefs.current[i] = el;
+                  textRefs.current[i] = el;
                 }}
-                className="type-h1 text-ink headline-constrain"
+                className="fw-text-fixed"
               >
-                {f.headline}
-              </h2>
-              {f.buttonText && (
-                <div className="fw-button">
-                  <Button
-                    href={`/work/${f.slug}`}
-                    variant="solid"
-                    size="sm"
-                    aria-label={`${f.buttonText} — ${f.headline}`}
-                    onFocus={() => {
-                      // Tab can land here while the row is still off-screen
-                      // (it stays in the focus order on purpose — see the
-                      // .fw-text-fixed comment in layout.css). Pull the row
-                      // into view so the scroll-scrubbed timeline reveals it
-                      // and pointer-events line up with what's focused.
-                      //
-                      // Must go through Lenis, not native scrollIntoView —
-                      // Lenis owns the page's scroll position and ScrollTrigger
-                      // only re-syncs on Lenis's own 'scroll' event, so a
-                      // native scroll call here would move window.scrollY
-                      // without ever notifying ScrollTrigger, leaving the row
-                      // permanently invisible despite being "in view".
-                      //
-                      // Scrolling the row's top/center into the viewport
-                      // isn't precise enough either — the timeline's "fully
-                      // revealed, no blur" window is centered on centers[i]
-                      // (a fraction of the trigger's own scroll range), which
-                      // doesn't line up with the row's geometric top or
-                      // center. Convert that progress fraction to an actual
-                      // page scroll position via the trigger's start/end.
-                      const rowEl = bandRefs.current[i];
-                      if (!rowEl) return;
-                      const trigger = mainTriggerRef.current;
-                      const p = centersRef.current[i];
-                      const target =
-                        trigger && p !== undefined
-                          ? trigger.start + p * (trigger.end - trigger.start)
-                          : rowEl;
-                      if (lenis) {
-                        lenis.scrollTo(target, {
-                          duration: prefersReducedMotion() ? 0 : 1.2,
-                        });
-                      } else {
-                        rowEl.scrollIntoView({
-                          behavior: prefersReducedMotion() ? "auto" : "smooth",
-                          block: "center",
-                        });
-                      }
-                    }}
+                <p
+                  className="type-eyebrow text-ink-muted"
+                  style={{ overflow: "hidden", margin: 0 }}
+                >
+                  <span
+                    className="eyebrow-inner"
+                    style={{ display: "inline-block", willChange: "transform" }}
                   >
-                    {f.buttonText}
-                  </Button>
-                </div>
-              )}
+                    {f.eyebrow}
+                  </span>
+                </p>
+                <h2
+                  ref={(el) => {
+                    headlineRefs.current[i] = el;
+                  }}
+                  className="type-h1 text-ink headline-constrain"
+                >
+                  {f.headline}
+                </h2>
+                {f.buttonText && (
+                  <div className="fw-button">
+                    <Button
+                      href={`/work/${f.slug}`}
+                      variant="solid"
+                      size="sm"
+                      aria-label={`${f.buttonText} — ${f.headline}`}
+                      onFocus={() => {
+                        // Tab can land here while the row is still off-screen
+                        // (it stays in the focus order on purpose — see the
+                        // .fw-text-fixed comment in layout.css). Pull the row
+                        // into view so the scroll-scrubbed timeline reveals it
+                        // and pointer-events line up with what's focused.
+                        //
+                        // Must go through Lenis, not native scrollIntoView —
+                        // Lenis owns the page's scroll position and ScrollTrigger
+                        // only re-syncs on Lenis's own 'scroll' event, so a
+                        // native scroll call here would move window.scrollY
+                        // without ever notifying ScrollTrigger, leaving the row
+                        // permanently invisible despite being "in view".
+                        //
+                        // Scrolling the row's top/center into the viewport
+                        // isn't precise enough either — the timeline's "fully
+                        // revealed, no blur" window is centered on centers[i]
+                        // (a fraction of the trigger's own scroll range), which
+                        // doesn't line up with the row's geometric top or
+                        // center. Convert that progress fraction to an actual
+                        // page scroll position via the trigger's start/end.
+                        const rowEl = bandRefs.current[i];
+                        if (!rowEl) return;
+                        const trigger = mainTriggerRef.current;
+                        const p = centersRef.current[i];
+                        const target =
+                          trigger && p !== undefined
+                            ? trigger.start + p * (trigger.end - trigger.start)
+                            : rowEl;
+                        if (lenis) {
+                          lenis.scrollTo(target, {
+                            duration: prefersReducedMotion() ? 0 : 1.2,
+                          });
+                        } else {
+                          rowEl.scrollIntoView({
+                            behavior: prefersReducedMotion()
+                              ? "auto"
+                              : "smooth",
+                            block: "center",
+                          });
+                        }
+                      }}
+                    >
+                      {f.buttonText}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="fw-media">
-            <div
-              ref={(el) => {
-                mediaRefs.current[i] = el;
-              }}
-              className="fw-media__inner"
-            >
-              {/* Plain <img> fallback — visible until the GL canvas
+            <div className="fw-media">
+              <div
+                ref={(el) => {
+                  mediaRefs.current[i] = el;
+                }}
+                className="fw-media__inner"
+              >
+                {/* Plain <img> fallback — visible until the GL canvas
                   reports ready (onReady above), and the only thing
                   that renders at all with JS/WebGL unavailable. */}
-              <img src={imageFor(f, theme)} alt={f.imageAlt ?? ""} />
-              <canvas
-                ref={(el) => {
-                  canvasRefs.current[i] = el;
-                }}
-                aria-hidden="true"
-              />
+                <img src={imageFor(f, theme)} alt={f.imageAlt ?? ""} />
+                <canvas
+                  ref={(el) => {
+                    canvasRefs.current[i] = el;
+                  }}
+                  aria-hidden="true"
+                />
+              </div>
             </div>
           </div>
-        </div>
         );
       })}
     </section>
