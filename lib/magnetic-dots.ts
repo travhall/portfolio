@@ -1,28 +1,45 @@
 /**
  * magnetic-dots.ts — WebGL2 canvas overlay for the FeatureWipe hover effect.
  *
- * Renders a halftone "dots" image, hidden until the cursor enters, then
- * fades in and warps toward the pointer: a localized magnetic pull plus a
- * radiating ripple that animates continuously while hovered. Pointer-driven
- * rather than scroll-driven, so it's its own class rather than a third
- * MediaEffect on MediaGL (media-gl.ts) — the driver loop and uniforms don't
- * overlap with that scroll/velocity model.
+ * Renders a procedural duotone halftone of a source image — flat ink color
+ * on flat paper color, dot size driven by the source's per-cell brightness
+ * — hidden until the cursor enters, then fades in and warps the whole dot
+ * grid toward the pointer: a localized magnetic pull plus an organic noise
+ * ripple that animates continuously while hovered.
+ *
+ * Deliberately a flat duotone rather than the photo's real colors: a busy
+ * photographic background sitting behind headline/button text was a real
+ * legibility/contrast problem, and a flat two-color halftone is much calmer
+ * while still reading as "the project's image" at a glance. The ink color
+ * is the case study's brand color and the paper color is the page surface
+ * — both resolved to RGB by the caller (FeatureWipe) and passed in, since
+ * this class only deals in plain WebGL color values, not CSS/OKLCH.
+ *
+ * Pointer-driven rather than scroll-driven, so it's its own class rather
+ * than a third MediaEffect on MediaGL (media-gl.ts) — the driver loop and
+ * uniforms don't overlap with that scroll/velocity model.
  *
  * Deliberately skipped on touch/coarse-pointer devices — callers should
  * check supportsHoverPointer() before constructing one.
  */
 
-import { coverRatio } from "./media-gl";
+import { coverRatio, NOISE } from "./media-gl";
 
 function reducedMotion(): boolean {
   if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  return (
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+  );
 }
 
 export function supportsHoverPointer(): boolean {
   if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(hover: hover) and (pointer: fine)").matches ?? false;
+  return (
+    window.matchMedia?.("(hover: hover) and (pointer: fine)").matches ?? false
+  );
 }
+
+export type RGB = [number, number, number];
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 // Every tunable knob for the effect lives here so it can be experimented
@@ -33,30 +50,73 @@ export interface MagneticDotsConfig {
   radius: number;
   /** Strength of the inward pull toward the cursor, in UV units. */
   strength: number;
-  /** Amplitude of the radiating ripple wave, in UV units. */
+  /** Amplitude of the organic noise warp, in UV units. */
   rippleAmp: number;
-  /** Spatial frequency of the ripple — higher = tighter rings. */
+  /** Spatial frequency of the noise field — higher = smaller, busier cells. */
   rippleFreq: number;
-  /** Ripple animation speed. */
+  /** Noise animation speed. */
   rippleSpeed: number;
   /** Pointer-follow easing per frame (0–1) — higher tracks faster. */
   mouseEase: number;
   /** Reveal fade in/out easing per frame (0–1). */
   revealEase: number;
+  /** Pull/warp magnitude is driven entirely by this — 0 at a still cursor
+   *  (grid stays undistorted), scaling up with pointer speed. There's no
+   *  always-on baseline distortion from proximity alone anymore. */
+  velocityBoost: number;
+  /** Maps raw pointer speed (UV units/sec) to the 0–1 velocity signal —
+   *  higher means a slower flick already reads as "fast". */
+  velocityScale: number;
+  /** Per-frame decay of the velocity signal once the pointer stops moving. */
+  velocityDecay: number;
+  /** Halftone cell size, in canvas-aspect-corrected units (see u_canvasRatio
+   *  in the shader) — roughly cellSize * max(canvasW, canvasH) px per cell. */
+  cellSize: number;
+  /** Max dot radius as a fraction of cellSize — ~0.5 lets the darkest cells
+   *  nearly fill their cell without touching neighbors. */
+  dotMax: number;
+  /** Multiplier on each cell's paper-distance (see colorWeight) before
+   *  sizing its dot — UI/website screenshots are mostly flat light
+   *  backgrounds with little contrast, so without this most cells stay
+   *  too faint to read as a recognizable shape. */
+  contrast: number;
+  /** Blend between brightness-only contrast (0) and full RGB distance from
+   *  the paper color (1) when deciding a cell's dot size. Pure brightness
+   *  misses saturated-but-bright elements (e.g. a brand-colored button on
+   *  a light page); full color distance picks those up too. */
+  colorWeight: number;
 }
 
 export const DEFAULT_MAGNETIC_DOTS_CONFIG: MagneticDotsConfig = {
   radius: 0.32,
-  strength: 0.06,
-  rippleAmp: 0.012,
-  rippleFreq: 26,
-  rippleSpeed: 2.6,
+  // strength/rippleAmp scaled down with cellSize below — at the old larger
+  // cellSize a displacement of a fraction of a cell was subtle, but against
+  // a much finer grid the same raw uv displacement spans many cells and
+  // shreds the pattern into streaks instead of a recognizable halftone.
+  strength: 0.011,
+  rippleAmp: 0.0025,
+  rippleFreq: 5,
+  rippleSpeed: 0.3,
   mouseEase: 0.12,
   revealEase: 0.1,
+  velocityBoost: 1.8,
+  velocityScale: 4,
+  velocityDecay: 6,
+  // Denser grid — small enough to resolve actual image shapes instead of
+  // reading as an abstract blob pattern.
+  cellSize: 0.0055,
+  dotMax: 0.48,
+  contrast: 1.7,
+  colorWeight: 0.6,
 };
 
 export interface MagneticDotsOptions extends Partial<MagneticDotsConfig> {
+  /** Source image the halftone's per-cell brightness is sampled from. */
   src: string;
+  /** Duotone "ink" color (dots), as 0–1 RGB. */
+  inkColor: RGB;
+  /** Duotone "paper" color (background), as 0–1 RGB. */
+  paperColor: RGB;
   onReady?: () => void;
 }
 
@@ -68,38 +128,76 @@ in vec2 a_uv;
 out vec2 v_uv;
 void main(){v_uv=a_uv;gl_Position=vec4(a_pos,0.,1.);}`;
 
-const FRAG_SRC = `#version 300 es
+const FRAG_SRC =
+  `#version 300 es
 precision mediump float;
 uniform sampler2D u_map;
-uniform float u_time,u_reveal,u_radius,u_strength,u_rippleAmp,u_rippleFreq,u_rippleSpeed;
-uniform vec2 u_mouse,u_ratio;
+uniform float u_time,u_reveal,u_radius,u_strength,u_rippleAmp,u_rippleFreq,u_rippleSpeed,u_vel,u_velocityBoost,u_cellSize,u_dotMax,u_contrast,u_colorWeight;
+uniform vec2 u_mouse,u_ratio,u_canvasRatio;
+uniform vec3 u_inkColor,u_paperColor;
 in vec2 v_uv;
 out vec4 fragColor;
 vec2 cover(vec2 u){u-=.5;u*=u_ratio;u+=.5;return u;}
+float luminance(vec3 c){return dot(c, vec3(0.299, 0.587, 0.114));}
+` +
+  NOISE +
+  `
 void main(){
   vec2 uv = v_uv;
 
-  // Distance to pointer in aspect-corrected space so the influence radius
-  // reads as a circle regardless of the canvas's aspect ratio.
-  vec2 d = (uv - u_mouse) * u_ratio;
+  // Distance to pointer corrected by the CANVAS's own aspect ratio (not
+  // the image-cover ratio — those differ now that this canvas is a tall
+  // full-row backdrop rather than photo-shaped) so the influence radius
+  // reads as a true circle regardless of how narrow/wide the row is.
+  vec2 d = (uv - u_mouse) * u_canvasRatio;
   float dist = length(d);
   float falloff = 1.0 - smoothstep(0.0, u_radius, dist);
   vec2 dir = dist > 0.0001 ? d / dist : vec2(0.0);
-  vec2 dirUv = dir / max(u_ratio, vec2(0.0001));
+  vec2 dirUv = dir / max(u_canvasRatio, vec2(0.0001));
 
-  // Magnetic pull: sample slightly toward the pointer so the image bulges
-  // toward it. Ripple: a decaying wave radiating outward from the pointer,
-  // animated continuously while hovered.
-  float ripple = sin(dist * u_rippleFreq - u_time * u_rippleSpeed) * falloff * u_rippleAmp;
-  vec2 warped = uv - dirUv * falloff * u_strength + dirUv * ripple;
+  // Motion-gated, not always-on: at a still cursor this is exactly 0, so
+  // the grid stays perfectly crisp/undistorted at rest. It only ramps up
+  // once the cursor is actually moving (u_vel), scaled by velocityBoost —
+  // a static hover no longer warps the grid, only a moving one does.
+  float motion = clamp(u_vel * u_velocityBoost, 0.0, 1.0);
 
-  vec4 tex = texture(u_map, cover(warped));
-  fragColor = vec4(tex.rgb, tex.a * u_reveal);
+  // Magnetic pull + organic noise warp on the whole dot grid (applied to
+  // uv before the grid is computed below), so the grid itself bulges and
+  // ripples toward the pointer rather than just resampling brightness.
+  vec2 noiseUv = uv * u_rippleFreq;
+  float nx = snoise3(vec3(noiseUv, u_time * u_rippleSpeed));
+  float ny = snoise3(vec3(noiseUv + 17.3, u_time * u_rippleSpeed + 4.1));
+  vec2 noiseWarp = vec2(nx, ny) * falloff * u_rippleAmp * motion;
+  vec2 warped = uv - dirUv * falloff * u_strength * motion + noiseWarp;
+
+  // Halftone: divide the (aspect-corrected) warped position into a grid of
+  // cells, sample the source image's color at each cell's center, and draw
+  // a dot whose radius grows the more that cell DIFFERS from the paper
+  // color — blending brightness contrast with full color distance, so a
+  // saturated brand-colored button that's bright (and so nearly invisible
+  // in a brightness-only halftone) still shows up against a light page.
+  vec2 p = warped * u_canvasRatio / u_cellSize;
+  vec2 cellIdx = floor(p);
+  vec2 cellCenterUv = ((cellIdx + 0.5) * u_cellSize) / u_canvasRatio;
+  vec3 cellColor = texture(u_map, cover(cellCenterUv)).rgb;
+  float diffLum = abs(luminance(cellColor) - luminance(u_paperColor));
+  float diffColor = length(cellColor - u_paperColor) * 0.5774; // /sqrt(3), normalizes max RGB-cube distance to 1
+  float diff = clamp(mix(diffLum, diffColor, u_colorWeight) * u_contrast, 0.0, 1.0);
+  float dotRadius = diff * u_dotMax;
+  float distInCell = length(p - (cellIdx + 0.5));
+  float dotMask = 1.0 - smoothstep(dotRadius - 0.06, dotRadius, distInCell);
+
+  vec3 duotone = mix(u_paperColor, u_inkColor, dotMask);
+  fragColor = vec4(duotone, u_reveal);
 }`;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function compileShader(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
+function compileShader(
+  gl: WebGL2RenderingContext,
+  type: number,
+  src: string,
+): WebGLShader {
   if (gl.isContextLost()) return null as unknown as WebGLShader;
   const s = gl.createShader(type)!;
   gl.shaderSource(s, src);
@@ -110,7 +208,11 @@ function compileShader(gl: WebGL2RenderingContext, type: number, src: string): W
   return s;
 }
 
-function createProgram(gl: WebGL2RenderingContext, vert: string, frag: string): WebGLProgram {
+function createProgram(
+  gl: WebGL2RenderingContext,
+  vert: string,
+  frag: string,
+): WebGLProgram {
   const p = gl.createProgram()!;
   gl.attachShader(p, compileShader(gl, gl.VERTEX_SHADER, vert));
   gl.attachShader(p, compileShader(gl, gl.FRAGMENT_SHADER, frag));
@@ -141,6 +243,15 @@ export class MagneticDots {
   private uMouse!: WebGLUniformLocation;
   private uRatio!: WebGLUniformLocation;
   private uMap!: WebGLUniformLocation;
+  private uVel!: WebGLUniformLocation;
+  private uVelocityBoost!: WebGLUniformLocation;
+  private uCanvasRatio!: WebGLUniformLocation;
+  private uCellSize!: WebGLUniformLocation;
+  private uDotMax!: WebGLUniformLocation;
+  private uContrast!: WebGLUniformLocation;
+  private uColorWeight!: WebGLUniformLocation;
+  private uInkColor!: WebGLUniformLocation;
+  private uPaperColor!: WebGLUniformLocation;
 
   private ready = false;
   private disposed = false;
@@ -155,6 +266,14 @@ export class MagneticDots {
   private reveal = 0;
   private revealTarget = 0;
   private hovered = false;
+
+  // Pointer speed signal — raw samples come from setPointer() (one per
+  // pointermove), then decay continuously in _tick so it settles back to 0
+  // a beat after the cursor stops, instead of snapping to 0 immediately.
+  private velRaw = 0;
+  private vel = 0;
+  private lastPointerSample: [number, number] | null = null;
+  private lastPointerTime = 0;
 
   private resizeObserver: ResizeObserver | null = null;
   private _boundResize!: () => void;
@@ -212,6 +331,15 @@ export class MagneticDots {
     this.uMouse = gl.getUniformLocation(this.prog, "u_mouse")!;
     this.uRatio = gl.getUniformLocation(this.prog, "u_ratio")!;
     this.uMap = gl.getUniformLocation(this.prog, "u_map")!;
+    this.uVel = gl.getUniformLocation(this.prog, "u_vel")!;
+    this.uVelocityBoost = gl.getUniformLocation(this.prog, "u_velocityBoost")!;
+    this.uCanvasRatio = gl.getUniformLocation(this.prog, "u_canvasRatio")!;
+    this.uCellSize = gl.getUniformLocation(this.prog, "u_cellSize")!;
+    this.uDotMax = gl.getUniformLocation(this.prog, "u_dotMax")!;
+    this.uContrast = gl.getUniformLocation(this.prog, "u_contrast")!;
+    this.uColorWeight = gl.getUniformLocation(this.prog, "u_colorWeight")!;
+    this.uInkColor = gl.getUniformLocation(this.prog, "u_inkColor")!;
+    this.uPaperColor = gl.getUniformLocation(this.prog, "u_paperColor")!;
 
     // prettier-ignore
     const pos = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
@@ -252,7 +380,17 @@ export class MagneticDots {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
     } else {
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        1,
+        1,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        new Uint8Array(4),
+      );
     }
     gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -290,6 +428,7 @@ export class MagneticDots {
 
     const { w, h } = this._size();
     const [rx, ry] = coverRatio(w, h, this.imgW, this.imgH);
+    const [crx, cry] = coverRatio(w, h, 1, 1);
     gl.uniform1f(this.uTime, this.time);
     gl.uniform1f(this.uReveal, this.reveal);
     gl.uniform1f(this.uRadius, this.opts.radius);
@@ -299,6 +438,15 @@ export class MagneticDots {
     gl.uniform1f(this.uRippleSpeed, this.opts.rippleSpeed);
     gl.uniform2f(this.uMouse, this.mouse[0], this.mouse[1]);
     gl.uniform2f(this.uRatio, rx, ry);
+    gl.uniform2f(this.uCanvasRatio, crx, cry);
+    gl.uniform1f(this.uVel, reducedMotion() ? 0 : this.vel);
+    gl.uniform1f(this.uVelocityBoost, this.opts.velocityBoost);
+    gl.uniform1f(this.uCellSize, this.opts.cellSize);
+    gl.uniform1f(this.uDotMax, this.opts.dotMax);
+    gl.uniform1f(this.uContrast, this.opts.contrast);
+    gl.uniform1f(this.uColorWeight, this.opts.colorWeight);
+    gl.uniform3f(this.uInkColor, ...this.opts.inkColor);
+    gl.uniform3f(this.uPaperColor, ...this.opts.paperColor);
     gl.uniform1i(this.uMap, 0);
 
     gl.activeTexture(gl.TEXTURE0);
@@ -312,13 +460,26 @@ export class MagneticDots {
 
   /** uv is normalized [0,1] in standard screen space (x: left→right, y: top→bottom). */
   setPointer(u: number, v: number) {
-    this.mouseTarget = [u, 1 - v];
+    const target: [number, number] = [u, 1 - v];
+
+    const now = performance.now();
+    if (this.lastPointerSample) {
+      const dt = Math.max((now - this.lastPointerTime) / 1000, 0.001);
+      const dx = target[0] - this.lastPointerSample[0];
+      const dy = target[1] - this.lastPointerSample[1];
+      const speed = Math.sqrt(dx * dx + dy * dy) / dt;
+      this.velRaw = Math.max(0, Math.min(1, speed * this.opts.velocityScale));
+    }
+    this.lastPointerSample = target;
+    this.lastPointerTime = now;
+
+    this.mouseTarget = target;
     this.start();
   }
 
   enter() {
     this.hovered = true;
-    this.revealTarget = reducedMotion() ? 1 : 1;
+    this.revealTarget = 1;
     this.start();
   }
 
@@ -347,16 +508,25 @@ export class MagneticDots {
     this.last = now;
     this.time += dt;
 
-    this.mouse[0] += (this.mouseTarget[0] - this.mouse[0]) * this.opts.mouseEase;
-    this.mouse[1] += (this.mouseTarget[1] - this.mouse[1]) * this.opts.mouseEase;
+    this.mouse[0] +=
+      (this.mouseTarget[0] - this.mouse[0]) * this.opts.mouseEase;
+    this.mouse[1] +=
+      (this.mouseTarget[1] - this.mouse[1]) * this.opts.mouseEase;
     this.reveal += (this.revealTarget - this.reveal) * this.opts.revealEase;
+
+    // velRaw decays on its own (no continuous pointermove keeps re-arming
+    // it), then vel eases toward it — same spring shape as mouse/reveal
+    // above, so a held-still cursor settles back to a calm warp.
+    this.velRaw *= Math.exp(-dt * this.opts.velocityDecay);
+    this.vel += (this.velRaw - this.vel) * Math.min(1, dt * 9);
 
     this._renderOnce();
 
     const settling =
       Math.abs(this.reveal - this.revealTarget) > 0.001 ||
       Math.abs(this.mouse[0] - this.mouseTarget[0]) > 0.0005 ||
-      Math.abs(this.mouse[1] - this.mouseTarget[1]) > 0.0005;
+      Math.abs(this.mouse[1] - this.mouseTarget[1]) > 0.0005 ||
+      this.vel > 0.001;
 
     if (!this.hovered && !settling) {
       this.stop();

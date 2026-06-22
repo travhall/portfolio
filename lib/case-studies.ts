@@ -16,14 +16,18 @@ export interface CaseStudy {
   imageDark?: string;
   imageAlt?: string;
   buttonText?: string;
-  /** OKLCH string used as the row's tint in light mode. */
+  /** OKLCH string used as the row's tint in light mode, and as the
+   *  magnetic-dots halftone's ink color. */
   brandLight?: string;
-  /** OKLCH string used as the row's tint in dark mode. Falls back to brandLight. */
+  /** OKLCH string used as the row's tint in dark mode, and as the
+   *  magnetic-dots halftone's ink color. Falls back to brandLight. */
   brandDark?: string;
-  /** Halftone "dots" image for the magnetic hover effect — light mode. */
-  dotsImage?: string;
-  /** Halftone "dots" image for the magnetic hover effect — dark mode. */
-  dotsImageDark?: string;
+  /** Source screenshot the magnetic-dots hover halftone is generated
+   *  from — light mode. */
+  revealImage?: string;
+  /** Source screenshot the magnetic-dots hover halftone is generated
+   *  from — dark mode. */
+  revealImageDark?: string;
 }
 
 export const caseStudies: CaseStudy[] = [
@@ -36,8 +40,8 @@ export const caseStudies: CaseStudy[] = [
     buttonText: "View Case Study",
     brandLight: "oklch(0.83 0.07 195.9)",
     brandDark: "oklch(0.48 0.09 195.9)",
-    dotsImage: "/images/work-dots-wyliedog-light.jpg",
-    dotsImageDark: "/images/work-dots-wyliedog-dark.jpg",
+    revealImage: "/images/work-img-wyliedog-light.jpg",
+    revealImageDark: "/images/work-img-wyliedog-dark.jpg",
   },
   {
     slug: "el-camino",
@@ -48,8 +52,8 @@ export const caseStudies: CaseStudy[] = [
     buttonText: "Visit Skate Shop",
     brandLight: "oklch(0.87 0.115 80)",
     brandDark: "oklch(0.6 0.16 80)",
-    dotsImage: "/images/work-dots-elcamino-light.jpg",
-    dotsImageDark: "/images/work-dots-elcamino-dark.jpg",
+    revealImage: "/images/work-img-elcamino-light.jpg",
+    revealImageDark: "/images/work-img-elcamino-dark.jpg",
   },
   {
     slug: "moxie-beauty",
@@ -60,8 +64,8 @@ export const caseStudies: CaseStudy[] = [
     buttonText: "View Case Study",
     brandLight: "oklch(0.85 0.1 350)",
     brandDark: "oklch(0.55 0.15 350)",
-    dotsImage: "/images/work-dots-moxie-light.jpg",
-    dotsImageDark: "/images/work-dots-moxie-dark.jpg",
+    revealImage: "/images/work-img-moxie-light.jpg",
+    revealImageDark: "/images/work-img-moxie-dark.jpg",
   },
   {
     slug: "antibroadcasting",
@@ -72,7 +76,7 @@ export const caseStudies: CaseStudy[] = [
     buttonText: "View Redesign",
     brandLight: "oklch(0.82 0.12 25)",
     brandDark: "oklch(0.52 0.17 25)",
-    dotsImage: "/images/work-dots-antibroadcasting-light.jpg",
-    dotsImageDark: "/images/work-dots-antibroadcasting-dark.jpg",
+    revealImage: "/images/work-img-antibroadcasting-light.jpg",
+    revealImageDark: "/images/work-img-antibroadcasting-dark.jpg",
   },
 ];

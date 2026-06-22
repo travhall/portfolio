@@ -40,7 +40,7 @@ export interface MediaGLOptions {
 
 // ─── GLSL ─────────────────────────────────────────────────────────────────────
 
-const NOISE = `
+export const NOISE = `
 vec3 mod289v3(vec3 x){return x-floor(x*(1./289.))*289.;}
 vec4 mod289v4(vec4 x){return x-floor(x*(1./289.))*289.;}
 vec4 permute4(vec4 x){return mod289v4(((x*34.)+1.)*x);}

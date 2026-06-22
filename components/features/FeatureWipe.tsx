@@ -32,7 +32,7 @@ import { prefersReducedMotion } from "@/components/ui/ripple";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { useTheme } from "@/lib/use-theme";
 import type { CaseStudy } from "@/lib/case-studies";
-import { MagneticDots, supportsHoverPointer } from "@/lib/magnetic-dots";
+import { MagneticDots, supportsHoverPointer, type RGB } from "@/lib/magnetic-dots";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -51,8 +51,27 @@ function brandColorFor(f: CaseStudy, theme: "light" | "dark") {
   return f.brandLight;
 }
 
-function dotsImageFor(f: CaseStudy, theme: "light" | "dark") {
-  return theme === "dark" && f.dotsImageDark ? f.dotsImageDark : f.dotsImage;
+function revealImageFor(f: CaseStudy, theme: "light" | "dark") {
+  return theme === "dark" && f.revealImageDark ? f.revealImageDark : f.revealImage;
+}
+
+// Resolves any CSS color (oklch(), var(--token), etc.) to 0–1 RGB by letting
+// the browser's own color parser do the work via a throwaway 2D canvas —
+// far simpler than hand-rolling OKLCH→sRGB, and WebGL only accepts plain
+// RGB floats, not CSS color strings.
+let colorProbeCtx: CanvasRenderingContext2D | null = null;
+function cssColorToRgb(color: string): RGB {
+  if (!colorProbeCtx) {
+    const c = document.createElement("canvas");
+    c.width = c.height = 1;
+    colorProbeCtx = c.getContext("2d", { willReadFrequently: true });
+  }
+  const ctx = colorProbeCtx;
+  if (!ctx) return [0, 0, 0];
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return [r / 255, g / 255, b / 255];
 }
 
 interface Props {
@@ -167,13 +186,21 @@ export function FeatureWipe({ features, id }: Props) {
       disposeDots();
       if (!supportsHoverPointer()) return;
 
+      // Paper color is the same for every row (the page surface); read once
+      // per init rather than per-row. Computed fresh each time this runs —
+      // including on theme change — so it tracks light/dark automatically.
+      const rootStyle = getComputedStyle(document.documentElement);
+      const paperColor = cssColorToRgb(rootStyle.getPropertyValue("--surface"));
+      const inkFallback = rootStyle.getPropertyValue("--ink");
+
       features.forEach((f, i) => {
         const canvas = dotsCanvasRefs.current[i];
         const rowEl = bandRefs.current[i];
-        const src = dotsImageFor(f, theme);
+        const src = revealImageFor(f, theme);
         if (!canvas || !rowEl || !src) return;
 
-        const dots = new MagneticDots(canvas, { src });
+        const inkColor = cssColorToRgb(brandColorFor(f, theme) ?? inkFallback);
+        const dots = new MagneticDots(canvas, { src, inkColor, paperColor });
         dotsInstancesRef.current[i] = dots;
 
         // Tracked across the whole row (not just the photo) — the dots

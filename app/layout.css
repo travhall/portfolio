@@ -325,7 +325,11 @@
 
 .fw-row:hover,
 .fw-row:focus-within {
-  background: color-mix(in oklch, var(--row-brand, transparent) 8%, var(--surface));
+  background: color-mix(
+    in oklch,
+    var(--row-brand, transparent) 8%,
+    var(--surface)
+  );
 }
 
 /* Magnetic-dots hover backdrop — fills the whole row, behind the photo
@@ -376,6 +380,17 @@
   overflow: hidden;
   z-index: 1;
   min-height: var(--fw-row-min-h);
+  opacity: 1;
+  transition: opacity var(--btn-dur) var(--ease);
+}
+
+/* The photo sits above the magnetic-dots backdrop (.fw-dots-canvas,
+ * z-index 0) — fading it out on hover/focus is what makes that backdrop
+ * (and whatever it reveals near the cursor) actually legible instead of
+ * being fully covered. */
+.fw-row:hover .fw-media,
+.fw-row:focus-within .fw-media {
+  opacity: 0;
 }
 
 /* Side placement — set by data-side on the row */
@@ -665,6 +680,7 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  padding: var(--gut);
 }
 
 /* Skills and experience stack vertically in the constrained centre column */
@@ -674,9 +690,6 @@
   gap: clamp(48px, 7vh, 80px);
 }
 
-.about-bio {
-  padding: var(--gut);
-}
 .about-experience,
 .about-skills {
   border-top: 1px solid var(--line);
@@ -776,7 +789,6 @@
   .about-content {
     grid-column: 1;
     grid-row: 2;
-    padding-inline: var(--gut);
   }
 
   .about-rail {
@@ -784,6 +796,7 @@
     grid-row: 1;
     padding: 1rem;
     position: relative;
+    top: unset;
     height: auto;
     aspect-ratio: unset;
   }
