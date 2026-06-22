@@ -196,7 +196,12 @@ export function FeatureWipe({ features, id }: Props) {
       features.forEach((f, i) => {
         const canvas = dotsCanvasRefs.current[i];
         const rowEl = bandRefs.current[i];
-        const src = revealImageFor(f, theme);
+        // Trying the actual case-study cover photo (photo-*) as the
+        // halftone source instead of the work-img-* screenshot, to compare
+        // recognizability — real photos halftone much better than UI
+        // screenshots, per the earlier discussion. revealImageFor(f, theme)
+        // is the previous source, easy to swap back.
+        const src = imageFor(f, theme);
         if (!canvas || !rowEl || !src) return;
 
         const inkColor = cssColorToRgb(brandColorFor(f, theme) ?? inkFallback);
