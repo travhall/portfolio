@@ -494,7 +494,13 @@ export function FeatureWipe({ features, id }: Props) {
   return (
     <section ref={sectionRef} className="fw-section" id={id}>
       {features.map((f, i) => {
-        const brandColor = brandColorFor(f, theme);
+        // Theme-independent on purpose: light-dark() resolves at paint time
+        // off the same color-scheme the anti-FOUC script sets pre-hydration,
+        // so server and client always agree (see lib/use-theme.ts comment
+        // for why a React-read theme value can't drive this safely).
+        const rowBrand = f.brandLight
+          ? `light-dark(${f.brandLight}, ${f.brandDark ?? f.brandLight})`
+          : undefined;
         return (
           <div
             key={f.slug}
@@ -503,8 +509,8 @@ export function FeatureWipe({ features, id }: Props) {
             }}
             className={`fw-row fw-row--${f.side}`}
             style={
-              brandColor
-                ? ({ "--row-brand": brandColor } as CSSProperties)
+              rowBrand
+                ? ({ "--row-brand": rowBrand } as CSSProperties)
                 : undefined
             }
           >

@@ -4,7 +4,7 @@
 // direction, persisted to localStorage. components/ui/ripple.ts's
 // prefersReducedMotion() consults this attribute first.
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export type MotionPref = "on" | "off";
 
@@ -29,34 +29,31 @@ export function applyMotionPref(pref: MotionPref) {
   }
 }
 
+function subscribe(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-motion"],
+  });
+
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  media.addEventListener("change", onChange);
+
+  return () => {
+    observer.disconnect();
+    media.removeEventListener("change", onChange);
+  };
+}
+
+function getServerSnapshot(): MotionPref {
+  return "on";
+}
+
 /** Reactive read of the resolved motion preference — for components (e.g.
  *  FeatureWipe) that stay mounted across a Menu-driven toggle and need to
- *  re-run their own setup, not just re-render. */
+ *  re-run their own setup, not just re-render. useSyncExternalStore makes
+ *  this hydration-safe: React guarantees the first client render matches
+ *  getServerSnapshot, then resyncs to the real value right after hydration. */
 export function useMotionPref(): MotionPref {
-  const [pref, setPref] = useState<MotionPref>(() =>
-    typeof document === "undefined" ? "on" : readMotionPref()
-  );
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => setPref(readMotionPref()));
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-motion"],
-    });
-
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onSystem = () => {
-      if (!document.documentElement.hasAttribute("data-motion")) {
-        setPref(readMotionPref());
-      }
-    };
-    media.addEventListener("change", onSystem);
-
-    return () => {
-      observer.disconnect();
-      media.removeEventListener("change", onSystem);
-    };
-  }, []);
-
-  return pref;
+  return useSyncExternalStore(subscribe, readMotionPref, getServerSnapshot);
 }

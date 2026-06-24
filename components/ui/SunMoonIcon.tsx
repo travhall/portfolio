@@ -20,7 +20,6 @@ export interface SunMoonHandle {
 }
 
 interface Props {
-  dark:  boolean;
   size?: number;
 }
 
@@ -41,7 +40,7 @@ const RAYS: [number, number, number, number][] = [
 ];
 
 export const SunMoonIcon = forwardRef<SunMoonHandle, Props>(
-  function SunMoonIcon({ dark, size = 16 }, ref) {
+  function SunMoonIcon({ size = 16 }, ref) {
     const groupRef = useRef<SVGGElement>(null);
     const coreRef  = useRef<SVGCircleElement>(null);
     const occRef   = useRef<SVGCircleElement>(null);
@@ -103,18 +102,13 @@ export const SunMoonIcon = forwardRef<SunMoonHandle, Props>(
         aria-hidden="true"
         style={{ overflow: "visible", display: "block", flex: "none" }}
       >
-        <g
-          ref={groupRef}
-          style={{
-            transformOrigin: "8px 8px",
-            transform: dark ? "rotate(-45deg)" : "rotate(0deg)",
-          }}
-        >
+        <g ref={groupRef} className="sun-moon-icon__group">
           <circle
             ref={coreRef}
-            cx={dark ? 7.2 : 8}
+            className="sun-moon-icon__core"
+            cx={8}
             cy={8}
-            r={dark ? 3.4 : 2.4}
+            r={2.4}
             fill="none"
             stroke="currentColor"
             strokeWidth={1.6}
@@ -124,21 +118,22 @@ export const SunMoonIcon = forwardRef<SunMoonHandle, Props>(
             <line
               key={i}
               ref={el => { rayRefs.current[i] = el; }}
+              className="sun-moon-icon__ray"
               x1={x1} y1={y1} x2={x2} y2={y2}
               {...rayProps}
-              strokeDashoffset={dark ? "2.2" : "0"}
-              style={{ opacity: dark ? 0 : 1 }}
+              strokeDashoffset="0"
             />
           ))}
 
           <circle
             ref={occRef}
-            cx={dark ? 10 : 22}
+            className="sun-moon-icon__occ"
+            cx={22}
             cy={7.5}
             r={3.4}
             fill="var(--surface)"
             stroke="none"
-            opacity={dark ? 1 : 0}
+            opacity={0}
           />
         </g>
       </svg>

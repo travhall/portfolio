@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Manrope, Geist_Mono } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
@@ -75,11 +76,9 @@ export default function RootLayout({
           mount and will already be in sync.
         */}
         <head>
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}var m=localStorage.getItem('motion');if(m==='on'||m==='off'){document.documentElement.setAttribute('data-motion',m);}}catch(e){}})();`,
-            }}
-          />
+          <Script id="theme-init" strategy="beforeInteractive">
+            {`(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}var m=localStorage.getItem('motion');if(m==='on'||m==='off'){document.documentElement.setAttribute('data-motion',m);}}catch(e){}})();`}
+          </Script>
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}

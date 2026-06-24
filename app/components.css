@@ -579,6 +579,76 @@ html[data-motion="off"] .tag--leaving {
   }
 }
 
+/* SunMoonIcon's resting geometry — driven entirely by data-theme/the OS
+ * media query, same pattern as .about-portrait__fallback, so the icon is
+ * already correct on first paint (set by the anti-FOUC script before
+ * hydration) with nothing for React to disagree with. The imperative
+ * .animate() handle on SunMoonIcon overrides these via inline style/attrs
+ * for the click-triggered morph transition only. */
+.sun-moon-icon__group {
+  transform-origin: 8px 8px;
+  transform: rotate(0deg);
+}
+.sun-moon-icon__core {
+  cx: 8;
+  r: 2.4;
+}
+.sun-moon-icon__ray {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+.sun-moon-icon__occ {
+  cx: 22;
+  opacity: 0;
+}
+@media (prefers-color-scheme: dark) {
+  .sun-moon-icon__group {
+    transform: rotate(-45deg);
+  }
+  .sun-moon-icon__core {
+    cx: 7.2;
+    r: 3.4;
+  }
+  .sun-moon-icon__ray {
+    stroke-dashoffset: 2.2;
+    opacity: 0;
+  }
+  .sun-moon-icon__occ {
+    cx: 10;
+    opacity: 1;
+  }
+}
+html[data-theme="dark"] .sun-moon-icon__group {
+  transform: rotate(-45deg);
+}
+html[data-theme="dark"] .sun-moon-icon__core {
+  cx: 7.2;
+  r: 3.4;
+}
+html[data-theme="dark"] .sun-moon-icon__ray {
+  stroke-dashoffset: 2.2;
+  opacity: 0;
+}
+html[data-theme="dark"] .sun-moon-icon__occ {
+  cx: 10;
+  opacity: 1;
+}
+html[data-theme="light"] .sun-moon-icon__group {
+  transform: rotate(0deg);
+}
+html[data-theme="light"] .sun-moon-icon__core {
+  cx: 8;
+  r: 2.4;
+}
+html[data-theme="light"] .sun-moon-icon__ray {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+html[data-theme="light"] .sun-moon-icon__occ {
+  cx: 22;
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toggle-pill__label.is-exiting,
   .toggle-pill__label.is-entering {
