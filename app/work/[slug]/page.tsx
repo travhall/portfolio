@@ -12,19 +12,21 @@ interface Props {
 }
 
 export function generateStaticParams() {
-  return caseStudies.map((study) => ({ slug: study.slug }));
+  return caseStudies
+    .filter((study) => !study.comingSoon)
+    .map((study) => ({ slug: study.slug }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const study = caseStudies.find((s) => s.slug === slug);
+  const study = caseStudies.find((s) => s.slug === slug && !s.comingSoon);
   if (!study) return createMetadata({ path: `/work/${slug}` });
   return createMetadata({ title: study.headline, path: `/work/${study.slug}` });
 }
 
 export default async function CaseStudyPage({ params }: Props) {
   const { slug } = await params;
-  const study = caseStudies.find((s) => s.slug === slug);
+  const study = caseStudies.find((s) => s.slug === slug && !s.comingSoon);
   if (!study) notFound();
 
   return (
@@ -41,10 +43,13 @@ export default async function CaseStudyPage({ params }: Props) {
         <p className="type-eyebrow text-ink-muted">{study.eyebrow}</p>
         <h1 className="type-h1 text-ink">{study.headline}</h1>
 
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={study.image}
           alt={study.imageAlt ?? ""}
-          style={{ width: "100%", margin: "2rem 0" }}
+          width={756}
+          height={910}
+          style={{ width: "100%", height: "auto", margin: "2rem 0" }}
         />
 
         <Button variant="ghost" href="/">

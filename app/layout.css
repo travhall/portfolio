@@ -135,6 +135,9 @@
     transition: none;
   }
 }
+html[data-motion="off"] .topbar__toggle-line {
+  transition: none;
+}
 
 /* ── HEADER SPACER ───────────────────────────────────────────────────────── */
 /*
@@ -147,36 +150,37 @@
  */
 .header-spacer {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 1fr;
   height: var(--topbar-h);
   border-bottom: 1px solid var(--line);
   position: relative;
-
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    width: 0;
-    pointer-events: none;
-  }
-  &::before {
-    left: 25%;
-    border-right: 1px solid var(--line);
-  }
-  &::after {
-    right: 25%;
-    border-left: 1px solid var(--line);
-  }
 }
 
-@media (max-width: 899px) {
+/* Desktop threshold — kept in sync with lib/breakpoints.ts DESKTOP_BP (900)
+   and the sibling breakpoints at .intro-section, .fw-section, .about-body/.about-cta.
+   @media not @container: grid-template-columns with fr units can't safely live
+   inside a @container query on the element that establishes that same container
+   (circular inline-size dependency) — see plans/004-container-query-migration.md. */
+@media (min-width: 900px) {
   .header-spacer {
-    grid-template-columns: 1fr;
-  }
-  .header-spacer::before,
-  .header-spacer::after {
-    display: none;
+    grid-template-columns: 1fr 2fr 1fr;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      width: 0;
+      pointer-events: none;
+    }
+    &::before {
+      left: 25%;
+      border-right: 1px solid var(--line);
+    }
+    &::after {
+      right: 25%;
+      border-left: 1px solid var(--line);
+    }
   }
 }
 
@@ -190,38 +194,20 @@
  */
 .intro-section {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 1fr;
   align-items: center;
   min-height: var(--row-min-h);
   border-bottom: 1px solid var(--line);
   position: relative;
-
-  /* Hairlines at 25% / 75% — continuous with .fw-section::before/after */
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    width: 0;
-    pointer-events: none;
-  }
-  &::before {
-    left: 25%;
-    border-right: 1px solid var(--line);
-  }
-  &::after {
-    right: 25%;
-    border-left: 1px solid var(--line);
-  }
 }
 
 .intro-section__inner {
-  grid-column: 2 / 3;
+  grid-column: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: clamp(16px, 3vh, 28px);
-  padding-inline: clamp(24px, 4vw, 48px);
+  padding-inline: var(--gut);
 }
 
 .intro-section__statement {
@@ -230,18 +216,35 @@
   margin-bottom: 1.5rem;
 }
 
-/* Mobile: single column, drop hairlines, full-bleed padding */
-@media (max-width: 899px) {
+/* Desktop threshold — kept in sync with lib/breakpoints.ts DESKTOP_BP (900)
+   and the sibling breakpoints at .header-spacer, .fw-section, .about-body/.about-cta.
+   @media not @container: grid-template-columns with fr units can't safely live
+   inside a @container query on the element that establishes that same container
+   (circular inline-size dependency) — see plans/004-container-query-migration.md. */
+@media (min-width: 900px) {
   .intro-section {
-    grid-template-columns: 1fr;
-  }
-  .intro-section::before,
-  .intro-section::after {
-    display: none;
+    grid-template-columns: 1fr 2fr 1fr;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      width: 0;
+      pointer-events: none;
+    }
+    &::before {
+      left: 25%;
+      border-right: 1px solid var(--line);
+    }
+    &::after {
+      right: 25%;
+      border-left: 1px solid var(--line);
+    }
   }
   .intro-section__inner {
-    grid-column: 1;
-    padding-inline: var(--gut);
+    grid-column: 2 / 3;
+    padding-inline: clamp(24px, 4vw, 48px);
   }
 }
 
@@ -269,13 +272,6 @@
   background: var(--surface);
   position: relative;
   isolation: isolate;
-
-  /*
-   * Dwell buffers — scroll into the section before the first row is
-   * visible; scroll past all rows before exiting. 20vh each gives a
-   * comfortable lead-in / lead-out without excessive page length.
-   */
-  padding-block: 20vh;
   /* max-width: var(--maxw);
   margin: 0 auto;
   border-left: 1px solid var(--line);
@@ -358,7 +354,22 @@
   opacity: 1;
 }
 
+/*
+ * Dwell buffers — scroll into the section before the first row is visible;
+ * scroll past all rows before exiting. 20vh each gives a comfortable
+ * lead-in/lead-out without excessive page length. Lives here (not on
+ * .fw-section's own padding-block) because a @container query cannot
+ * reliably restyle a box-model property on the same element that
+ * establishes the container — confirmed by isolated reproduction outside
+ * this codebase. .fw-row is a child of .fw-section, so it responds to the
+ * @container fw-section query correctly; .fw-section's own padding does
+ * not. See plans/014-fix-fw-section-self-container-query.md.
+ */
+.fw-row:first-child {
+  margin-block-start: 20vh;
+}
 .fw-row:last-child {
+  margin-block-end: 20vh;
   border-bottom: 1px solid var(--line);
 }
 
@@ -506,9 +517,14 @@
  * prefers-reduced-motion is a media query because it reflects a system
  * preference, not a layout context — the two are combined via @media.
  */
+/* Desktop threshold — kept in sync with lib/breakpoints.ts DESKTOP_BP (900)
+   and the sibling breakpoints at .header-spacer, .intro-section, .about-body/.about-cta. */
 @container fw-section (max-width: 899px) {
-  .fw-section {
-    padding-block: 0;
+  .fw-row:first-child {
+    margin-block-start: 10vh;
+  }
+  .fw-row:last-child {
+    margin-block-end: 10vh;
   }
 
   .fw-section::before,
@@ -567,18 +583,51 @@
   }
 }
 
+/*
+ * Reduced motion at desktop widths (≥900px, outside the mobile container
+ * query above): keep the grid intact — image stays in its alternating
+ * column, text stays in the centre column — just drop the fixed-viewport-
+ * overlay/clip-path wipe trick in favour of letting the text sit statically
+ * in its own grid cell. (At <900px the container query above already
+ * handles layout; this only needs to touch positioning/visibility.)
+ */
 @media (prefers-reduced-motion: reduce) {
+  .fw-clip-cell {
+    overflow: visible;
+    clip-path: none;
+  }
   .fw-text-fixed {
+    position: static;
+    /* .fw-clip-cell is a stretched grid item (matches .fw-media's height) —
+       height:100% lets this element's own flex centering (align-items/
+       justify-content: center, from the base rule) center its content
+       within that full row height instead of sitting flush at the top. */
+    height: 100%;
     opacity: 1 !important;
     visibility: visible !important;
     transform: none !important;
-    pointer-events: auto;
+    pointer-events: auto !important;
   }
-
   .fw-media__inner {
     clip-path: none !important;
     transform: none !important;
   }
+}
+html[data-motion="off"] .fw-clip-cell {
+  overflow: visible;
+  clip-path: none;
+}
+html[data-motion="off"] .fw-text-fixed {
+  position: static;
+  height: 100%;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  pointer-events: auto !important;
+}
+html[data-motion="off"] .fw-media__inner {
+  clip-path: none !important;
+  transform: none !important;
 }
 
 /* ── ABOUT LAYOUT ────────────────────────────────────────────────────────── */
@@ -596,39 +645,21 @@
  */
 .about-body {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 1fr;
   align-items: start;
   position: relative;
   border-bottom: 1px solid var(--line);
-
-  /* Column hairlines — continuous with header-spacer and home page grid */
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    width: 0;
-    pointer-events: none;
-  }
-  &::before {
-    left: 25%;
-    border-right: 1px solid var(--line);
-  }
-  &::after {
-    right: 25%;
-    border-left: 1px solid var(--line);
-  }
 }
 
 /* ── Left column — sticky portrait + actions below ── */
 .about-rail {
-  aspect-ratio: 9 / 16;
-  grid-column: 1 / 2;
+  grid-column: 1;
   grid-row: 1;
-  position: sticky;
-  padding: 0;
-  top: 116px;
-  min-height: var(--row-min-h);
+  padding: 1rem;
+  position: relative;
+  top: unset;
+  height: auto;
+  aspect-ratio: unset;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -639,16 +670,19 @@
   flex-wrap: wrap;
   gap: 8px;
   margin: 1rem 0;
-  padding: 1rem;
+  padding: 16px var(--gut) 0;
   flex-shrink: 0;
 }
 
 .about-portrait {
   position: relative;
   width: 100%;
-  flex: 1;
+  flex: none;
   min-height: 0;
   overflow: hidden;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  margin: 0;
 }
 .about-portrait__fallback {
   position: absolute;
@@ -688,8 +722,8 @@ html[data-theme="light"] .about-portrait__fallback {
 
 /* ── Centre column — scrolling content ── */
 .about-content {
-  grid-column: 2 / 3;
-  grid-row: 1;
+  grid-column: 1;
+  grid-row: 2;
   display: flex;
   flex-direction: column;
 }
@@ -763,89 +797,106 @@ html[data-theme="light"] .about-portrait__fallback {
   margin-top: 10px;
 }
 
-/* ── Full-width CTA row ── */
-.about-cta {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  width: 100%;
-  border-bottom: 1px solid var(--line);
-  position: relative;
+/* Desktop threshold — kept in sync with lib/breakpoints.ts DESKTOP_BP (900)
+   and the sibling breakpoints at .header-spacer, .intro-section, .fw-section.
+   @media not @container: grid-template-columns with fr units can't safely live
+   inside a @container query on the element that establishes that same container
+   (circular inline-size dependency) — see plans/004-container-query-migration.md. */
+@media (min-width: 900px) {
+  .about-body {
+    grid-template-columns: 1fr 2fr 1fr;
 
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    width: 0;
-    pointer-events: none;
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      width: 0;
+      pointer-events: none;
+    }
+    &::before {
+      left: 25%;
+      border-right: 1px solid var(--line);
+    }
+    &::after {
+      right: 25%;
+      border-left: 1px solid var(--line);
+    }
   }
-  &::before {
-    left: 25%;
-    border-right: 1px solid var(--line);
+
+  .about-content {
+    grid-column: 2 / 3;
+    grid-row: 1;
   }
-  &::after {
-    right: 25%;
-    border-left: 1px solid var(--line);
+
+  .about-rail {
+    aspect-ratio: 9 / 16;
+    grid-column: 1 / 2;
+    position: sticky;
+    padding: 0;
+    top: 116px;
+    min-height: var(--row-min-h);
+  }
+
+  .about-portrait {
+    flex: 1;
+    aspect-ratio: auto;
+  }
+
+  .about-rail__actions {
+    padding: 1rem;
   }
 }
 
+/* ── Full-width CTA row ── */
+.about-cta {
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 100%;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+
 .about-cta__inner {
-  grid-column: 2 / 3;
+  grid-column: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: clamp(20px, 3vh, 32px);
-  padding: clamp(48px, 7vh, 96px) clamp(24px, 4vw, 48px);
+  padding-block: clamp(48px, 7vh, 96px);
+  padding-inline: var(--gut);
 }
 
-@media (max-width: 899px) {
-  .about-body {
-    grid-template-columns: 1fr;
-  }
-  .about-body::before,
-  .about-body::after {
-    display: none;
-  }
-
-  /* Image first on mobile, then content */
-  .about-content {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .about-rail {
-    grid-column: 1;
-    grid-row: 1;
-    padding: 1rem;
-    position: relative;
-    top: unset;
-    height: auto;
-    aspect-ratio: unset;
-  }
-
-  .about-portrait {
-    height: auto;
-    aspect-ratio: 3 / 4;
-    flex: none;
-    /* No padding — matches FeatureWipe mobile images, edge-to-edge */
-    margin: 0;
-  }
-
-  .about-rail__actions {
-    padding: 16px var(--gut) 0;
-  }
-
+/* Desktop threshold — kept in sync with lib/breakpoints.ts DESKTOP_BP (900)
+   and the sibling breakpoints at .header-spacer, .intro-section, .fw-section, .about-body.
+   @media not @container: grid-template-columns with fr units can't safely live
+   inside a @container query on the element that establishes that same container
+   (circular inline-size dependency) — see plans/004-container-query-migration.md. */
+@media (min-width: 900px) {
   .about-cta {
-    grid-template-columns: 1fr;
-  }
-  .about-cta::before,
-  .about-cta::after {
-    display: none;
+    grid-template-columns: 1fr 2fr 1fr;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      width: 0;
+      pointer-events: none;
+    }
+    &::before {
+      left: 25%;
+      border-right: 1px solid var(--line);
+    }
+    &::after {
+      right: 25%;
+      border-left: 1px solid var(--line);
+    }
   }
 
   .about-cta__inner {
-    grid-column: 1;
-    padding-inline: var(--gut);
+    grid-column: 2 / 3;
+    padding-inline: clamp(24px, 4vw, 48px);
   }
 }
 
@@ -899,38 +950,45 @@ html[data-theme="light"] .about-portrait__fallback {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
-  padding: 40px var(--gut) clamp(40px, 6vh, 72px);
-  /* max-width: var(--maxw);
-  margin: 0 auto; */
+  padding: 0 var(--gut) clamp(40px, 6vh, 72px);
   will-change: filter;
 }
-.menu-overlay__nav {
-  flex: 1;
+/* Header band — sits at the same height as the fixed Topbar above it (which
+   owns the wordmark + close control), so the nav links read as part of one
+   continuous header row even though they're two different fixed layers. */
+.menu-overlay__header {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: clamp(8px, 2vh, 16px);
-  padding: clamp(40px, 6vh, 80px) 0;
+  min-height: var(--topbar-h);
+  flex-shrink: 0;
+}
+.menu-overlay__nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
 }
 .menu-overlay__link {
-  align-self: start;
-  font-size: clamp(48px, 8vw, 96px);
-  font-weight: var(--fw-light);
-  letter-spacing: var(--track-tight);
-  line-height: 1.05;
-  color: var(--ink);
+  font-size: 15px;
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-snug);
+  color: var(--ink-muted);
   text-decoration: none;
-  display: block;
+  display: inline-block;
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(8px);
   transition: color 0.2s var(--ease);
 }
 .menu-overlay__link:hover {
-  color: var(--water);
+  color: var(--ink);
 }
 .menu-overlay__link:focus-visible {
   outline: 2px solid var(--focus-ring);
-  outline-offset: 8px;
+  outline-offset: 4px;
+}
+/* Reserved for the case-study filmstrip/preview — empty for now. */
+.menu-overlay__content {
+  flex: 1;
 }
 .menu-overlay__bottom {
   display: flex;
@@ -941,16 +999,24 @@ html[data-theme="light"] .about-portrait__fallback {
   flex-shrink: 0;
   opacity: 0;
 }
+.menu-overlay__settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.menu-overlay__settings-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-faint);
+  font-size: var(--text-eyebrow);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-wide);
+}
 .menu-overlay__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-}
-
-/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
-@media (min-width: 1800px) {
-  .menu-overlay__surface {
-    padding: var(--gut) 0 clamp(48px, 4vw, 96px);
-  }
 }

@@ -146,8 +146,14 @@ function run(el: HTMLElement, parts: RippleParts, cx: number, cy: number, opts: 
   requestAnimationFrame(frame);
 }
 
-/** True if the user has asked the OS for reduced motion. */
+/** True if motion should be reduced — the in-app data-motion override
+ *  (see lib/motion-pref.ts) takes priority over the OS-level media query. */
 export function prefersReducedMotion(): boolean {
+  if (typeof document !== "undefined") {
+    const explicit = document.documentElement.getAttribute("data-motion");
+    if (explicit === "off") return true;
+    if (explicit === "on") return false;
+  }
   if (typeof window === "undefined") return false;
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 }

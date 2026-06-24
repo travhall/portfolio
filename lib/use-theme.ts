@@ -19,11 +19,11 @@ function resolveTheme(): Theme {
 }
 
 export function useTheme(): Theme {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>(() =>
+    typeof document === "undefined" ? "light" : resolveTheme()
+  );
 
   useEffect(() => {
-    setTheme(resolveTheme());
-
     const observer = new MutationObserver(() => setTheme(resolveTheme()));
     observer.observe(document.documentElement, {
       attributes: true,

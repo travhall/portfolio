@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { SunMoonIcon, type SunMoonHandle } from "./SunMoonIcon";
 import { triggerRipple, prefersReducedMotion } from "./ripple";
+import { useTogglePillAnimation } from "./useTogglePillAnimation";
 
 const RIPPLE_THEME = { strength: 7, size: 60, duration: 500 };
 
@@ -36,13 +37,13 @@ function applyTheme(mode: Theme) {
 interface Props { className?: string; }
 
 export function ThemeToggle({ className = "" }: Props) {
-  const [theme, setTheme]     = useState<Theme>("light");
-  const [animDir, setAnimDir] = useState<"in" | "out" | null>(null);
-  const labelRef  = useRef<HTMLSpanElement>(null);
-  const iconRef   = useRef<SunMoonHandle>(null);
+  const [theme, setTheme] = useState<Theme>(() =>
+    typeof document === "undefined" ? "light" : readTheme()
+  );
+  const { animDir, labelRef, runToggle } = useTogglePillAnimation();
+  const iconRef = useRef<SunMoonHandle>(null);
 
   useEffect(() => {
-    setTheme(readTheme());
     const observer = new MutationObserver(() => setTheme(readTheme()));
     observer.observe(document.documentElement, {
       attributes: true,
@@ -63,18 +64,10 @@ export function ThemeToggle({ className = "" }: Props) {
     // Fire icon morph immediately — runs from current DOM state
     if (!reduced) iconRef.current?.animate(next === "dark");
 
-    if (!reduced && labelRef.current) {
-      setAnimDir("out");
-      setTimeout(() => {
-        setTheme(next);
-        applyTheme(next);
-        setAnimDir("in");
-        setTimeout(() => setAnimDir(null), 280);
-      }, 160);
-    } else {
+    runToggle(reduced, () => {
       setTheme(next);
       applyTheme(next);
-    }
+    });
 
     if (!reduced) triggerRipple(e.currentTarget, e, RIPPLE_THEME);
   }
@@ -82,7 +75,7 @@ export function ThemeToggle({ className = "" }: Props) {
   return (
     <button
       type="button"
-      className={`theme-toggle ${className}`.trim()}
+      className={`toggle-pill ${className}`.trim()}
       onClick={toggle}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
       aria-pressed={theme === "dark"}
@@ -91,7 +84,7 @@ export function ThemeToggle({ className = "" }: Props) {
       <span
         ref={labelRef}
         className={[
-          "theme-toggle__label",
+          "toggle-pill__label",
           animDir === "out" ? "is-exiting" : "",
           animDir === "in"  ? "is-entering" : "",
         ].filter(Boolean).join(" ")}

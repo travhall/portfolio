@@ -451,6 +451,14 @@
     animation-duration: 0.01s;
   }
 }
+html[data-motion="off"] .btn,
+html[data-motion="off"] .btn__icon,
+html[data-motion="off"] .tag__x {
+  transition: none;
+}
+html[data-motion="off"] .tag--leaving {
+  animation-duration: 0.01s;
+}
 
 /* ── SPLITTEXT LINE MASK ─────────────────────────────────────────────────── */
 /*
@@ -485,18 +493,18 @@
   overflow: visible;
 }
 
-/* ── THEME TOGGLE ────────────────────────────────────────────────────────── */
+/* ── TOGGLE PILL ──────────────────────────────────────────────────────────── */
 /*
- * Single ghost button — sparkle icon + text label ("Light" / "Dark").
- * Matches the topbar menu toggle in height, gap, and type register.
- * The label clips to a fixed width so the button doesn't shift size
- * between "Light" (5ch) and "Dark" (4ch).
+ * Single ghost button — icon + text label, two states. Shared by ThemeToggle
+ * ("Light" / "Dark") and MotionToggle ("Motion On" / "Motion Off"). Matches
+ * the topbar menu toggle in height, gap, and type register. The label clips
+ * to a fixed min-width so the button doesn't shift size between states.
  *
  * Label animation: on toggle the current label slides up and fades (is-exiting),
  * then the new label slides up from below and fades in (is-entering).
- * overflow:hidden on .theme-toggle__label clips the travel.
+ * overflow:hidden on .toggle-pill__label clips the travel.
  */
-.theme-toggle {
+.toggle-pill {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -510,32 +518,30 @@
   font-size: var(--text-eyebrow);
   font-weight: var(--fw-medium);
   letter-spacing: var(--track-wide);
-  /* text-transform: uppercase; */
-  /* line-height: 1; */
   transition:
     color var(--btn-dur) var(--ease),
     border-color var(--btn-dur) var(--ease),
     background var(--btn-dur) var(--ease);
 }
-.theme-toggle:hover {
+.toggle-pill:hover {
   color: var(--ink);
   border-color: var(--ink);
 }
-.theme-toggle:focus-visible {
+.toggle-pill:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.theme-toggle__icon {
+.toggle-pill__icon {
   flex: none;
   transition: opacity var(--btn-dur) var(--ease);
 }
-.theme-toggle:hover .theme-toggle__icon {
+.toggle-pill:hover .toggle-pill__icon {
   opacity: 1;
 }
 
-.theme-toggle__label {
-  /* Fixed width prevents button resizing between "Light" and "Dark" */
+.toggle-pill__label {
+  /* Fixed width prevents button resizing between states */
   display: inline-block;
   min-width: 3.2ch;
   overflow: hidden;
@@ -544,21 +550,25 @@
   line-height: 1.25em;
   vertical-align: middle;
 }
-
-.theme-toggle__label.is-exiting {
-  animation: theme-label-out 0.16s var(--ease) forwards;
-}
-.theme-toggle__label.is-entering {
-  animation: theme-label-in 0.28s var(--ease) forwards;
+/* MotionToggle's label is wider ("Motion Off") — let it claim more room */
+.toggle-pill__label--wide {
+  min-width: 6.4ch;
 }
 
-@keyframes theme-label-out {
+.toggle-pill__label.is-exiting {
+  animation: toggle-label-out 0.16s var(--ease) forwards;
+}
+.toggle-pill__label.is-entering {
+  animation: toggle-label-in 0.28s var(--ease) forwards;
+}
+
+@keyframes toggle-label-out {
   to {
     opacity: 0;
     transform: translateY(-60%);
   }
 }
-@keyframes theme-label-in {
+@keyframes toggle-label-in {
   from {
     opacity: 0;
     transform: translateY(60%);
@@ -570,10 +580,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .theme-toggle__label.is-exiting,
-  .theme-toggle__label.is-entering {
+  .toggle-pill__label.is-exiting,
+  .toggle-pill__label.is-entering {
     animation: none;
   }
+}
+html[data-motion="off"] .toggle-pill__label.is-exiting,
+html[data-motion="off"] .toggle-pill__label.is-entering {
+  animation: none;
 }
 
 /* ── EMAIL ACTION ────────────────────────────────────────────────────────── */
@@ -676,4 +690,7 @@
   .email-action__panel {
     animation: none;
   }
+}
+html[data-motion="off"] .email-action__panel {
+  animation: none;
 }

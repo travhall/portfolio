@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
 import { Icon, ICON_NAMES } from "@/components/ui/Icon";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { MotionToggle } from "@/components/ui/MotionToggle";
 import { ContrastSwatch } from "./ContrastSwatch";
 import "./kit.css";
 
@@ -124,12 +125,16 @@ export default function KitPage() {
             <p className="type-eyebrow text-ink-muted">Internal · unlinked</p>
             <h1 className="type-display text-ink kit-header__title">Style guide</h1>
           </div>
-          <ThemeToggle />
+          <div className="kit-row kit-row--tight">
+            <ThemeToggle />
+            <MotionToggle />
+          </div>
         </div>
         <p className="type-lead text-ink-muted kit-header__lead">
           The living source of truth for the portfolio&apos;s design system — tokens and
           components as they actually exist in the codebase. Not part of the public site.
-          Use the theme toggle above to audit every pairing in both light and dark.
+          Use the toggles above to audit every pairing in both light and dark, and to
+          preview the reduced-motion state.
         </p>
       </header>
 

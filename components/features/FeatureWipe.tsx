@@ -2,8 +2,6 @@
 
 /**
  * FeatureWipe — USP section scroll mechanic with clip-path wipe effects.
- * Faithful re-engineering of the godaylight.com feature section. cSpell:ignore godaylight
- *
  * Key mechanic:
  *   - The <section> has large top + bottom padding acting as scroll dwell buffers.
  *   - Rows are stacked naturally with grid layout (NOT 100vh).
@@ -31,6 +29,8 @@ import { MediaGL } from "@/lib/media-gl";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { useTheme } from "@/lib/use-theme";
+import { useMotionPref } from "@/lib/motion-pref";
+import { DESKTOP_BP } from "@/lib/breakpoints";
 import type { CaseStudy } from "@/lib/case-studies";
 import {
   MagneticDots,
@@ -53,12 +53,6 @@ function imageFor(f: CaseStudy, theme: "light" | "dark") {
 function brandColorFor(f: CaseStudy, theme: "light" | "dark") {
   if (theme === "dark") return f.brandDark ?? f.brandLight;
   return f.brandLight;
-}
-
-function revealImageFor(f: CaseStudy, theme: "light" | "dark") {
-  return theme === "dark" && f.revealImageDark
-    ? f.revealImageDark
-    : f.revealImage;
 }
 
 // Resolves any CSS color (oklch(), var(--token), etc.) to 0–1 RGB by letting
@@ -88,6 +82,7 @@ interface Props {
 export function FeatureWipe({ features, id }: Props) {
   const lenis = useLenis();
   const theme = useTheme();
+  const motionPref = useMotionPref();
   const sectionRef = useRef<HTMLElement>(null);
   const bandRefs = useRef<(HTMLDivElement | null)[]>([]);
   const textRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -105,22 +100,27 @@ export function FeatureWipe({ features, id }: Props) {
   const centersRef = useRef<number[]>([]);
   const mainTriggerRef = useRef<ScrollTrigger | null>(null);
 
-  // Keep arrays matching current features length
-  bandRefs.current = bandRefs.current.slice(0, features.length);
-  textRefs.current = textRefs.current.slice(0, features.length);
-  mediaRefs.current = mediaRefs.current.slice(0, features.length);
-  canvasRefs.current = canvasRefs.current.slice(0, features.length);
-  dotsCanvasRefs.current = dotsCanvasRefs.current.slice(0, features.length);
-  headlineRefs.current = headlineRefs.current.slice(0, features.length);
-  glInstancesRef.current = glInstancesRef.current.slice(0, features.length);
-  dotsInstancesRef.current = dotsInstancesRef.current.slice(0, features.length);
-
   useLayoutEffect(() => {
+    // Keep arrays matching current features length (trimmed here, not during
+    // render, to satisfy react-hooks/refs)
+    bandRefs.current = bandRefs.current.slice(0, features.length);
+    textRefs.current = textRefs.current.slice(0, features.length);
+    mediaRefs.current = mediaRefs.current.slice(0, features.length);
+    canvasRefs.current = canvasRefs.current.slice(0, features.length);
+    dotsCanvasRefs.current = dotsCanvasRefs.current.slice(0, features.length);
+    headlineRefs.current = headlineRefs.current.slice(0, features.length);
+    glInstancesRef.current = glInstancesRef.current.slice(0, features.length);
+    dotsInstancesRef.current = dotsInstancesRef.current.slice(
+      0,
+      features.length,
+    );
+
     let ctx: gsap.Context;
     let splits: SplitText[] = [];
     let perFeatureChars: Element[][] = [];
     let glTriggers: ReturnType<typeof ScrollTrigger.create>[] = [];
     let currentWidth = window.innerWidth;
+    const reduced = motionPref === "off";
 
     // ── GL lifecycle ────────────────────────────────────────────────────────
     // Dispose all existing GL instances (called before re-init and on unmount)
@@ -252,7 +252,20 @@ export function FeatureWipe({ features, id }: Props) {
       splits = [];
       perFeatureChars = [];
 
-      const isDesktop = window.innerWidth >= 900;
+      if (reduced) {
+        // No parallax/halftone canvases and no scroll-driven cascade — CSS
+        // (layout.css, the reduced-motion + data-motion="off" blocks)
+        // collapses every row to the same static stacked layout used on
+        // mobile, regardless of width. Plain <img> fallback (already in
+        // the DOM) stands in for the GL canvas since it's never created.
+        disposeGL();
+        disposeDots();
+        centersRef.current = [];
+        mainTriggerRef.current = null;
+        return;
+      }
+
+      const isDesktop = window.innerWidth >= DESKTOP_BP;
 
       // Always init GL regardless of breakpoint — images show on mobile too
       initGL();
@@ -476,7 +489,7 @@ export function FeatureWipe({ features, id }: Props) {
       disposeGL();
       disposeDots();
     };
-  }, [features, theme]);
+  }, [features, theme, motionPref]);
 
   return (
     <section ref={sectionRef} className="fw-section" id={id}>
@@ -599,7 +612,9 @@ export function FeatureWipe({ features, id }: Props) {
               >
                 {/* Plain <img> fallback — visible until the GL canvas
                   reports ready (onReady above), and the only thing
-                  that renders at all with JS/WebGL unavailable. */}
+                  that renders at all with JS/WebGL unavailable.
+                  eslint-disable-next-line @next/next/no-img-element */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imageFor(f, theme)} alt={f.imageAlt ?? ""} />
                 <canvas
                   ref={(el) => {

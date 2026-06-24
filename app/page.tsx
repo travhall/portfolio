@@ -32,7 +32,7 @@ export default function HomePage() {
       {/* ── Work ──────────────────────────────────────────────────────────
           Scroll-driven project feature section.
       ──────────────────────────────────────────────────────────────────── */}
-      <FeatureWipe id="work" features={caseStudies} />
+      <FeatureWipe id="work" features={caseStudies.filter((s) => s.featured)} />
     </main>
   );
 }

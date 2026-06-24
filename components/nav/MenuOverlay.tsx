@@ -4,8 +4,8 @@
  * MenuOverlay — full-screen glass takeover with a fade + settle animation.
  *
  * Open  — The overlay fades and scales in while its content layer eases from
- *         blurred to sharp — like glass settling into place. Nav links
- *         stagger in while it's still settling. At the same time, a
+ *         blurred to sharp — like glass settling into place. The header nav
+ *         links fade in while it's still settling. At the same time, a
  *         water-ripple (the same SVG displacement technique used on buttons)
  *         radiates across the whole pane — background, blur and all — from
  *         the toggle button's click point, as if the button's tap dropped
@@ -14,14 +14,20 @@
  * Close — Nav links exit first, then the overlay fades/blurs back out, with
  *         a quicker ripple pulse from the same origin.
  *
- * Theme toggle — cycles auto → dark → light, writes a data-theme attribute on
- *                <html> so the CSS [data-theme] overrides take effect instantly.
+ * Layout — a slim header band (nav links, aligned to the same row the fixed
+ *          Topbar's wordmark/close occupy above it) sits over an empty
+ *          content area reserved for the case-study filmstrip (not designed
+ *          yet), with the settings + social row pinned to the bottom.
+ *
+ * Theme/motion toggles — write data-theme / data-motion attributes on <html>
+ *                so the CSS [data-theme]/[data-motion] overrides take effect
+ *                instantly (see lib/motion-pref.ts for the motion override).
  *
  * Focus — the overlay is `inert` while closed (removes its links from the tab
  *         order and the a11y tree). On open, focus moves to the first nav
  *         link and Tab/Shift+Tab is trapped within the overlay's links and
- *         theme toggle. The Topbar's menu button is the only open/close
- *         control and remains visible above the overlay throughout. cSpell:ignore Topbar
+ *         controls. The Topbar's menu button is the only open/close control
+ *         and remains visible above the overlay throughout. cSpell:ignore Topbar
  */
 
 import { useEffect, useRef, type RefObject } from "react";
@@ -30,7 +36,9 @@ import { Link, useTransitionRouter } from "next-view-transitions";
 import { gsap } from "gsap";
 import { Button } from "@/components/ui/Button";
 import { EmailButton } from "@/components/ui/EmailButton";
+import { Icon } from "@/components/ui/Icon";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { MotionToggle } from "@/components/ui/MotionToggle";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { prefersReducedMotion, triggerRipple } from "@/components/ui/ripple";
 import { siteConfig } from "@/lib/site-config";
@@ -43,9 +51,8 @@ interface Props {
 }
 
 const NAV_LINKS = [
-  { label: "Work", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: `mailto:${siteConfig.email}` },
+  { label: "All Work", href: "/work" },
+  { label: "About Me", href: "/about" },
 ];
 
 // Same water-ripple technique as buttons (components/ui/ripple.ts), scaled
@@ -91,6 +98,14 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
     // lenis.start() — leaving scrolling permanently stopped.
     lenis?.start();
 
+    // Reduced motion (OS setting or the in-app Motion toggle, see
+    // lib/motion-pref.ts) collapses every tween below to near-zero duration
+    // instead of skipping the timeline outright — end states (opacity,
+    // scale, blur, pointer-events) still need to land correctly, just
+    // without the animated transition between them.
+    const reduced = prefersReducedMotion();
+    const d = (seconds: number) => (reduced ? 0.01 : seconds);
+
     if (isOpen) {
       lenis?.stop();
 
@@ -107,12 +122,12 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
         pointerEvents: "auto",
       });
       gsap.set(surfaceRef.current, { filter: "blur(12px)" });
-      gsap.set([...linksRef.current, bottomRef.current], { opacity: 0, y: 18 });
+      gsap.set([...linksRef.current, bottomRef.current], { opacity: 0, y: 8 });
 
       tl.to(overlay, {
         opacity: 1,
         scale: 1,
-        duration: 0.6,
+        duration: d(0.6),
         ease: "power3.out",
       });
 
@@ -120,7 +135,7 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
         surfaceRef.current,
         {
           filter: "blur(0px)",
-          duration: 0.6,
+          duration: d(0.6),
           ease: "power3.out",
         },
         "<",
@@ -132,11 +147,11 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
         {
           opacity: 1,
           y: 0,
-          duration: 0.5,
+          duration: d(0.5),
           ease: "power3.out",
-          stagger: 0.09,
+          stagger: reduced ? 0 : 0.09,
         },
-        "-=0.4",
+        reduced ? "<" : "-=0.4",
       );
 
       tl.to(
@@ -144,15 +159,17 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
         {
           opacity: 1,
           y: 0,
-          duration: 0.4,
+          duration: d(0.4),
           ease: "power2.out",
         },
-        "-=0.3",
+        reduced ? "<" : "-=0.3",
       );
 
       // Ripple the whole pane — background, blur, and content together —
-      // from the toggle button's click point.
-      if (!prefersReducedMotion()) {
+      // from the toggle button's click point. triggerRipple already
+      // no-ops under reduced motion, but skip the call entirely so it
+      // doesn't even queue a single frame.
+      if (!reduced) {
         const { x, y } = originRef.current;
         triggerRipple(overlay, { clientX: x, clientY: y }, RIPPLE_MENU_OPEN);
       }
@@ -180,9 +197,9 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
       tl.to([...linksRef.current, bottomRef.current], {
         opacity: 0,
         y: -8,
-        duration: 0.15,
+        duration: d(0.15),
         ease: "power2.in",
-        stagger: { each: 0.04, from: "end" },
+        stagger: reduced ? 0 : { each: 0.04, from: "end" },
       });
 
       tl.to(
@@ -190,28 +207,28 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
         {
           opacity: 0,
           scale: 1.02,
-          duration: 0.4,
+          duration: d(0.4),
           ease: "power2.in",
         },
-        "-=0.05",
+        reduced ? "<" : "-=0.05",
       );
 
       tl.to(
         surfaceRef.current,
         {
           filter: "blur(8px)",
-          duration: 0.4,
+          duration: d(0.4),
           ease: "power2.in",
         },
         "<",
       );
 
-      if (!prefersReducedMotion()) {
+      if (!reduced) {
         const { x, y } = originRef.current;
         triggerRipple(overlay, { clientX: x, clientY: y }, RIPPLE_MENU_CLOSE);
       }
     }
-  }, [isOpen, lenis]);
+  }, [isOpen, lenis, originRef]);
 
   // ── Focus management ────────────────────────────────────────────────────
   //
@@ -263,49 +280,62 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
       inert={!isOpen}
     >
       <div ref={surfaceRef} className="menu-overlay__surface">
-        {/* Navigation links */}
-        <nav className="menu-overlay__nav" aria-label="Primary navigation">
-          {NAV_LINKS.map(({ label, href }, i) => (
-            <Link
-              key={label}
-              href={href}
-              className="menu-overlay__link"
-              ref={(el) => {
-                if (el) linksRef.current[i] = el;
-              }}
-              onClick={(e) => {
-                e.preventDefault();
+        {/* Header band — aligned to the same row the fixed Topbar's
+            wordmark/close occupy above it (see .menu-overlay__header). */}
+        <div className="menu-overlay__header">
+          <nav className="menu-overlay__nav" aria-label="Primary navigation">
+            {NAV_LINKS.map(({ label, href }, i) => (
+              <Link
+                key={label}
+                href={href}
+                className="menu-overlay__link"
+                ref={(el) => {
+                  if (el) linksRef.current[i] = el;
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
 
-                // Ripple on the link itself, plus the surface-wide close
-                // ripple radiating from the same point.
-                if (!prefersReducedMotion()) {
-                  triggerRipple(e.currentTarget, e, RIPPLE_LINK);
-                }
-                originRef.current = { x: e.clientX, y: e.clientY };
+                  // Ripple on the link itself, plus the surface-wide close
+                  // ripple radiating from the same point.
+                  if (!prefersReducedMotion()) {
+                    triggerRipple(e.currentTarget, e, RIPPLE_LINK);
+                  }
+                  originRef.current = { x: e.clientX, y: e.clientY };
 
-                if (href.startsWith("mailto:") || href.startsWith("http")) {
-                  // Wait for the close animation to finish before leaving
-                  // the SPA — see pendingHrefRef and onComplete above.
-                  pendingHrefRef.current = href;
-                } else if (href !== pathname) {
-                  // Navigate immediately — the still-opaque overlay covers
-                  // the page swap as it plays its own close animation, so
-                  // the old page is never revealed underneath.
-                  router.push(href);
-                }
-                // else: already on this page — just close the menu, no
-                // route transition/fade for a same-page "navigation".
-                onClose();
-              }}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+                  if (href.startsWith("mailto:") || href.startsWith("http")) {
+                    // Wait for the close animation to finish before leaving
+                    // the SPA — see pendingHrefRef and onComplete above.
+                    pendingHrefRef.current = href;
+                  } else if (href !== pathname) {
+                    // Navigate immediately — the still-opaque overlay covers
+                    // the page swap as it plays its own close animation, so
+                    // the old page is never revealed underneath.
+                    router.push(href);
+                  }
+                  // else: already on this page — just close the menu, no
+                  // route transition/fade for a same-page "navigation".
+                  onClose();
+                }}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-        {/* Bottom row — theme toggle + quick links */}
+        {/* Reserved for the case-study filmstrip/preview — empty for now. */}
+        <div className="menu-overlay__content" aria-hidden="true" />
+
+        {/* Bottom row — settings (theme/motion) + social links */}
         <div ref={bottomRef} className="menu-overlay__bottom">
-          <ThemeToggle />
+          <div className="menu-overlay__settings">
+            <span className="menu-overlay__settings-label">
+              <Icon name="settings" size={14} />
+              Settings
+            </span>
+            <ThemeToggle />
+            <MotionToggle />
+          </div>
           <div className="menu-overlay__actions">
             <Button
               variant="ghost"
@@ -321,15 +351,6 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
               href={siteConfig.links.linkedin}
               onClick={onClose}
             />
-            <Button
-              variant="ghost"
-              icon="download"
-              iconPos="right"
-              href={siteConfig.cv}
-              onClick={onClose}
-            >
-              Download CV
-            </Button>
             <EmailButton variant="ghost" iconOnly="mail" aria-label="Email" />
           </div>
         </div>

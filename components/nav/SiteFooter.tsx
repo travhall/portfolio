@@ -10,15 +10,11 @@
  * long page. cSpell:ignore topbar
  */
 
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { EmailButton } from "@/components/ui/EmailButton";
-import { useLenis } from "@/components/providers/SmoothScroll";
 import { siteConfig } from "@/lib/site-config";
 
 export function SiteFooter() {
-  const pathname = usePathname();
-  const lenis = useLenis();
   const year = new Date().getFullYear();
 
   return (

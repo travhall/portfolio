@@ -348,7 +348,6 @@ export class MediaGL {
   private _renderOnce() {
     if (!this.ready || this.disposed) return;
     const gl  = this.gl;
-    const dpr = Math.min(window.devicePixelRatio ?? 1, 2);
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(this.prog);
@@ -452,7 +451,7 @@ export class MediaGL {
 
   // ── Cleanup ────────────────────────────────────────────────────────────────
 
-  dispose(_keepContext = false) {
+  dispose(_keepContext = false): void {
     this.disposed = true;
     this.stop();
     window.removeEventListener('scroll', this._boundScroll);
@@ -461,16 +460,6 @@ export class MediaGL {
     this.resizeObserver = null;
     // Do not call loseContext — it permanently breaks the canvas element for
     // React remounts (StrictMode or navigation). The GPU resources are freed
-    // when the canvas is removed from the DOM.
   }
 }
 
-// ─── Utility ─────────────────────────────────────────────────────────────────
-
-export function getHeroSrc(lightSrc: string, darkSrc: string): string {
-  if (typeof window === 'undefined') return lightSrc;
-  const forced = document.documentElement.getAttribute('data-theme');
-  if (forced === 'dark')  return darkSrc;
-  if (forced === 'light') return lightSrc;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? darkSrc : lightSrc;
-}

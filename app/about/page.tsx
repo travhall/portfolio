@@ -50,7 +50,7 @@ export default function AboutPage() {
         <div className="about-content">
           <div className="about-bio">
             <h1 className="type-h1 text-ink">
-              Hi, I'm Travis & I make things people use.
+            Hi, I&apos;m Travis &amp; I make things people use.
             </h1>
 
             <p className="type-lead text-ink">
@@ -59,7 +59,7 @@ export default function AboutPage() {
               eCommerce platform along the way. MFA, if that matters to you.
             </p>
             <p className="type-body text-ink-muted">
-              The short version: I've built the systems, led the teams, and
+              The short version: I&apos;ve built the systems, led the teams, and
               written the production code. Sometimes all three on the same
               project.
             </p>

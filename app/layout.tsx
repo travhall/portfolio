@@ -69,14 +69,15 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {/*
-          Anti-FOUC: restore the saved theme before the first paint.
-          Runs synchronously so there is zero flash between SSR and hydration.
-          The ThemeToggle reads data-theme on mount and will already be in sync.
+          Anti-FOUC: restore the saved theme + motion preference before the
+          first paint. Runs synchronously so there is zero flash between SSR
+          and hydration. ThemeToggle/MotionToggle read these attributes on
+          mount and will already be in sync.
         */}
         <head>
           <script
             dangerouslySetInnerHTML={{
-              __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`,
+              __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}var m=localStorage.getItem('motion');if(m==='on'||m==='off'){document.documentElement.setAttribute('data-motion',m);}}catch(e){}})();`,
             }}
           />
           <script

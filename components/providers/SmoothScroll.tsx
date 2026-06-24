@@ -16,6 +16,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -35,6 +36,11 @@ export function useLenis(): Lenis | null {
 }
 
 export function SmoothScroll({ children }: { children: ReactNode }) {
+  // Stored in a ref to avoid triggering a re-render on mount, and to
+  // sidestep the react-hooks/set-state-in-effect rule (Lenis is an external
+  // system — not React state). We still need the context value to update
+  // synchronously so a separate useState drives the Provider value.
+  const lenisRef = useRef<Lenis | null>(null);
   const [lenis, setLenis] = useState<Lenis | null>(null);
   const pathname = usePathname();
 
@@ -47,13 +53,14 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   // limit on the page you land on next. Re-sync explicitly on every
   // pathname change, after the new route's content has painted.
   useEffect(() => {
-    if (!lenis) return;
+    const instance = lenisRef.current;
+    if (!instance) return;
     const id = requestAnimationFrame(() => {
-      lenis.resize();
+      instance.resize();
       ScrollTrigger.refresh();
     });
     return () => cancelAnimationFrame(id);
-  }, [lenis, pathname]);
+  }, [pathname]);
 
   useEffect(() => {
     // Custom inertial scrolling is a motion effect, not just a convenience —
@@ -68,6 +75,9 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       smoothWheel: true,
     });
 
+    lenisRef.current = instance;
+    // Update state so the context value propagates to children.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLenis(instance);
 
     instance.on('scroll', ScrollTrigger.update);
@@ -99,6 +109,8 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       window.removeEventListener('load', handleLoad);
       gsap.ticker.remove(tick);
       instance.destroy();
+      lenisRef.current = null;
+      setLenis(null);
     };
   }, []);
 
