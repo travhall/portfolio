@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/Button";
 import { MediaGL } from "@/lib/media-gl";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { useLenis } from "@/components/providers/SmoothScroll";
-import { useTheme } from "@/lib/use-theme";
+import { useTheme, resolveTheme } from "@/lib/use-theme";
 import { useMotionPref } from "@/lib/motion-pref";
 import { DESKTOP_BP } from "@/lib/breakpoints";
 import type { CaseStudy } from "@/lib/case-studies";
@@ -391,7 +391,10 @@ export function FeatureWipe({ features, id }: Props) {
       const f = features[i];
       const canvas = canvasRefs.current[i];
       const rowEl = bandRefs.current[i];
-      const src = imageFor(f, theme);
+      // resolveTheme() (direct DOM read), not the theme closure value — see
+      // its comment in lib/use-theme.ts for why the latter can lag by one
+      // render on first mount and flash the wrong photo into the texture.
+      const src = imageFor(f, resolveTheme());
       if (!canvas || !src || !rowEl) return;
 
       const gl = new MediaGL(canvas, {
@@ -449,10 +452,13 @@ export function FeatureWipe({ features, id }: Props) {
       const f = features[i];
       const canvas = dotsCanvasRefs.current[i];
       const rowEl = bandRefs.current[i];
-      const src = imageFor(f, theme);
+      // resolveTheme(), not the theme closure value — same reasoning as
+      // initRowGL above.
+      const rowTheme = resolveTheme();
+      const src = imageFor(f, rowTheme);
       if (!canvas || !rowEl || !src) return;
 
-      const inkColor = cssColorToRgb(brandColorFor(f, theme) ?? inkFallback);
+      const inkColor = cssColorToRgb(brandColorFor(f, rowTheme) ?? inkFallback);
       const dots = new MagneticDots(canvas, { src, inkColor, paperColor });
       dotsInstancesRef.current[i] = dots;
 
@@ -662,10 +668,27 @@ export function FeatureWipe({ features, id }: Props) {
               >
                 {/* Plain <img> fallback — visible until the GL canvas
                   reports ready (onReady above), and the only thing
-                  that renders at all with JS/WebGL unavailable.
+                  that renders at all with JS/WebGL unavailable. Both
+                  light/dark variants are always rendered; layout.css picks
+                  the right one via [data-theme]/prefers-color-scheme — a
+                  pure CSS toggle, not React state, so there's nothing to
+                  flash on first paint (see lib/use-theme.ts's resolveTheme
+                  comment for why the JS-driven equivalent can).
                   eslint-disable-next-line @next/next/no-img-element */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imageFor(f, theme)} alt={f.imageAlt ?? ""} />
+                <img
+                  src={f.image}
+                  alt={f.imageAlt ?? ""}
+                  className="fw-img--light"
+                />
+                {f.imageDark && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={f.imageDark}
+                    alt={f.imageAlt ?? ""}
+                    className="fw-img--dark"
+                  />
+                )}
                 <canvas
                   ref={(el) => {
                     canvasRefs.current[i] = el;

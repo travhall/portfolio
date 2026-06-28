@@ -11,7 +11,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { MediaGL } from "@/lib/media-gl";
-import { useTheme } from "@/lib/use-theme";
+import { useTheme, resolveTheme } from "@/lib/use-theme";
 import { useMotionPref } from "@/lib/motion-pref";
 
 const SRC_LIGHT = "/images/about-img-light.jpg";
@@ -29,8 +29,13 @@ export function AboutPortrait() {
     const canvas = canvasRef.current;
     if (!media || !canvas || motionPref === "off") return;
 
+    // Use resolveTheme() (direct DOM read), not the theme closure value —
+    // on the very first mount the latter can still be "light" for one
+    // render even when the saved preference is dark (see resolveTheme's
+    // comment in lib/use-theme.ts). `theme` stays in the deps below so this
+    // effect still re-runs on toggle.
     glRef.current = new MediaGL(canvas, {
-      src: theme === "dark" ? SRC_DARK : SRC_LIGHT,
+      src: resolveTheme() === "dark" ? SRC_DARK : SRC_LIGHT,
       effect: "parallax",
       intensity: 1.5,
       onReady: () => media.classList.add("is-gl"),

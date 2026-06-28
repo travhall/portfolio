@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Manrope, Geist_Mono } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
@@ -71,14 +70,23 @@ export default function RootLayout({
       >
         {/*
           Anti-FOUC: restore the saved theme + motion preference before the
-          first paint. Runs synchronously so there is zero flash between SSR
-          and hydration. ThemeToggle/MotionToggle read these attributes on
-          mount and will already be in sync.
+          first paint. A plain inline <script>, not next/script's Script
+          component — Script's beforeInteractive strategy only serializes
+          into the RSC payload here (Next 16 + Turbopack) and isn't present
+          as a literal tag in the raw server HTML, so it executes during
+          hydration, well after first paint, defeating its whole purpose
+          (confirmed by curling the page: no literal <script id="theme-init">
+          in the response). A plain dangerouslySetInnerHTML <script>, like
+          the JSON-LD one right below, IS literal in the HTML and blocks
+          parsing synchronously, which is what actually prevents the flash.
         */}
         <head>
-          <Script id="theme-init" strategy="beforeInteractive">
-            {`(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}var m=localStorage.getItem('motion');if(m==='on'||m==='off'){document.documentElement.setAttribute('data-motion',m);}}catch(e){}})();`}
-          </Script>
+          <script
+            id="theme-init"
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}var m=localStorage.getItem('motion');if(m==='on'||m==='off'){document.documentElement.setAttribute('data-motion',m);}}catch(e){}})();`,
+            }}
+          />
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}

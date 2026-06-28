@@ -460,6 +460,36 @@ html[data-motion="off"] .topbar__toggle-line {
   pointer-events: none;
 }
 
+/* Light/dark fallback <img> are both always rendered (FeatureWipe) so the
+   theme-correct one is a pure CSS toggle, same as .about-portrait__fallback
+   — no React state involved, so there's nothing to get hydration-correct
+   and nothing to flash. .fw-img--dark is only rendered when the case study
+   actually has a dark variant (otherwise the single light <img> covers
+   both modes, matching imageFor()'s fallback in FeatureWipe.tsx). */
+.fw-media__inner img.fw-img--dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  .fw-media__inner img.fw-img--light:has(~ .fw-img--dark) {
+    display: none;
+  }
+  .fw-media__inner img.fw-img--dark {
+    display: block;
+  }
+}
+html[data-theme="dark"] .fw-media__inner img.fw-img--light:has(~ .fw-img--dark) {
+  display: none;
+}
+html[data-theme="dark"] .fw-media__inner img.fw-img--dark {
+  display: block;
+}
+html[data-theme="light"] .fw-media__inner img.fw-img--light {
+  display: block;
+}
+html[data-theme="light"] .fw-media__inner img.fw-img--dark {
+  display: none;
+}
+
 /* ─── Fixed text overlay ── */
 /*
  * All .fw-text-fixed instances in a section simultaneously occupy the same
