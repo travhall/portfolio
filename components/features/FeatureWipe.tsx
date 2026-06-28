@@ -100,187 +100,25 @@ export function FeatureWipe({ features, id }: Props) {
   const centersRef = useRef<number[]>([]);
   const mainTriggerRef = useRef<ScrollTrigger | null>(null);
 
+  // ── Timeline effect ─────────────────────────────────────────────────────
+  // SplitText + the scrubbed GSAP timeline. Deliberately excludes `theme`
+  // from its deps — none of this (char splits, fade/drift timing, centers)
+  // depends on light vs. dark, so toggling theme must not re-run it. See the
+  // lazy-media effect below for the theme-dependent half (image src + ink
+  // color), which is cheap to re-run on its own.
   useLayoutEffect(() => {
     // Keep arrays matching current features length (trimmed here, not during
     // render, to satisfy react-hooks/refs)
     bandRefs.current = bandRefs.current.slice(0, features.length);
     textRefs.current = textRefs.current.slice(0, features.length);
-    mediaRefs.current = mediaRefs.current.slice(0, features.length);
-    canvasRefs.current = canvasRefs.current.slice(0, features.length);
-    dotsCanvasRefs.current = dotsCanvasRefs.current.slice(0, features.length);
     headlineRefs.current = headlineRefs.current.slice(0, features.length);
-    glInstancesRef.current = glInstancesRef.current.slice(0, features.length);
-    dotsInstancesRef.current = dotsInstancesRef.current.slice(
-      0,
-      features.length,
-    );
 
     let ctx: gsap.Context;
     let splits: SplitText[] = [];
     let perFeatureChars: Element[][] = [];
-    // Per-row, not flat — rows enter/exit lazily (see lazy media section
-    // below) so each row's trigger/cleanup must be killed individually.
-    const glTriggers: (ReturnType<typeof ScrollTrigger.create> | null)[] =
-      features.map(() => null);
-    const dotsCleanups: ((() => void) | null)[] = features.map(() => null);
-    let mediaObserver: IntersectionObserver | null = null;
     let currentWidth = window.innerWidth;
     const reduced = motionPref === "off";
 
-    // ── GL lifecycle ────────────────────────────────────────────────────────
-    // Each row gets its own WebGL2 context (MediaGL) and the dots overlay
-    // gets a second one — with N rows that's up to 2N live contexts.
-    // Browsers cap concurrent WebGL contexts (mobile Safari as low as ~8),
-    // so eagerly creating all of them would silently evict off-screen rows'
-    // contexts once the page has enough sections. Instead, only the rows
-    // near the viewport (see mediaObserver below) get a live context.
-    function disposeRowGL(i: number) {
-      glTriggers[i]?.kill();
-      glTriggers[i] = null;
-      glInstancesRef.current[i]?.dispose();
-      glInstancesRef.current[i] = null;
-      mediaRefs.current[i]?.classList.remove("is-gl");
-    }
-
-    // Instantiate one MediaGL per canvas, driven by a per-row ScrollTrigger.
-    // u_vel  ← instantaneous scroll speed, eased by MediaGL's internal spring
-    // u_scroll ← 0→1 as the row travels through the viewport
-    function initRowGL(i: number) {
-      if (glInstancesRef.current[i]) return; // already active
-      const f = features[i];
-      const canvas = canvasRefs.current[i];
-      const rowEl = bandRefs.current[i];
-      const src = imageFor(f, theme);
-      if (!canvas || !src || !rowEl) return;
-
-      const gl = new MediaGL(canvas, {
-        src,
-        effect: "parallax",
-        intensity: IMG_INTENSITY,
-        externalScroll: true, // disable internal _measure(), ScrollTrigger drives it
-        onReady: () => mediaRefs.current[i]?.classList.add("is-gl"),
-      });
-      glInstancesRef.current[i] = gl;
-
-      let lastY = window.scrollY;
-
-      // Trigger is created outside gsap.context() so ctx.revert() won't
-      // reach it — killed explicitly in disposeRowGL instead.
-      glTriggers[i] = ScrollTrigger.create({
-        trigger: rowEl,
-        start: "top bottom",
-        end: "bottom top",
-        onUpdate: (self) => {
-          const y = window.scrollY;
-          const dy = y - lastY;
-          lastY = y;
-          // Divide by 30 not 60 — gives 2× stronger velocity signal
-          // so chromatic aberration reads clearly at normal scroll speeds
-          const vel = Math.max(-1, Math.min(1, dy / 30));
-          gl.setScrollState(vel, self.progress);
-          // Same scroll-velocity signal also drives the dots canvas's
-          // chromatic-aberration fringe — only visible while it's also
-          // hovered (CSS opacity), so this is harmless the rest of the time.
-          dotsInstancesRef.current[i]?.setScrollState(vel);
-        },
-      });
-    }
-
-    // ── Magnetic dots lifecycle ─────────────────────────────────────────────
-    // Pointer-driven hover effect — skipped entirely on touch/coarse-pointer
-    // devices (see supportsHoverPointer), so it never attaches listeners or
-    // spins up a canvas where there's no mouse to react to. Also lazy per
-    // row, for the same WebGL-context-budget reason as GL above.
-
-    // Paper color is the same for every row (the page surface); read once
-    // per init rather than per-row.
-    let paperColor: RGB = [1, 1, 1];
-    let inkFallback = "";
-
-    function disposeRowDots(i: number) {
-      dotsCleanups[i]?.();
-      dotsCleanups[i] = null;
-      dotsInstancesRef.current[i]?.dispose();
-      dotsInstancesRef.current[i] = null;
-    }
-
-    function initRowDots(i: number) {
-      if (dotsInstancesRef.current[i] || !supportsHoverPointer()) return;
-      const f = features[i];
-      const canvas = dotsCanvasRefs.current[i];
-      const rowEl = bandRefs.current[i];
-      const src = imageFor(f, theme);
-      if (!canvas || !rowEl || !src) return;
-
-      const inkColor = cssColorToRgb(brandColorFor(f, theme) ?? inkFallback);
-      const dots = new MagneticDots(canvas, { src, inkColor, paperColor });
-      dotsInstancesRef.current[i] = dots;
-
-      // Tracked across the whole row (not just the photo) — the dots
-      // canvas is a full-row backdrop sitting behind both the photo and
-      // text columns, so hovering anywhere on the row should drive it.
-      const onMove = (e: PointerEvent) => {
-        const r = rowEl.getBoundingClientRect();
-        dots.setPointer(
-          (e.clientX - r.left) / r.width,
-          (e.clientY - r.top) / r.height,
-        );
-      };
-      const onEnter = (e: PointerEvent) => {
-        onMove(e);
-        dots.enter();
-      };
-      const onLeave = () => dots.leave();
-
-      rowEl.addEventListener("pointerenter", onEnter);
-      rowEl.addEventListener("pointermove", onMove);
-      rowEl.addEventListener("pointerleave", onLeave);
-      dotsCleanups[i] = () => {
-        rowEl.removeEventListener("pointerenter", onEnter);
-        rowEl.removeEventListener("pointermove", onMove);
-        rowEl.removeEventListener("pointerleave", onLeave);
-      };
-    }
-
-    function disposeAllMedia() {
-      features.forEach((_, i) => {
-        disposeRowGL(i);
-        disposeRowDots(i);
-      });
-    }
-
-    // Lazily inits/disposes GL + dots per row as it nears the viewport,
-    // instead of creating up to 2×N WebGL contexts up front.
-    function setupLazyMedia() {
-      mediaObserver?.disconnect();
-      // Computed fresh each call (including on theme change) so ink/paper
-      // colors track light/dark automatically.
-      const rootStyle = getComputedStyle(document.documentElement);
-      paperColor = cssColorToRgb(rootStyle.getPropertyValue("--surface"));
-      inkFallback = rootStyle.getPropertyValue("--ink");
-
-      mediaObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            const i = bandRefs.current.indexOf(
-              entry.target as HTMLDivElement,
-            );
-            if (i === -1) return;
-            if (entry.isIntersecting) {
-              initRowGL(i);
-              initRowDots(i);
-            } else {
-              disposeRowGL(i);
-              disposeRowDots(i);
-            }
-          });
-        },
-        { rootMargin: "50% 0px" }, // preload/keep alive one viewport-height early
-      );
-      bandRefs.current.forEach((el) => el && mediaObserver?.observe(el));
-    }
-
-    // ── Main init ───────────────────────────────────────────────────────────
     function init() {
       if (ctx) ctx.revert();
       splits.forEach((s) => s.revert());
@@ -288,25 +126,15 @@ export function FeatureWipe({ features, id }: Props) {
       perFeatureChars = [];
 
       if (reduced) {
-        // No parallax/halftone canvases and no scroll-driven cascade — CSS
-        // (layout.css, the reduced-motion + data-motion="off" blocks)
-        // collapses every row to the same static stacked layout used on
-        // mobile, regardless of width. Plain <img> fallback (already in
-        // the DOM) stands in for the GL canvas since it's never created.
-        mediaObserver?.disconnect();
-        mediaObserver = null;
-        disposeAllMedia();
+        // No scroll-driven cascade — CSS (layout.css, the reduced-motion +
+        // data-motion="off" blocks) collapses every row to the same static
+        // stacked layout used on mobile, regardless of width.
         centersRef.current = [];
         mainTriggerRef.current = null;
         return;
       }
 
       const isDesktop = window.innerWidth >= DESKTOP_BP;
-
-      // Always init GL regardless of breakpoint — images show on mobile too.
-      // Lazy per-row (see setupLazyMedia) rather than eager for every row.
-      setupLazyMedia();
-
       if (!isDesktop) {
         // Mobile layout forces .fw-text-fixed visible via CSS (no scrubbed
         // timeline at all), so there's no scroll-progress target to reuse.
@@ -519,9 +347,190 @@ export function FeatureWipe({ features, id }: Props) {
     return () => {
       clearTimeout(resizeTimeout);
       window.removeEventListener("resize", handleResize);
-      mediaObserver?.disconnect();
       if (ctx) ctx.revert();
       splits.forEach((s) => s.revert());
+    };
+  }, [features, motionPref]);
+
+  // ── Lazy media effect ───────────────────────────────────────────────────
+  // GL (chromatic-aberration parallax) + magnetic-dots halftone canvases.
+  // Depends on `theme` (image src + ink color) but not on layout/SplitText,
+  // so toggling theme only re-runs this — no GSAP timeline/SplitText churn.
+  // Lazy per-row via IntersectionObserver: each row owns up to two WebGL2
+  // contexts, and browsers cap concurrent contexts (mobile Safari ~8), so
+  // only rows near the viewport get a live context at any time.
+  useLayoutEffect(() => {
+    mediaRefs.current = mediaRefs.current.slice(0, features.length);
+    canvasRefs.current = canvasRefs.current.slice(0, features.length);
+    dotsCanvasRefs.current = dotsCanvasRefs.current.slice(0, features.length);
+    glInstancesRef.current = glInstancesRef.current.slice(0, features.length);
+    dotsInstancesRef.current = dotsInstancesRef.current.slice(
+      0,
+      features.length,
+    );
+
+    const glTriggers: (ReturnType<typeof ScrollTrigger.create> | null)[] =
+      features.map(() => null);
+    const dotsCleanups: ((() => void) | null)[] = features.map(() => null);
+    let mediaObserver: IntersectionObserver | null = null;
+    const reduced = motionPref === "off";
+
+    function disposeRowGL(i: number) {
+      glTriggers[i]?.kill();
+      glTriggers[i] = null;
+      glInstancesRef.current[i]?.dispose();
+      glInstancesRef.current[i] = null;
+      mediaRefs.current[i]?.classList.remove("is-gl");
+    }
+
+    // Instantiate one MediaGL per canvas, driven by a per-row ScrollTrigger.
+    // u_vel  ← instantaneous scroll speed, eased by MediaGL's internal spring
+    // u_scroll ← 0→1 as the row travels through the viewport
+    function initRowGL(i: number) {
+      if (glInstancesRef.current[i]) return; // already active
+      const f = features[i];
+      const canvas = canvasRefs.current[i];
+      const rowEl = bandRefs.current[i];
+      const src = imageFor(f, theme);
+      if (!canvas || !src || !rowEl) return;
+
+      const gl = new MediaGL(canvas, {
+        src,
+        effect: "parallax",
+        intensity: IMG_INTENSITY,
+        externalScroll: true, // disable internal _measure(), ScrollTrigger drives it
+        onReady: () => mediaRefs.current[i]?.classList.add("is-gl"),
+      });
+      glInstancesRef.current[i] = gl;
+
+      let lastY = window.scrollY;
+
+      // Trigger is created outside gsap.context() — killed explicitly in
+      // disposeRowGL instead.
+      glTriggers[i] = ScrollTrigger.create({
+        trigger: rowEl,
+        start: "top bottom",
+        end: "bottom top",
+        onUpdate: (self) => {
+          const y = window.scrollY;
+          const dy = y - lastY;
+          lastY = y;
+          // Divide by 30 not 60 — gives 2× stronger velocity signal
+          // so chromatic aberration reads clearly at normal scroll speeds
+          const vel = Math.max(-1, Math.min(1, dy / 30));
+          gl.setScrollState(vel, self.progress);
+          // Same scroll-velocity signal also drives the dots canvas's
+          // chromatic-aberration fringe — only visible while it's also
+          // hovered (CSS opacity), so this is harmless the rest of the time.
+          dotsInstancesRef.current[i]?.setScrollState(vel);
+        },
+      });
+    }
+
+    // Pointer-driven hover effect — skipped entirely on touch/coarse-pointer
+    // devices (see supportsHoverPointer), so it never attaches listeners or
+    // spins up a canvas where there's no mouse to react to. Also lazy per
+    // row, for the same WebGL-context-budget reason as GL above.
+
+    // Paper color is the same for every row (the page surface); read once
+    // per init rather than per-row.
+    let paperColor: RGB = [1, 1, 1];
+    let inkFallback = "";
+
+    function disposeRowDots(i: number) {
+      dotsCleanups[i]?.();
+      dotsCleanups[i] = null;
+      dotsInstancesRef.current[i]?.dispose();
+      dotsInstancesRef.current[i] = null;
+    }
+
+    function initRowDots(i: number) {
+      if (dotsInstancesRef.current[i] || !supportsHoverPointer()) return;
+      const f = features[i];
+      const canvas = dotsCanvasRefs.current[i];
+      const rowEl = bandRefs.current[i];
+      const src = imageFor(f, theme);
+      if (!canvas || !rowEl || !src) return;
+
+      const inkColor = cssColorToRgb(brandColorFor(f, theme) ?? inkFallback);
+      const dots = new MagneticDots(canvas, { src, inkColor, paperColor });
+      dotsInstancesRef.current[i] = dots;
+
+      // Tracked across the whole row (not just the photo) — the dots
+      // canvas is a full-row backdrop sitting behind both the photo and
+      // text columns, so hovering anywhere on the row should drive it.
+      const onMove = (e: PointerEvent) => {
+        const r = rowEl.getBoundingClientRect();
+        dots.setPointer(
+          (e.clientX - r.left) / r.width,
+          (e.clientY - r.top) / r.height,
+        );
+      };
+      const onEnter = (e: PointerEvent) => {
+        onMove(e);
+        dots.enter();
+      };
+      const onLeave = () => dots.leave();
+
+      rowEl.addEventListener("pointerenter", onEnter);
+      rowEl.addEventListener("pointermove", onMove);
+      rowEl.addEventListener("pointerleave", onLeave);
+      dotsCleanups[i] = () => {
+        rowEl.removeEventListener("pointerenter", onEnter);
+        rowEl.removeEventListener("pointermove", onMove);
+        rowEl.removeEventListener("pointerleave", onLeave);
+      };
+    }
+
+    function disposeAllMedia() {
+      features.forEach((_, i) => {
+        disposeRowGL(i);
+        disposeRowDots(i);
+      });
+    }
+
+    // Lazily inits/disposes GL + dots per row as it nears the viewport,
+    // instead of creating up to 2×N WebGL contexts up front.
+    function setupLazyMedia() {
+      mediaObserver?.disconnect();
+      // Computed fresh each call (including on theme change) so ink/paper
+      // colors track light/dark automatically.
+      const rootStyle = getComputedStyle(document.documentElement);
+      paperColor = cssColorToRgb(rootStyle.getPropertyValue("--surface"));
+      inkFallback = rootStyle.getPropertyValue("--ink");
+
+      mediaObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const i = bandRefs.current.indexOf(
+              entry.target as HTMLDivElement,
+            );
+            if (i === -1) return;
+            if (entry.isIntersecting) {
+              initRowGL(i);
+              initRowDots(i);
+            } else {
+              disposeRowGL(i);
+              disposeRowDots(i);
+            }
+          });
+        },
+        { rootMargin: "50% 0px" }, // preload/keep alive one viewport-height early
+      );
+      bandRefs.current.forEach((el) => el && mediaObserver?.observe(el));
+    }
+
+    if (reduced) {
+      // No parallax/halftone canvases — CSS collapses every row to the
+      // static stacked layout regardless of width.
+      disposeAllMedia();
+    } else {
+      // Always init regardless of breakpoint — images show on mobile too.
+      setupLazyMedia();
+    }
+
+    return () => {
+      mediaObserver?.disconnect();
       disposeAllMedia();
     };
   }, [features, theme, motionPref]);
