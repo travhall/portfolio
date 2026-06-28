@@ -531,7 +531,7 @@ export function FeatureWipe({ features, id }: Props) {
                 ref={(el) => {
                   textRefs.current[i] = el;
                 }}
-                className="fw-text-fixed glass-surface"
+                className="fw-text-fixed"
               >
                 <p
                   className="type-eyebrow text-ink-muted"

@@ -23,7 +23,7 @@ export default function HomePage() {
       <section className="intro-section">
         <div className="intro-section__inner">
           <h1 className="type-h1 text-ink intro-section__statement">
-            Most things on the internet are fine. I try to do better.
+            Most things on the internet are fine. I try to do better.*
           </h1>
           <ScrollCue to="#work" label="View selected work" />
         </div>
