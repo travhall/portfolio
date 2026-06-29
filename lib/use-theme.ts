@@ -48,9 +48,25 @@ function subscribe(onChange: () => void) {
   const media = window.matchMedia("(prefers-color-scheme: dark)");
   media.addEventListener("change", onChange);
 
+  // Cross-tab sync: another same-origin tab changing the theme writes to
+  // localStorage, which fires `storage` in every *other* open tab (never
+  // the tab that made the write). Re-apply that tab's choice onto this
+  // document's own data-theme attribute, which then flows through the
+  // MutationObserver above exactly like a same-tab toggle would.
+  function onStorage(e: StorageEvent) {
+    if (e.key !== "theme") return;
+    if (e.newValue === "light" || e.newValue === "dark") {
+      document.documentElement.setAttribute("data-theme", e.newValue);
+    } else if (e.newValue === null) {
+      document.documentElement.removeAttribute("data-theme");
+    }
+  }
+  window.addEventListener("storage", onStorage);
+
   return () => {
     observer.disconnect();
     media.removeEventListener("change", onChange);
+    window.removeEventListener("storage", onStorage);
   };
 }
 

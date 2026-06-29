@@ -39,9 +39,20 @@ function subscribe(onChange: () => void) {
   const media = window.matchMedia("(prefers-reduced-motion: reduce)");
   media.addEventListener("change", onChange);
 
+  function onStorage(e: StorageEvent) {
+    if (e.key !== "motion") return;
+    if (e.newValue === "on" || e.newValue === "off") {
+      document.documentElement.setAttribute("data-motion", e.newValue);
+    } else if (e.newValue === null) {
+      document.documentElement.removeAttribute("data-motion");
+    }
+  }
+  window.addEventListener("storage", onStorage);
+
   return () => {
     observer.disconnect();
     media.removeEventListener("change", onChange);
+    window.removeEventListener("storage", onStorage);
   };
 }
 
