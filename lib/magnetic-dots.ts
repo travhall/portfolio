@@ -33,6 +33,11 @@
 import { coverRatio, NOISE } from "./media-gl";
 
 function reducedMotion(): boolean {
+  if (typeof document !== "undefined") {
+    const explicit = document.documentElement.getAttribute("data-motion");
+    if (explicit === "off") return true;
+    if (explicit === "on") return false;
+  }
   if (typeof window === "undefined") return false;
   return (
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false

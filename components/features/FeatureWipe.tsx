@@ -29,7 +29,7 @@ import { MediaGL } from "@/lib/media-gl";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { useTheme, resolveTheme } from "@/lib/use-theme";
-import { useMotionPref } from "@/lib/motion-pref";
+import { useMotionPref, readMotionPref } from "@/lib/motion-pref";
 import { DESKTOP_BP } from "@/lib/breakpoints";
 import type { CaseStudy } from "@/lib/case-studies";
 import {
@@ -117,7 +117,20 @@ export function FeatureWipe({ features, id }: Props) {
     let splits: SplitText[] = [];
     let perFeatureChars: Element[][] = [];
     let currentWidth = window.innerWidth;
-    const reduced = motionPref === "off";
+    // readMotionPref() (direct DOM read), not the motionPref closure value —
+    // same reasoning as resolveTheme() in lib/use-theme.ts: on the very first
+    // mount, useSyncExternalStore's getServerSnapshot() must lie and report
+    // "on" to satisfy hydration, even though the anti-FOUC script in
+    // app/layout.tsx has already set data-motion="off" on <html> before this
+    // effect ever runs. Trusting the lagging `motionPref` value here let this
+    // effect's first pass wrongly spin up the full GSAP/IntersectionObserver
+    // setup, which the resync's second pass then had to tear down — any row
+    // whose IntersectionObserver callback fired late (after teardown) was
+    // left with an orphaned MediaGL instance that the next effect run's
+    // `if (glInstancesRef.current[i]) return;` guard then treated as already
+    // active forever, permanently hiding that row's photo behind a never-
+    // drawn canvas. Reading the DOM directly sidesteps the lag entirely.
+    const reduced = readMotionPref() === "off";
 
     function init() {
       if (ctx) ctx.revert();
@@ -373,7 +386,11 @@ export function FeatureWipe({ features, id }: Props) {
       features.map(() => null);
     const dotsCleanups: ((() => void) | null)[] = features.map(() => null);
     let mediaObserver: IntersectionObserver | null = null;
-    const reduced = motionPref === "off";
+    // readMotionPref() (direct DOM read), not the motionPref closure value —
+    // see the matching comment on the timeline effect above for why the
+    // hook's value can lag by one render on first mount, and why that lag
+    // specifically causes images to go permanently blank here.
+    const reduced = readMotionPref() === "off";
 
     function disposeRowGL(i: number) {
       glTriggers[i]?.kill();
@@ -513,10 +530,16 @@ export function FeatureWipe({ features, id }: Props) {
             );
             if (i === -1) return;
             if (entry.isIntersecting) {
-              initRowGL(i);
+              // Dots stay available even with motion off — it's a hover-
+              // only reveal, not a scroll/GSAP-driven effect, and
+              // MagneticDots already internally zeroes its own ripple/
+              // velocity distortion via reducedMotion() (see
+              // lib/magnetic-dots.ts). Only the chromatic-aberration GL
+              // parallax is genuinely motion-driven enough to skip here.
+              if (!reduced) initRowGL(i);
               initRowDots(i);
             } else {
-              disposeRowGL(i);
+              if (!reduced) disposeRowGL(i);
               disposeRowDots(i);
             }
           });
@@ -526,14 +549,11 @@ export function FeatureWipe({ features, id }: Props) {
       bandRefs.current.forEach((el) => el && mediaObserver?.observe(el));
     }
 
-    if (reduced) {
-      // No parallax/halftone canvases — CSS collapses every row to the
-      // static stacked layout regardless of width.
-      disposeAllMedia();
-    } else {
-      // Always init regardless of breakpoint — images show on mobile too.
-      setupLazyMedia();
-    }
+    // Always init regardless of breakpoint (images show on mobile too) and
+    // regardless of `reduced` — the observer drives both GL and dots, and
+    // `reduced` is checked per-effect inside the callback above so dots
+    // keep working even when GL parallax is skipped.
+    setupLazyMedia();
 
     return () => {
       mediaObserver?.disconnect();
