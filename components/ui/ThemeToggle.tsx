@@ -8,7 +8,7 @@
  * snapshot. The text label slides up/down independently.
  */
 
-import { useRef, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { SunMoonIcon, type SunMoonHandle } from "./SunMoonIcon";
 import { triggerRipple, prefersReducedMotion } from "./ripple";
 import { useTogglePillAnimation } from "./useTogglePillAnimation";
@@ -24,18 +24,38 @@ function applyTheme(mode: Theme) {
 interface Props { className?: string; }
 
 export function ThemeToggle({ className = "" }: Props) {
-  const theme = useTheme();
+  const observedTheme = useTheme();
+  const [theme, setTheme] = useState<Theme>(observedTheme);
   const { animDir, labelRef, runToggle } = useTogglePillAnimation();
   const iconRef = useRef<SunMoonHandle>(null);
 
+  // pendingRef tracks the in-flight click's target value synchronously — see
+  // the identical pattern (and its rationale) in MotionToggle.tsx.
+  const pendingRef = useRef<Theme | null>(null);
+
+  // Re-sync from the hook (an external change — OS preference, dev tools,
+  // another tab) only when no click-driven toggle is in flight.
+  useEffect(() => {
+    if (pendingRef.current === null) {
+      setTheme(observedTheme);
+    }
+  }, [observedTheme]);
+
   function toggle(e: MouseEvent<HTMLButtonElement>) {
-    const next: Theme = theme === "light" ? "dark" : "light";
+    const current = pendingRef.current ?? theme;
+    const next: Theme = current === "light" ? "dark" : "light";
+    pendingRef.current = next;
     const reduced = prefersReducedMotion();
 
     // Fire icon morph immediately — runs from current DOM state
     if (!reduced) iconRef.current?.animate(next === "dark");
 
-    runToggle(reduced, () => applyTheme(next));
+    runToggle(reduced, () => {
+      if (pendingRef.current !== next) return; // superseded by a later click
+      setTheme(next);
+      applyTheme(next);
+      pendingRef.current = null;
+    });
 
     if (!reduced) triggerRipple(e.currentTarget, e, RIPPLE_THEME);
   }
