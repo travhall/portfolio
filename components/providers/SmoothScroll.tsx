@@ -54,6 +54,14 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   // pathname change, after the new route's content has painted.
   useEffect(() => {
     const instance = lenisRef.current;
+    // Land every new route at the top. Next's own scroll restoration works on
+    // native window scroll, which Lenis has taken over — so without this a
+    // client navigation keeps the previous page's scroll position (e.g. you
+    // click a featured project halfway down the home page and the case study
+    // page opens already scrolled down). immediate: true snaps, no glide.
+    if (instance) instance.scrollTo(0, { immediate: true });
+    else window.scrollTo(0, 0);
+
     if (!instance) return;
     const id = requestAnimationFrame(() => {
       instance.resize();

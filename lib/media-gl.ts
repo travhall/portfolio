@@ -77,6 +77,12 @@ precision mediump float;
 uniform sampler2D u_map;
 uniform float u_time,u_vel,u_scroll,u_intensity;
 uniform vec2 u_ratio;
+// Hover fabric-wave (parallax effect only — see FRAG_PARALLAX) — u_hover is
+// eased 0→1 on button hover/focus, u_origin is the point on the image
+// nearest the button the ripple radiates from. Harmless no-op if unused by
+// a given shader (gooey doesn't reference them).
+uniform float u_hover;
+uniform vec2 u_origin;
 in vec2 v_uv;
 out vec4 fragColor;
 vec2 cover(vec2 u){u-=.5;u*=u_ratio;u+=.5;return u;}
@@ -97,13 +103,44 @@ void main(){
   float wy = snoise3(vec3(uv * 1.2 + 5.3, t));
   uv += vec2(wx, wy) * 0.003 * u_intensity;
 
+  // hdecay — still used by the chromatic-aberration term below to keep the
+  // colour fringe strongest near the button (u_origin) edge of the image.
+  vec2  hd     = (uv - u_origin) * u_ratio;
+  float hdecay = exp(-length(hd) * 2.2);
+
+  // Hover ROLLING WAVE — a single low-frequency crest travelling down the
+  // image, like a wave rolling to shore, rather than the omnidirectional
+  // swirl of noise. It's a directional sine of position-minus-time, so every
+  // knob is explicit:
+  //   ROLL_FREQ   crests visible across the image height (~1 → one band).
+  //   ROLL_SPEED  how fast the band travels (cycles/sec).
+  //   the −u_time sign sets travel DOWN the image; flip to + to roll up.
+  // Gated by u_hover (eased 0→1 in JS) so it's inert at rest. A faint second
+  // wave at ~1.9× frequency + offset phase keeps successive crests from
+  // reading as a metronome — one wave, then the next, gently undulating.
+  const float TAU       = 6.28318530718;
+  const float rollFreq  = 1.05;
+  const float rollSpeed = 0.42;
+  float roll  = sin((uv.y * rollFreq - u_time * rollSpeed) * TAU);
+  roll += 0.35 * sin((uv.y * rollFreq * 1.9 - u_time * rollSpeed * 1.3) * TAU + 1.7);
+  float ramp  = u_intensity * u_hover;
+  uv.x += roll * 0.018 * ramp; // lateral shear — the visible "waver" band
+  uv.y += roll * 0.006 * ramp; // slight vertical roll so the band undulates
+
   // Chromatic aberration — the main effect. disp is a noise field that
   // spatially varies the per-channel offset so it reads as lens aberration
-  // rather than a uniform shift. The base offset (.04) is visible even at
-  // rest; the velocity term (.06 * abs(v)) grows it dramatically on scroll.
-  float disp = snoise3(vec3(uv * 1.8, t)) * 0.5 + 0.5;
-  float v    = u_vel * u_intensity;
-  float mag  = (.04 + disp * .06) * v;
+  // rather than a uniform shift. mag is zero at rest (both terms below scale
+  // with a driving signal), so two independent things can drive it:
+  //   scrollMag — grows with scroll velocity, sign flips with direction.
+  //   hoverMag  — grows with the same u_hover/hdecay that drives the wave
+  //     above, so the fringe is strongest right where the ripple originates
+  //     and fades out with it — reads as one combined effect, not two
+  //     independent layers, and gives the hover state the same "aberration"
+  //     texture the reference has instead of a bare geometric warp.
+  float disp      = snoise3(vec3(uv * 1.8, t)) * 0.5 + 0.5;
+  float scrollMag = (.04 + disp * .06) * (u_vel * u_intensity);
+  float hoverMag  = (.03 + disp * .05) * u_hover * u_intensity * hdecay;
+  float mag  = scrollMag + hoverMag;
   vec2  off  = vec2(0.0, 1.0) * mag;
 
   vec2 cuv = cover(uv);
@@ -174,6 +211,8 @@ export class MediaGL {
   private uIntensity!: WebGLUniformLocation;
   private uRatio!:     WebGLUniformLocation;
   private uMap!:       WebGLUniformLocation;
+  private uHover!:     WebGLUniformLocation;
+  private uOrigin!:    WebGLUniformLocation;
 
   private ready    = false;
   private disposed = false;
@@ -188,6 +227,10 @@ export class MediaGL {
   private scroll  = 0;
   private scrollT = 0;
   private lastY   = 0;
+
+  private hover:  number = 0;
+  private hoverT: number = 0;
+  private origin: [number, number] = [0.5, 0.5];
 
   private _boundScroll!: () => void;
   private _boundResize!: () => void;
@@ -251,13 +294,17 @@ export class MediaGL {
     // Compile program
     this.prog = createProgram(gl, VERT_SRC, frag);
 
-    // Cache uniform locations
+    // Cache uniform locations. u_hover/u_origin are null on programs that
+    // don't reference them (e.g. gooey) — gl.uniform*(null, ...) is a
+    // spec-defined no-op, so that's safe to just always set in _renderOnce.
     this.uTime      = gl.getUniformLocation(this.prog, 'u_time')!;
     this.uVel       = gl.getUniformLocation(this.prog, 'u_vel')!;
     this.uScroll    = gl.getUniformLocation(this.prog, 'u_scroll')!;
     this.uIntensity = gl.getUniformLocation(this.prog, 'u_intensity')!;
     this.uRatio     = gl.getUniformLocation(this.prog, 'u_ratio')!;
     this.uMap       = gl.getUniformLocation(this.prog, 'u_map')!;
+    this.uHover     = gl.getUniformLocation(this.prog, 'u_hover')!;
+    this.uOrigin    = gl.getUniformLocation(this.prog, 'u_origin')!;
 
     // Fullscreen quad VAO
     // prettier-ignore
@@ -360,6 +407,8 @@ export class MediaGL {
     gl.uniform1f(this.uIntensity, this.opts.intensity);
     gl.uniform2f(this.uRatio,     rx, ry);
     gl.uniform1i(this.uMap,       0);
+    gl.uniform1f(this.uHover,     this.hover);
+    gl.uniform2f(this.uOrigin,    this.origin[0], this.origin[1]);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.tex);
@@ -393,6 +442,24 @@ export class MediaGL {
     this.start();
   }
 
+  // Fabric-wave hover trigger — see FRAG_PARALLAX. Call on pointer/focus
+  // enter+leave of the row's "View Case Study" button, not the image itself
+  // (there's no live cursor position over the image to follow; the wave is
+  // an ambient animation anchored at setOrigin's point, gated by this).
+  setHover(active: boolean) {
+    // No wave motion under reduced motion — same neutral-state policy as
+    // setScrollState above.
+    this.hoverT = reducedMotion() ? 0 : active ? 1 : 0;
+    this.start();
+  }
+
+  // One-time (not per-frame) — the point on the image nearest the button,
+  // in UV space (0,0 = top-left, 1,1 = bottom-right), that the hover-wave
+  // radiates from. Set once after construction based on the row's side.
+  setOrigin(x: number, y: number) {
+    this.origin = [x, y];
+  }
+
   setEffect(name: MediaEffect) {
     if (this.opts.effect === name || !this.ready || this.disposed) return;
     this.opts.effect = name;
@@ -406,6 +473,8 @@ export class MediaGL {
     this.uIntensity = gl.getUniformLocation(this.prog, 'u_intensity')!;
     this.uRatio     = gl.getUniformLocation(this.prog, 'u_ratio')!;
     this.uMap       = gl.getUniformLocation(this.prog, 'u_map')!;
+    this.uHover     = gl.getUniformLocation(this.prog, 'u_hover')!;
+    this.uOrigin    = gl.getUniformLocation(this.prog, 'u_origin')!;
     this.start();
   }
 
@@ -433,6 +502,7 @@ export class MediaGL {
     this.velT   *= Math.exp(-dt * 6.0);
     this.vel    += (this.velT   - this.vel)    * Math.min(1, dt * 9);
     this.scroll += (this.scrollT - this.scroll) * Math.min(1, dt * 6);
+    this.hover  += (this.hoverT - this.hover)   * Math.min(1, dt * 8);
 
     this._renderOnce();
 
@@ -441,7 +511,12 @@ export class MediaGL {
     const settling =
       Math.abs(this.vel)    > 0.001 ||
       Math.abs(this.velT)   > 0.001 ||
-      Math.abs(this.scroll  - this.scrollT) > 0.001;
+      Math.abs(this.scroll  - this.scrollT) > 0.001 ||
+      // hoverT > 0 for the entire hover duration (not just while easing),
+      // so this keeps the loop alive for continuous ambient wave motion the
+      // whole time the button is hovered — not just during the fade in/out.
+      this.hoverT > 0.001 ||
+      this.hover  > 0.001;
 
     if (!visible && !settling) { this.stop(); return; }
     if (visible && !settling && this.opts.effect === 'parallax') { this.stop(); return; }

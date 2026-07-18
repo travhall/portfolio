@@ -29,8 +29,23 @@ export default async function CaseStudyPage({ params }: Props) {
   const study = caseStudies.find((s) => s.slug === slug && !s.comingSoon);
   if (!study) notFound();
 
+  const brand = study.brandLight
+    ? `light-dark(${study.brandLight}, ${study.brandDark ?? study.brandLight})`
+    : undefined;
+
   return (
     <main id="main-content">
+      {/* Full-bleed brand background — the shared element the home page's
+          featured panel morphs into (view-transition-name: fw-brand, in
+          layout.css), so the colour is seamless across the transition. */}
+      {brand && (
+        <div
+          className="cs-brand-bg"
+          aria-hidden="true"
+          style={{ background: brand }}
+        />
+      )}
+
       <div className="header-spacer" aria-hidden="true" />
 
       <section

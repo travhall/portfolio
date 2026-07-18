@@ -300,6 +300,17 @@ p {
 ::view-transition-new(topbar) {
   animation: none;
 }
+
+/* fw-brand — the featured panel's brand colour morphing into the case study
+ * page's full-bleed background (and back). The group animates the box from the
+ * panel's band up to full-viewport; old/new are the same solid brand colour so
+ * their default cross-fade is invisible — the colour simply holds while the
+ * box expands. Eased to match the root fade timing so the whole transition
+ * reads as one motion. Covered by the reduced-motion / data-motion resets. */
+::view-transition-group(fw-brand) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
 @keyframes fade-out-page {
   to {
     opacity: 0;

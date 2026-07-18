@@ -310,48 +310,49 @@ html[data-motion="off"] .topbar__toggle-line {
   grid-template-rows: 1fr;
   min-height: var(--fw-row-min-h);
   border-top: 1px solid var(--line);
-  position: relative; /* anchors .fw-dots-canvas, the full-row backdrop layer */
-  /* --row-brand is set inline per-row from case study data (lib/case-studies.ts),
-     already resolved to the light/dark variant. Reserved for hover/focus only —
-     other hover effects will layer on top later — so the resting state always
-     matches the page surface. */
+  position: relative;
   background: var(--surface);
-  transition: background var(--btn-dur) var(--ease);
 }
 
-.fw-row:hover,
-.fw-row:focus-within {
-  background: color-mix(
-    in oklch,
-    var(--row-brand, transparent) 8%,
-    var(--surface)
-  );
-}
-
-/* Magnetic-dots hover backdrop — fills the whole row, behind the photo
- * (.fw-media, z-index 1) and text (.fw-clip-cell, z-index 2) columns, in
- * the same panel the brand-color hover tint above lives in. Starts fully
- * transparent (the shader's alpha channel handles reveal on hover, see
- * lib/magnetic-dots.ts); --dots-blend left configurable for later
- * experiments with how it composites over --row-brand beneath it. */
-.fw-dots-canvas {
+/* Brand-colour fill layer (rendered as the row's first child in
+   FeatureWipe.tsx). Its own element — not the row's `background` — so it can
+   take a view-transition-name and morph into the case study page's matching
+   background across the page transition, without dragging the image/text
+   snapshot along. Sits behind both columns: .fw-media (z-index 1) and
+   .fw-clip-cell (z-index 2). --row-brand is set inline per-row from the case
+   study data, already resolved to the light/dark variant. */
+.fw-row__brand {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  mix-blend-mode: var(--dots-blend, normal);
-  /* Same property/duration/easing/trigger as .fw-media's opacity fade below
-     — sharing one CSS transition (rather than this canvas fading in via its
-     own JS-eased alpha) guarantees the two move in lockstep, so the bare
-     page background never gets exposed for a frame between them. */
+  z-index: 0;
+  background: var(--row-brand, transparent);
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--btn-dur) var(--ease);
 }
-
-.fw-row:hover .fw-dots-canvas,
-.fw-row:focus-within .fw-dots-canvas {
+.fw-row:hover .fw-row__brand,
+.fw-row:focus-within .fw-row__brand {
   opacity: 1;
+}
+/* During the page-exit animation the pointer often leaves the button as it
+   animates away — is-exiting (set in FeatureWipe.tsx) keeps the brand fill on
+   independent of :hover so it stays behind the wiping image. */
+.fw-row.is-exiting .fw-row__brand {
+  opacity: 1;
+}
+
+/* Case study page brand background — the other half of the fw-brand shared
+   element. Full-viewport fixed fill (colour set inline per project from the
+   case study data), behind all in-flow content (z-index -1, above the body's
+   --surface). The featured panel's .fw-row__brand carries the same name only
+   on the clicked row (set imperatively on nav), so the browser morphs that
+   band up into this full-page fill — the colour holds, nothing cross-fades. */
+.cs-brand-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  view-transition-name: fw-brand;
 }
 
 /*
@@ -402,17 +403,6 @@ html[data-motion="off"] .topbar__toggle-line {
   overflow: hidden;
   z-index: 1;
   min-height: var(--fw-row-min-h);
-  opacity: 1;
-  transition: opacity var(--btn-dur) var(--ease);
-}
-
-/* The photo sits above the magnetic-dots backdrop (.fw-dots-canvas,
- * z-index 0) — fading it out on hover/focus is what makes that backdrop
- * (and whatever it reveals near the cursor) actually legible instead of
- * being fully covered. */
-.fw-row:hover .fw-media,
-.fw-row:focus-within .fw-media {
-  opacity: 0;
 }
 
 /* Side placement — set by data-side on the row */

@@ -21,6 +21,7 @@
  */
 
 import { useLayoutEffect, useRef, type CSSProperties } from "react";
+import { useTransitionRouter } from "next-view-transitions";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -32,11 +33,6 @@ import { useTheme, resolveTheme } from "@/lib/use-theme";
 import { useMotionPref, readMotionPref } from "@/lib/motion-pref";
 import { DESKTOP_BP } from "@/lib/breakpoints";
 import type { CaseStudy } from "@/lib/case-studies";
-import {
-  MagneticDots,
-  supportsHoverPointer,
-  type RGB,
-} from "@/lib/magnetic-dots";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -50,30 +46,6 @@ function imageFor(f: CaseStudy, theme: "light" | "dark") {
   return theme === "dark" && f.imageDark ? f.imageDark : f.image;
 }
 
-function brandColorFor(f: CaseStudy, theme: "light" | "dark") {
-  if (theme === "dark") return f.brandDark ?? f.brandLight;
-  return f.brandLight;
-}
-
-// Resolves any CSS color (oklch(), var(--token), etc.) to 0–1 RGB by letting
-// the browser's own color parser do the work via a throwaway 2D canvas —
-// far simpler than hand-rolling OKLCH→sRGB, and WebGL only accepts plain
-// RGB floats, not CSS color strings.
-let colorProbeCtx: CanvasRenderingContext2D | null = null;
-function cssColorToRgb(color: string): RGB {
-  if (!colorProbeCtx) {
-    const c = document.createElement("canvas");
-    c.width = c.height = 1;
-    colorProbeCtx = c.getContext("2d", { willReadFrequently: true });
-  }
-  const ctx = colorProbeCtx;
-  if (!ctx) return [0, 0, 0];
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, 1, 1);
-  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-  return [r / 255, g / 255, b / 255];
-}
-
 interface Props {
   features: CaseStudy[];
   id?: string;
@@ -81,6 +53,7 @@ interface Props {
 
 export function FeatureWipe({ features, id }: Props) {
   const lenis = useLenis();
+  const router = useTransitionRouter();
   const theme = useTheme();
   const motionPref = useMotionPref();
   const sectionRef = useRef<HTMLElement>(null);
@@ -88,10 +61,8 @@ export function FeatureWipe({ features, id }: Props) {
   const textRefs = useRef<(HTMLDivElement | null)[]>([]);
   const mediaRefs = useRef<(HTMLDivElement | null)[]>([]); // .mediaInner wrappers
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]); // GL canvases
-  const dotsCanvasRefs = useRef<(HTMLCanvasElement | null)[]>([]); // magnetic-dots overlay canvases
   const headlineRefs = useRef<(HTMLHeadingElement | null)[]>([]);
   const glInstancesRef = useRef<(MediaGL | null)[]>([]); // one per feature
-  const dotsInstancesRef = useRef<(MagneticDots | null)[]>([]); // one per feature
 
   // Scroll-progress target for each row's "fully revealed" window (centers[i]
   // below) plus the main timeline's ScrollTrigger, so the onFocus handler can
@@ -307,16 +278,57 @@ export function FeatureWipe({ features, id }: Props) {
             const fadeOutEnd = p_i + dist * 0.45;
             const fadeOutDuration = fadeOutEnd - fadeOutStart;
             tl.set(textEl, { pointerEvents: "none" }, fadeOutStart);
-            tl.to(
-              textEl,
-              {
-                opacity: 0,
-                filter: "blur(8px)",
-                ease: "power1.in",
-                duration: fadeOutDuration,
-              },
-              fadeOutStart,
-            );
+
+            // Exit = the entrance text reveal played in reverse: chars fall
+            // back down into the clip mask, the eyebrow slides back out left,
+            // and the button drops away. Mirrors the .to() calls in the
+            // fade-in block above (power2.out → power2.in, target/origin
+            // values swapped, char stagger reversed from "end").
+
+            // Headline chars cascade back down into the clip mask
+            if (chars.length > 0) {
+              tl.to(
+                chars,
+                {
+                  yPercent: 105,
+                  ease: "power2.in",
+                  duration: fadeOutDuration * 0.6,
+                  stagger: { amount: fadeOutDuration * 0.3, from: "end" },
+                },
+                fadeOutStart,
+              );
+            }
+
+            // Eyebrow slides back out to the left
+            if (eyebrowInner) {
+              tl.to(
+                eyebrowInner,
+                {
+                  opacity: 0,
+                  x: -14,
+                  ease: "power2.in",
+                  duration: fadeOutDuration * 0.5,
+                },
+                fadeOutStart + fadeOutDuration * 0.5,
+              );
+            }
+
+            // Button drops down and fades
+            if (buttonEl) {
+              tl.to(
+                buttonEl,
+                {
+                  y: 20,
+                  opacity: 0,
+                  ease: "power2.in",
+                  duration: fadeOutDuration * 0.8,
+                },
+                fadeOutStart,
+              );
+            }
+
+            // Hide the container once its contents have fully left
+            tl.set(textEl, { opacity: 0 }, fadeOutEnd);
           }
         }
 
@@ -366,25 +378,18 @@ export function FeatureWipe({ features, id }: Props) {
   }, [features, motionPref]);
 
   // ── Lazy media effect ───────────────────────────────────────────────────
-  // GL (chromatic-aberration parallax) + magnetic-dots halftone canvases.
-  // Depends on `theme` (image src + ink color) but not on layout/SplitText,
-  // so toggling theme only re-runs this — no GSAP timeline/SplitText churn.
-  // Lazy per-row via IntersectionObserver: each row owns up to two WebGL2
-  // contexts, and browsers cap concurrent contexts (mobile Safari ~8), so
-  // only rows near the viewport get a live context at any time.
+  // GL chromatic-aberration parallax canvases. Depends on `theme` (image src)
+  // but not on layout/SplitText, so toggling theme only re-runs this — no
+  // GSAP timeline/SplitText churn. Lazy per-row via IntersectionObserver:
+  // each row owns one WebGL2 context, and browsers cap concurrent contexts
+  // (mobile Safari ~8), so only rows near the viewport get a live context.
   useLayoutEffect(() => {
     mediaRefs.current = mediaRefs.current.slice(0, features.length);
     canvasRefs.current = canvasRefs.current.slice(0, features.length);
-    dotsCanvasRefs.current = dotsCanvasRefs.current.slice(0, features.length);
     glInstancesRef.current = glInstancesRef.current.slice(0, features.length);
-    dotsInstancesRef.current = dotsInstancesRef.current.slice(
-      0,
-      features.length,
-    );
 
     const glTriggers: (ReturnType<typeof ScrollTrigger.create> | null)[] =
       features.map(() => null);
-    const dotsCleanups: ((() => void) | null)[] = features.map(() => null);
     let mediaObserver: IntersectionObserver | null = null;
     // readMotionPref() (direct DOM read), not the motionPref closure value —
     // see the matching comment on the timeline effect above for why the
@@ -423,6 +428,12 @@ export function FeatureWipe({ features, id }: Props) {
       });
       glInstancesRef.current[i] = gl;
 
+      // Hover-wave origin: the image edge nearest the "View Case Study"
+      // button (always in the centre text column) — left edge when the
+      // photo sits on the right (f.side === "right"), right edge when it
+      // sits on the left. See onMouseEnter/Leave on the button below.
+      gl.setOrigin(f.side === "right" ? 0 : 1, 0.5);
+
       let lastY = window.scrollY;
 
       // Trigger is created outside gsap.context() — killed explicitly in
@@ -439,88 +450,20 @@ export function FeatureWipe({ features, id }: Props) {
           // so chromatic aberration reads clearly at normal scroll speeds
           const vel = Math.max(-1, Math.min(1, dy / 30));
           gl.setScrollState(vel, self.progress);
-          // Same scroll-velocity signal also drives the dots canvas's
-          // chromatic-aberration fringe — only visible while it's also
-          // hovered (CSS opacity), so this is harmless the rest of the time.
-          dotsInstancesRef.current[i]?.setScrollState(vel);
         },
       });
-    }
-
-    // Pointer-driven hover effect — skipped entirely on touch/coarse-pointer
-    // devices (see supportsHoverPointer), so it never attaches listeners or
-    // spins up a canvas where there's no mouse to react to. Also lazy per
-    // row, for the same WebGL-context-budget reason as GL above.
-
-    // Paper color is the same for every row (the page surface); read once
-    // per init rather than per-row.
-    let paperColor: RGB = [1, 1, 1];
-    let inkFallback = "";
-
-    function disposeRowDots(i: number) {
-      dotsCleanups[i]?.();
-      dotsCleanups[i] = null;
-      dotsInstancesRef.current[i]?.dispose();
-      dotsInstancesRef.current[i] = null;
-    }
-
-    function initRowDots(i: number) {
-      if (dotsInstancesRef.current[i] || !supportsHoverPointer()) return;
-      const f = features[i];
-      const canvas = dotsCanvasRefs.current[i];
-      const rowEl = bandRefs.current[i];
-      // resolveTheme(), not the theme closure value — same reasoning as
-      // initRowGL above.
-      const rowTheme = resolveTheme();
-      const src = imageFor(f, rowTheme);
-      if (!canvas || !rowEl || !src) return;
-
-      const inkColor = cssColorToRgb(brandColorFor(f, rowTheme) ?? inkFallback);
-      const dots = new MagneticDots(canvas, { src, inkColor, paperColor });
-      dotsInstancesRef.current[i] = dots;
-
-      // Tracked across the whole row (not just the photo) — the dots
-      // canvas is a full-row backdrop sitting behind both the photo and
-      // text columns, so hovering anywhere on the row should drive it.
-      const onMove = (e: PointerEvent) => {
-        const r = rowEl.getBoundingClientRect();
-        dots.setPointer(
-          (e.clientX - r.left) / r.width,
-          (e.clientY - r.top) / r.height,
-        );
-      };
-      const onEnter = (e: PointerEvent) => {
-        onMove(e);
-        dots.enter();
-      };
-      const onLeave = () => dots.leave();
-
-      rowEl.addEventListener("pointerenter", onEnter);
-      rowEl.addEventListener("pointermove", onMove);
-      rowEl.addEventListener("pointerleave", onLeave);
-      dotsCleanups[i] = () => {
-        rowEl.removeEventListener("pointerenter", onEnter);
-        rowEl.removeEventListener("pointermove", onMove);
-        rowEl.removeEventListener("pointerleave", onLeave);
-      };
     }
 
     function disposeAllMedia() {
       features.forEach((_, i) => {
         disposeRowGL(i);
-        disposeRowDots(i);
       });
     }
 
-    // Lazily inits/disposes GL + dots per row as it nears the viewport,
-    // instead of creating up to 2×N WebGL contexts up front.
+    // Lazily inits/disposes GL per row as it nears the viewport, instead of
+    // creating up to N WebGL contexts up front.
     function setupLazyMedia() {
       mediaObserver?.disconnect();
-      // Computed fresh each call (including on theme change) so ink/paper
-      // colors track light/dark automatically.
-      const rootStyle = getComputedStyle(document.documentElement);
-      paperColor = cssColorToRgb(rootStyle.getPropertyValue("--surface"));
-      inkFallback = rootStyle.getPropertyValue("--ink");
 
       mediaObserver = new IntersectionObserver(
         (entries) => {
@@ -530,17 +473,9 @@ export function FeatureWipe({ features, id }: Props) {
             );
             if (i === -1) return;
             if (entry.isIntersecting) {
-              // Dots stay available even with motion off — it's a hover-
-              // only reveal, not a scroll/GSAP-driven effect, and
-              // MagneticDots already internally zeroes its own ripple/
-              // velocity distortion via reducedMotion() (see
-              // lib/magnetic-dots.ts). Only the chromatic-aberration GL
-              // parallax is genuinely motion-driven enough to skip here.
               if (!reduced) initRowGL(i);
-              initRowDots(i);
             } else {
               if (!reduced) disposeRowGL(i);
-              disposeRowDots(i);
             }
           });
         },
@@ -549,10 +484,9 @@ export function FeatureWipe({ features, id }: Props) {
       bandRefs.current.forEach((el) => el && mediaObserver?.observe(el));
     }
 
-    // Always init regardless of breakpoint (images show on mobile too) and
-    // regardless of `reduced` — the observer drives both GL and dots, and
-    // `reduced` is checked per-effect inside the callback above so dots
-    // keep working even when GL parallax is skipped.
+    // Always init regardless of breakpoint (images show on mobile too);
+    // `reduced` is checked inside the callback above so the observer itself
+    // still runs (keeping mediaRefs/canvasRefs in sync) even with motion off.
     setupLazyMedia();
 
     return () => {
@@ -560,6 +494,80 @@ export function FeatureWipe({ features, id }: Props) {
       disposeAllMedia();
     };
   }, [features, theme, motionPref]);
+
+  // ── Page-exit animation ──────────────────────────────────────────────────
+  // Plays on "View Case Study" click, then navigates. Three coordinated
+  // parts (see the design notes):
+  //   1. Active row text — the entrance reveal in reverse (chars fall back
+  //      into the clip mask, eyebrow slides out left, button drops away).
+  //   2. Active row image — wipes off toward its outer edge (clipped by the
+  //      media column's overflow), revealing the brand fill behind it.
+  //   3. Other rows' images — wipe off toward their edges, revealing the
+  //      standard surface behind them.
+  // On complete it routes through next-view-transitions, so the active row's
+  // brand panel (tagged fw-brand) then morphs seamlessly into the case study
+  // page's matching background while the rest cross-fades.
+  const runExit = (i: number, href: string) => {
+    const activeRow = bandRefs.current[i];
+    const activeText = textRefs.current[i];
+
+    // Tag the active row's brand layer as the shared transition element so its
+    // colour holds into the case study page (whether or not we animate below).
+    const brandEl = activeRow?.querySelector<HTMLElement>(".fw-row__brand");
+    if (brandEl) brandEl.style.viewTransitionName = "fw-brand";
+
+    if (prefersReducedMotion() || !activeRow || !activeText) {
+      router.push(href);
+      return;
+    }
+
+    // Lock the brand fill visible — the pointer may leave the button as it
+    // animates away, which would otherwise drop :hover and hide the brand.
+    activeRow.classList.add("is-exiting");
+
+    const tl = gsap.timeline({
+      defaults: { ease: "power2.in" },
+      onComplete: () => router.push(href),
+    });
+
+    const chars = activeText.querySelectorAll(".char-inner");
+    const eyebrow = activeText.querySelector(".eyebrow-inner");
+    const button = activeText.querySelector(".fw-button");
+    if (chars.length > 0) {
+      tl.to(
+        chars,
+        {
+          yPercent: 105,
+          duration: 0.45,
+          stagger: { amount: 0.2, from: "end" },
+        },
+        0,
+      );
+    }
+    if (eyebrow) tl.to(eyebrow, { opacity: 0, x: -14, duration: 0.35 }, 0);
+    if (button) tl.to(button, { opacity: 0, y: 20, duration: 0.4 }, 0);
+
+    // Wipe every row's image away with a clip mask on its media column — the
+    // image stays put and is revealed away (not translated), exposing the
+    // brand fill (active row) / surface (other rows) already sitting behind it
+    // (.fw-row__brand, z-index 0). side "right" → image in the right column →
+    // wipes off to the right (left inset grows); "left" → wipes off left.
+    mediaRefs.current.forEach((inner, idx) => {
+      const mediaCol = inner?.parentElement; // .fw-media
+      if (!mediaCol) return;
+      const exitRight = features[idx].side === "right";
+      tl.fromTo(
+        mediaCol,
+        { clipPath: "inset(0% 0% 0% 0%)" },
+        {
+          clipPath: exitRight ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)",
+          duration: 0.6,
+          ease: "power2.inOut",
+        },
+        0,
+      );
+    });
+  };
 
   return (
     <section ref={sectionRef} className="fw-section" id={id}>
@@ -584,17 +592,11 @@ export function FeatureWipe({ features, id }: Props) {
                 : undefined
             }
           >
-            {/* Magnetic-dots hover backdrop — fills the whole row, behind the
-              photo and text columns. Hidden (alpha 0) until the cursor
-              enters; see lib/magnetic-dots.ts. Not rendered at all on
-              touch/coarse-pointer devices (initDots no-ops). */}
-            <canvas
-              ref={(el) => {
-                dotsCanvasRefs.current[i] = el;
-              }}
-              className="fw-dots-canvas"
-              aria-hidden="true"
-            />
+            {/* Brand-colour fill — its own layer (not the row's background) so
+                it can carry a view-transition-name and morph into the case
+                study page's matching background without dragging the image /
+                text along. Transparent at rest, full brand on hover/focus. */}
+            <div className="fw-row__brand" aria-hidden="true" />
 
             <div className="fw-clip-cell">
               <div
@@ -629,7 +631,32 @@ export function FeatureWipe({ features, id }: Props) {
                       variant="solid"
                       size="sm"
                       aria-label={`${f.buttonText} — ${f.headline}`}
+                      onClick={(e) => {
+                        // Play the exit animation, then navigate (see runExit).
+                        // Leave modifier / non-primary clicks alone so "open in
+                        // new tab" still works.
+                        if (
+                          e.metaKey ||
+                          e.ctrlKey ||
+                          e.shiftKey ||
+                          e.altKey ||
+                          e.button !== 0
+                        ) {
+                          return;
+                        }
+                        e.preventDefault();
+                        runExit(i, `/work/${f.slug}`);
+                      }}
+                      onMouseEnter={() => glInstancesRef.current[i]?.setHover(true)}
+                      onMouseLeave={() => glInstancesRef.current[i]?.setHover(false)}
+                      onBlur={() => glInstancesRef.current[i]?.setHover(false)}
                       onFocus={() => {
+                        // Fabric-wave hover trigger (see MediaGL.setHover) —
+                        // keyboard focus gets the same treatment as a mouse
+                        // hover, consistent with :focus-within elsewhere in
+                        // this row (CSS brand-tint background, etc).
+                        glInstancesRef.current[i]?.setHover(true);
+
                         // Tab can land here while the row is still off-screen
                         // (it stays in the focus order on purpose — see the
                         // .fw-text-fixed comment in layout.css). Pull the row
