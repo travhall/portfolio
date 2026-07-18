@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { BackHomeButton } from "@/components/nav/BackHomeButton";
 import { caseStudies } from "@/lib/case-studies";
 import { createMetadata } from "@/lib/metadata";
 
@@ -37,7 +37,7 @@ export default async function CaseStudyPage({ params }: Props) {
     <main id="main-content">
       {/* Full-bleed brand background — the shared element the home page's
           featured panel morphs into (view-transition-name: fw-brand, in
-          layout.css), so the colour is seamless across the transition. */}
+          layout.css), so the color is seamless across the transition. */}
       {brand && (
         <div
           className="cs-brand-bg"
@@ -52,7 +52,7 @@ export default async function CaseStudyPage({ params }: Props) {
         style={{
           maxWidth: "var(--maxw)",
           margin: "0 auto",
-          padding: "0 var(--gut)",
+          padding: "var(--gut)",
         }}
       >
         <p className="type-eyebrow text-ink-muted">{study.eyebrow}</p>
@@ -67,9 +67,7 @@ export default async function CaseStudyPage({ params }: Props) {
           style={{ width: "100%", height: "auto", margin: "2rem 0" }}
         />
 
-        <Button variant="ghost" href="/">
-          Let&apos;s get you back home
-        </Button>
+        <BackHomeButton>Let&apos;s get you back home</BackHomeButton>
       </section>
     </main>
   );

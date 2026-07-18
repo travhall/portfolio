@@ -1,4 +1,4 @@
-import { ScrollCue } from "@/components/nav/ScrollCue";
+import { IntroSection } from "@/components/features/IntroSection";
 import { FeatureWipe } from "@/components/features/FeatureWipe";
 import { createMetadata } from "@/lib/metadata";
 import { caseStudies } from "@/lib/case-studies";
@@ -16,18 +16,11 @@ export default function HomePage() {
       <div className="header-spacer" aria-hidden="true" />
 
       {/* ── Intro ─────────────────────────────────────────────────────────
-          Full-viewport panel. Same 3-column grid as FeatureWipe so the
-          column hairlines read as one continuous vertical system.
-          Content sits in the centre two columns, weight in the lower third.
+          Full-viewport hero (client component — plays the entrance reveal on
+          load). Same 3-column grid as FeatureWipe so the column hairlines
+          read as one continuous vertical system.
       ──────────────────────────────────────────────────────────────────── */}
-      <section className="intro-section">
-        <div className="intro-section__inner">
-          <h1 className="type-h1 text-ink intro-section__statement">
-            Most things on the internet are fine. I try to do better.*
-          </h1>
-          <ScrollCue to="#work" label="View selected work" />
-        </div>
-      </section>
+      <IntroSection />
 
       {/* ── Work ──────────────────────────────────────────────────────────
           Scroll-driven project feature section.

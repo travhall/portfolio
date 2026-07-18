@@ -60,10 +60,25 @@
   font-weight: var(--fw-medium);
   border-radius: 2px;
   transition: opacity 0.2s var(--ease);
+  /* Hidden by default so a full page load (initial visit, hard refresh, or
+     any plain <a> navigation) never paints the wordmark before the entrance
+     reveal's JS has hidden its individual characters — see
+     lib/text-reveal.ts's createTextReveal, which sets this back to 1
+     synchronously once it's done. Reduced-motion overrides below. */
+  opacity: 0;
 }
 .topbar__brand:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar__brand {
+    opacity: 1;
+  }
+}
+html[data-motion="off"] .topbar__brand {
+  opacity: 1;
 }
 
 /* ── Menu toggle ── */
@@ -88,6 +103,13 @@
   cursor: pointer;
   border-radius: 4px;
   transition: opacity 0.2s var(--ease);
+  /* Hidden by default, matching the wipe-in clip-path Topbar.tsx's entrance
+     JS establishes — same full-page-load flash prevention as .topbar__brand
+     above. clip-path only, deliberately not opacity — see the onComplete
+     note above this rule in the plan for why an opacity default here would
+     leave the button permanently hidden after every entrance. Reduced-motion
+     overrides below. */
+  clip-path: inset(110% 0% 0% 0%);
 }
 .topbar__toggle:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -134,9 +156,15 @@
   .topbar__toggle-line {
     transition: none;
   }
+  .topbar__toggle {
+    clip-path: none !important;
+  }
 }
 html[data-motion="off"] .topbar__toggle-line {
   transition: none;
+}
+html[data-motion="off"] .topbar__toggle {
+  clip-path: none !important;
 }
 
 /* ── HEADER SPACER ───────────────────────────────────────────────────────── */
@@ -214,6 +242,37 @@ html[data-motion="off"] .topbar__toggle-line {
   max-width: 26ch;
   text-wrap: balance;
   margin-bottom: 1.5rem;
+  /* Hidden by default — same full-page-load flash prevention as
+     .topbar__brand (see that rule's comment). Set back to 1 synchronously by
+     lib/text-reveal.ts's createTextReveal once characters are hidden.
+     Reduced-motion overrides below. */
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-section__statement {
+    opacity: 1 !important;
+  }
+}
+html[data-motion="off"] .intro-section__statement {
+  opacity: 1 !important;
+}
+
+.intro-section__cue {
+  /* Hidden by default, matching .intro-section__statement above — its own
+     entrance JS (IntroSection.tsx's gsap.set(cue, { opacity: 0, y: 24 }))
+     already re-establishes this same value, so this CSS default only matters
+     for the gap before that JS runs. Reduced-motion overrides below. */
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-section__cue {
+    opacity: 1 !important;
+  }
+}
+html[data-motion="off"] .intro-section__cue {
+  opacity: 1 !important;
 }
 
 /* Desktop threshold — kept in sync with lib/breakpoints.ts DESKTOP_BP (900)
@@ -314,7 +373,7 @@ html[data-motion="off"] .topbar__toggle-line {
   background: var(--surface);
 }
 
-/* Brand-colour fill layer (rendered as the row's first child in
+/* Brand-color fill layer (rendered as the row's first child in
    FeatureWipe.tsx). Its own element — not the row's `background` — so it can
    take a view-transition-name and morph into the case study page's matching
    background across the page transition, without dragging the image/text
@@ -342,11 +401,11 @@ html[data-motion="off"] .topbar__toggle-line {
 }
 
 /* Case study page brand background — the other half of the fw-brand shared
-   element. Full-viewport fixed fill (colour set inline per project from the
+   element. Full-viewport fixed fill (color set inline per project from the
    case study data), behind all in-flow content (z-index -1, above the body's
    --surface). The featured panel's .fw-row__brand carries the same name only
    on the clicked row (set imperatively on nav), so the browser morphs that
-   band up into this full-page fill — the colour holds, nothing cross-fades. */
+   band up into this full-page fill — the color holds, nothing cross-fades. */
 .cs-brand-bg {
   position: fixed;
   inset: 0;
@@ -413,6 +472,23 @@ html[data-motion="off"] .topbar__toggle-line {
   grid-column: 1 / 2;
 }
 
+/* Row-0-only: hidden by default (fully clipped, matching the exact values
+   FeatureWipe.tsx's entrance JS uses) so a full page load never paints the
+   first project's image before hydration has clipped it — same full-page-load
+   flash prevention as .topbar__brand et al. above (see plan 024). Only the
+   FIRST row gets this: rows 1+ use a different (scroll-triggered, not
+   load-triggered) reveal mechanism that isn't affected by this gap. Reduced
+   motion / mobile overrides below and in the existing @container/@media
+   blocks — row 0's clip-path is JS-driven only on desktop with motion on;
+   everywhere else it must be forced visible or the image is permanently
+   hidden. */
+.fw-row:first-child.fw-row--right .fw-media {
+  clip-path: inset(0% 0% 0% 100%);
+}
+.fw-row:first-child.fw-row--left .fw-media {
+  clip-path: inset(0% 100% 0% 0%);
+}
+
 /*
  * Inner wrapper is slightly oversized (top: -4%, height: 108%) to give
  * the clip-reveal entrance and shader parallax drift room to move without
@@ -467,7 +543,9 @@ html[data-motion="off"] .topbar__toggle-line {
     display: block;
   }
 }
-html[data-theme="dark"] .fw-media__inner img.fw-img--light:has(~ .fw-img--dark) {
+html[data-theme="dark"]
+  .fw-media__inner
+  img.fw-img--light:has(~ .fw-img--dark) {
   display: none;
 }
 html[data-theme="dark"] .fw-media__inner img.fw-img--dark {
@@ -586,6 +664,7 @@ html[data-theme="light"] .fw-media__inner img.fw-img--dark {
     min-height: auto;
     aspect-ratio: 3 / 4;
     order: 2;
+    clip-path: none !important;
   }
 
   .fw-row--right .fw-media,
@@ -632,6 +711,9 @@ html[data-theme="light"] .fw-media__inner img.fw-img--dark {
     clip-path: none !important;
     transform: none !important;
   }
+  .fw-row:first-child .fw-media {
+    clip-path: none !important;
+  }
 }
 html[data-motion="off"] .fw-clip-cell {
   overflow: visible;
@@ -648,6 +730,9 @@ html[data-motion="off"] .fw-text-fixed {
 html[data-motion="off"] .fw-media__inner {
   clip-path: none !important;
   transform: none !important;
+}
+html[data-motion="off"] .fw-row:first-child .fw-media {
+  clip-path: none !important;
 }
 
 /* ── ABOUT LAYOUT ────────────────────────────────────────────────────────── */

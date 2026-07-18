@@ -32,6 +32,7 @@ import { useLenis } from "@/components/providers/SmoothScroll";
 import { useTheme, resolveTheme } from "@/lib/use-theme";
 import { useMotionPref, readMotionPref } from "@/lib/motion-pref";
 import { DESKTOP_BP } from "@/lib/breakpoints";
+import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
 import type { CaseStudy } from "@/lib/case-studies";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -70,6 +71,12 @@ export function FeatureWipe({ features, id }: Props) {
   // that row — not just "row roughly in viewport", which can land mid-fade.
   const centersRef = useRef<number[]>([]);
   const mainTriggerRef = useRef<ScrollTrigger | null>(null);
+  // First-image entrance reveal plays once per mount (guarded so a resize
+  // re-init doesn't replay it — see the row-0 branch in the timeline effect).
+  const entrancePlayedRef = useRef(false);
+  // True once a page-exit animation has begun, so a second click during the
+  // exit can't start a competing timeline or fire a second router.push.
+  const isExitingRef = useRef(false);
 
   // ── Timeline effect ─────────────────────────────────────────────────────
   // SplitText + the scrubbed GSAP timeline. Deliberately excludes `theme`
@@ -332,13 +339,65 @@ export function FeatureWipe({ features, id }: Props) {
           }
         }
 
-        // Clip reveal on image wrappers — no scale, shader handles depth.
-        // inset clips top and bottom symmetrically so the reveal reads as
-        // the image rising into frame rather than scaling up from centre.
+        // Image reveals.
+        //   Row 0 — the only image in view on load — plays an entrance reveal
+        //     once: the inverse of the page-exit wipe (its media column
+        //     un-clips from its outer edge), with a chromatic-aberration burst
+        //     that eases out as it lands. It skips the scroll reveal below.
+        //   Rows 1+ keep the scroll-scrubbed reveal (inset clips the bottom so
+        //     the image rises into frame as its row scrolls up).
         bandRefs.current.forEach((rowEl, idx) => {
           if (!rowEl) return;
           const mediaInner = mediaRefs.current[idx];
-          if (!mediaInner) return;
+          const mediaCol = mediaInner?.parentElement; // .fw-media
+          if (!mediaInner || !mediaCol) return;
+
+          if (idx === 0) {
+            const exitRight = features[0].side === "right";
+            const clipped = exitRight
+              ? "inset(0% 0% 0% 100%)"
+              : "inset(0% 100% 0% 0%)";
+            if (!entrancePlayedRef.current) {
+              entrancePlayedRef.current = true;
+              // gsap.set (synchronous, before paint in this useLayoutEffect)
+              // hides it through the delay so the un-clipped image never
+              // flashes before the reveal starts.
+              gsap.set(mediaCol, { clipPath: clipped });
+              const introTl = gsap.timeline({
+                delay: ENTRANCE_DELAY.firstImage,
+              });
+              introTl.to(
+                mediaCol,
+                {
+                  clipPath: "inset(0% 0% 0% 0%)",
+                  ease: "power3.out",
+                  duration: 0.9,
+                },
+                0,
+              );
+              const burst = { vel: 1 };
+              introTl.to(
+                burst,
+                {
+                  vel: 0,
+                  duration: 1.0,
+                  ease: "power2.out",
+                  onUpdate: () =>
+                    glInstancesRef.current[0]?.setScrollState(burst.vel, 0.5),
+                },
+                0,
+              );
+            } else {
+              // A resize re-init after the entrance already played — just show it
+              // fully rather than replaying. Explicit set, not clearProps: .fw-media
+              // now has a CSS-default hidden clip-path on row 0 (app/layout.css, see
+              // plan 025) for the full-page-load flash fix. clearProps would fall
+              // through to that CSS default and re-hide the image on every desktop
+              // resize after the entrance has already played once.
+              gsap.set(mediaCol, { clipPath: "inset(0% 0% 0% 0%)" });
+            }
+            return;
+          }
 
           gsap.fromTo(
             mediaInner,
@@ -358,9 +417,23 @@ export function FeatureWipe({ features, id }: Props) {
       }, sectionRef);
     }
 
-    init();
+    // Split masks are measured at init time; if the display font hasn't
+    // loaded yet the line breaks are computed against the fallback font and
+    // never recomputed. Defer the first init until fonts are ready so the
+    // masks match the final glyph metrics. Resolves immediately on warm cache.
+    let fontsReady = true;
+    if (typeof document !== "undefined" && document.fonts.status !== "loaded") {
+      fontsReady = false;
+      document.fonts.ready.then(() => {
+        // The cleanup below flips this ref; bail if we unmounted first.
+        if (disposed) return;
+        init();
+      });
+    }
+    if (fontsReady) init();
 
     let resizeTimeout: NodeJS.Timeout;
+    let disposed = false;
     const handleResize = () => {
       if (window.innerWidth === currentWidth) return;
       currentWidth = window.innerWidth;
@@ -370,6 +443,7 @@ export function FeatureWipe({ features, id }: Props) {
     window.addEventListener("resize", handleResize);
 
     return () => {
+      disposed = true;
       clearTimeout(resizeTimeout);
       window.removeEventListener("resize", handleResize);
       if (ctx) ctx.revert();
@@ -468,9 +542,7 @@ export function FeatureWipe({ features, id }: Props) {
       mediaObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            const i = bandRefs.current.indexOf(
-              entry.target as HTMLDivElement,
-            );
+            const i = bandRefs.current.indexOf(entry.target as HTMLDivElement);
             if (i === -1) return;
             if (entry.isIntersecting) {
               if (!reduced) initRowGL(i);
@@ -508,11 +580,14 @@ export function FeatureWipe({ features, id }: Props) {
   // brand panel (tagged fw-brand) then morphs seamlessly into the case study
   // page's matching background while the rest cross-fades.
   const runExit = (i: number, href: string) => {
+    if (isExitingRef.current) return;
+    isExitingRef.current = true;
+
     const activeRow = bandRefs.current[i];
     const activeText = textRefs.current[i];
 
     // Tag the active row's brand layer as the shared transition element so its
-    // colour holds into the case study page (whether or not we animate below).
+    // color holds into the case study page (whether or not we animate below).
     const brandEl = activeRow?.querySelector<HTMLElement>(".fw-row__brand");
     if (brandEl) brandEl.style.viewTransitionName = "fw-brand";
 
@@ -592,7 +667,7 @@ export function FeatureWipe({ features, id }: Props) {
                 : undefined
             }
           >
-            {/* Brand-colour fill — its own layer (not the row's background) so
+            {/* Brand-color fill — its own layer (not the row's background) so
                 it can carry a view-transition-name and morph into the case
                 study page's matching background without dragging the image /
                 text along. Transparent at rest, full brand on hover/focus. */}
@@ -647,8 +722,12 @@ export function FeatureWipe({ features, id }: Props) {
                         e.preventDefault();
                         runExit(i, `/work/${f.slug}`);
                       }}
-                      onMouseEnter={() => glInstancesRef.current[i]?.setHover(true)}
-                      onMouseLeave={() => glInstancesRef.current[i]?.setHover(false)}
+                      onMouseEnter={() =>
+                        glInstancesRef.current[i]?.setHover(true)
+                      }
+                      onMouseLeave={() =>
+                        glInstancesRef.current[i]?.setHover(false)
+                      }
                       onBlur={() => glInstancesRef.current[i]?.setHover(false)}
                       onFocus={() => {
                         // Fabric-wave hover trigger (see MediaGL.setHover) —

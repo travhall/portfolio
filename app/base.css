@@ -117,7 +117,10 @@ a {
      Distinct from --line (layout dividers) so each can be tuned
      independently. brand-3-400 at oklch(0.71) achieves ~3.4:1 against
      --surface, clearing WCAG 1.4.11 non-text contrast (3:1 required). */
-  --border-control: light-dark(var(--color-brand-3-400), var(--color-brand-3-500));
+  --border-control: light-dark(
+    var(--color-brand-3-400),
+    var(--color-brand-3-500)
+  );
 
   /* water & glass */
   /* brand-1-700 not -600 — live measurement on --surface confirms -600 lands
@@ -301,10 +304,10 @@ p {
   animation: none;
 }
 
-/* fw-brand — the featured panel's brand colour morphing into the case study
+/* fw-brand — the featured panel's brand color morphing into the case study
  * page's full-bleed background (and back). The group animates the box from the
- * panel's band up to full-viewport; old/new are the same solid brand colour so
- * their default cross-fade is invisible — the colour simply holds while the
+ * panel's band up to full-viewport; old/new are the same solid brand color so
+ * their default cross-fade is invisible — the color simply holds while the
  * box expands. Eased to match the root fade timing so the whole transition
  * reads as one motion. Covered by the reduced-motion / data-motion resets. */
 ::view-transition-group(fw-brand) {

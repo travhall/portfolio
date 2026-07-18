@@ -14,22 +14,83 @@
  * button and overlay share a single source of truth.
  */
 
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import { usePathname } from "next/navigation";
 import { Link } from "next-view-transitions";
+import { gsap } from "gsap";
 import { MenuOverlay } from "./MenuOverlay";
 import { prefersReducedMotion, triggerRipple } from "@/components/ui/ripple";
+import { createTextReveal } from "@/lib/text-reveal";
 import { siteConfig } from "@/lib/site-config";
+import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
 
-const RIPPLE_BRAND  = { strength: 9, size: 90,  duration: 600 };
-const RIPPLE_TOGGLE = { strength: 8, size: 80,  duration: 550 };
+const RIPPLE_BRAND = { strength: 9, size: 90, duration: 600 };
+const RIPPLE_TOGGLE = { strength: 8, size: 80, duration: 550 };
 
 export function Topbar() {
   const headerRef = useRef<HTMLElement>(null);
   const brandRef = useRef<HTMLAnchorElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const menuOriginRef = useRef({ x: 0, y: 0 });
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+
+  // ── Entrance reveal — ONCE per site load ────────────────────────────────
+  // Topbar is a root-layout singleton, so this mount effect runs exactly once
+  // and survives client navigations (it does not replay on route change).
+  // The wordmark's characters cascade up out of their clip masks (the shared
+  // text reveal); the menu button wipes up alongside it. useLayoutEffect sets
+  // the hidden start state before the browser paints, so the server-rendered
+  // visible chrome never flashes before the reveal begins. cSpell:ignore Topbar Wordmark navigations
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const cleanups: Array<() => void> = [];
+
+    const brand = brandRef.current;
+    if (brand) {
+      const reveal = createTextReveal(brand, {
+        delay: ENTRANCE_DELAY.wordmark,
+        duration: 0.7,
+        stagger: 0.32,
+      });
+      let cancelled = false;
+      reveal.ready.then(() => {
+        if (!cancelled) reveal.tl.play();
+      });
+      cleanups.push(() => {
+        cancelled = true;
+        reveal.cleanup();
+      });
+    }
+
+    const toggle = toggleRef.current;
+    if (toggle) {
+      gsap.set(toggle, { clipPath: "inset(110% 0% 0% 0%)", opacity: 0 });
+      const tween = gsap.to(toggle, {
+        clipPath: "inset(0% 0% 0% 0%)",
+        opacity: 1,
+        ease: "power3.out",
+        duration: 0.7,
+        delay: ENTRANCE_DELAY.menuButton,
+        // clearProps once done so the CSS :hover opacity (0.6) works again
+        // instead of the tween's inline opacity: 1 pinning it.
+        onComplete: () => gsap.set(toggle, { clearProps: "opacity" }),
+      });
+      cleanups.push(() => {
+        tween.kill();
+        gsap.set(toggle, { clearProps: "clipPath,opacity" });
+      });
+    }
+
+    return () => cleanups.forEach((fn) => fn());
+  }, []);
 
   // Wordmark fade on scroll — pinned fully visible while the menu is open
   // so it can act as the overlay's "back to top / home" anchor.
@@ -103,6 +164,7 @@ export function Topbar() {
           {siteConfig.host}
         </Link>
         <button
+          ref={toggleRef}
           type="button"
           className="topbar__toggle"
           aria-label={isOpen ? "Close menu" : "Open menu"}
