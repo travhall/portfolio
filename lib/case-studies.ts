@@ -101,24 +101,31 @@ export const caseStudies: CaseStudy[] = [
     buttonText: "Visit Skate Shop",
     featured: true,
     theme: {
+      // bg is --surface-secondary, not --surface-primary — corrected after
+      // an initial pass used the wrong surface tier. button.fg is still the
+      // real --ui-button-text value (which is tied to --surface-primary in
+      // their source, unaffected by this correction), so it's a separate,
+      // deliberately different value from `bg` now, not the same-value
+      // coincidence it read as before.
+      //
       // No distinct border token sampled here — falls back to the derived
-      // fg/bg mix in resolveThemeVars. accentText comes from their real
-      // --content-emphasis (light) / --ui-accent (dark) tokens — a
-      // muted-down variant of the badge accent made specifically for text.
-      // Their real <button> elements (the tag/filter chips) use
-      // --ui-button-surface (same value as accent) with --ui-button-text,
-      // which is literally that mode's own bg color — spelled out
-      // explicitly below even though it matches this file's fallback
-      // defaults, so it reads as confirmed, not coincidental.
+      // fg/bg mix in resolveThemeVars, rechecked against the corrected bg
+      // (3.82:1 light / 4.46:1 dark, both clear the 3:1 UI floor).
+      //
+      // accentText is their real --content-emphasis (light) / --ui-accent
+      // (dark) tokens, but light's raw value only measured 4.52:1 against
+      // the corrected (lighter) bg — a razor-thin margin over the 4.5 AA
+      // floor, the same problem wylie-dog's dark accentText had above.
+      // Darkened 20% toward fg and re-measured at 6.01:1.
       light: {
-        bg: "oklch(96.5% 0.008 70)",
+        bg: "oklch(92% 0.012 70)",
         fg: "oklch(18% 0.024 70)",
         accent: "oklch(38% 0.072 117)",
-        accentText: "oklch(51.5% 0.075 60)",
+        accentText: "color-mix(in oklab, oklch(51.5% 0.075 60) 80%, oklch(18% 0.024 70) 20%)",
         button: { bg: "oklch(38% 0.072 117)", fg: "oklch(96.5% 0.008 70)" },
       },
       dark: {
-        bg: "oklch(12.5% 0.042 117)",
+        bg: "oklch(22% 0.052 117)",
         fg: "oklch(98.5% 0.008 117)",
         accent: "oklch(68% 0.065 60)",
         accentText: "oklch(76% 0.055 60)",

@@ -132,6 +132,26 @@ const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
     ];
   });
 
+// Every case study's real button colors — the filled "back home" CTA on
+// its case-study page (see .btn--solid's --cs-button-* override in
+// layout.css), not a derived tint. Same living-audit logic as the pairings
+// above: adding a project or changing its button colors surfaces a
+// pass/fail here automatically.
+const CASE_STUDY_BUTTON_PAIRINGS = caseStudies
+  .filter((study) => study.theme)
+  .map((study) => {
+    const vars = resolveThemeVars(study.theme)!;
+    return {
+      fgVar: vars["--cs-button-fg"],
+      bgVar: vars["--cs-button-bg"],
+      bgLabel: `${study.headline} button`,
+      sample: study.buttonText ?? "Let's get you back home",
+      sampleClassName: "type-small",
+      context: `Case-study button — --cs-button-fg on ${study.slug}'s --cs-button-bg`,
+      showAAA: false,
+    };
+  });
+
 const TYPE_ROWS = [
   { cls: "type-display",   label: "Display",   token: "--text-display · light 300" },
   { cls: "type-h1",        label: "Heading 1", token: "--text-h1 · light 300" },
@@ -247,6 +267,17 @@ export default function KitPage() {
       >
         <div className="kit-pairings">
           {CASE_STUDY_ACCENT_PAIRINGS.map((pairing) => (
+            <ContrastSwatch key={pairing.context} {...pairing} />
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        title="Case study buttons"
+        note="Each project's real filled-button colors — the case-study page's 'back home' CTA (.btn--solid's --cs-button-* override in layout.css). Same living audit; re-check here if any of these change."
+      >
+        <div className="kit-pairings">
+          {CASE_STUDY_BUTTON_PAIRINGS.map((pairing) => (
             <ContrastSwatch key={pairing.context} {...pairing} />
           ))}
         </div>
