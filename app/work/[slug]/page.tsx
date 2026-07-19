@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CaseStudyHero } from "@/components/features/CaseStudyHero";
 import { CaseStudyOverview } from "@/components/features/CaseStudyOverview";
 import { CaseStudyMedia } from "@/components/features/CaseStudyMedia";
+import { CaseStudyNav } from "@/components/features/CaseStudyNav";
 import { caseStudies } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
 import { createMetadata } from "@/lib/metadata";
@@ -75,6 +76,8 @@ export default async function CaseStudyPage({ params }: Props) {
           <CaseStudyMedia section={section} />
         </div>
       ))}
+
+      <CaseStudyNav currentSlug={study.slug} />
     </main>
   );
 }

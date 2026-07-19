@@ -767,3 +767,66 @@ html[data-motion="off"] .toggle-pill__label.is-entering {
 html[data-motion="off"] .email-action__panel {
   animation: none;
 }
+
+/* ═══════════════════════════════ CASE-STUDY CARD ═══════════════════════════
+   Shared between the case-study page's "Related Projects" nav (layout.css's
+   .case-nav) and the /work archive grid — one card, both places. Deliberately
+   plain (our own type-eyebrow/type-h3, not a themed re-skin per project):
+   these cards always point at a *different* project than whichever themed
+   page they might appear on, so borrowing --cs-fg/--cs-accent here would be
+   describing the wrong project's brand. auto-fit (not auto-fill) so a
+   short 3-4 item row (the related nav) has its empty tracks collapse and
+   stretch to fill, instead of leaving a ragged gap on wide viewports. */
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: calc(var(--gut) * 0.25);
+}
+.case-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  padding: var(--gut);
+}
+.case-card__media {
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: var(--surface-dim);
+}
+.case-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--btn-dur) var(--ease);
+}
+.case-card:hover .case-card__img {
+  transform: scale(1.03);
+}
+.case-card__eyebrow {
+  margin-top: 0.25rem;
+}
+.case-card__title {
+  margin: 0;
+}
+.case-card--disabled {
+  cursor: default;
+}
+
+/* Mobile — matches FeatureWipe's own mobile treatment (layout.css's
+   `@container fw-section (max-width: 899px)`): the image bleeds edge-to-edge
+   while the eyebrow/title keep a readable inset. .case-grid's single column
+   at this width (auto-fit's minmax(280px, 1fr) already collapses to 1 col
+   well before 900px) means each card is the full row, so breaking just the
+   media out of .cs-container's padding — not the whole card — reads as one
+   continuous edge-to-edge photo per row, same as .fw-media on mobile.
+   Negative margin exactly cancels .cs-container's own padding (both read
+   the same --gut fraction, so they stay in sync if that value ever changes).
+   Desktop threshold kept in sync with lib/breakpoints.ts DESKTOP_BP (900),
+   same as every other breakpoint in this codebase. */
+@media (max-width: 899px) {
+  .case-card__media {
+    margin-inline: calc(-1 * var(--gut) * 0.25);
+  }
+}

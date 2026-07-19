@@ -176,11 +176,17 @@ html[data-motion="off"] .topbar__toggle {
  * rather than floating over empty space. cSpell:ignore wordmark
  * No content — purely structural rhythm.
  */
+/* border-bottom reads --cs-border first — .header-spacer is a descendant
+   of the case-study page's themed <main> (app/work/[slug]/page.tsx), so on
+   a themed case study this resolves to that project's own border color
+   instead of the site's fixed --line, which can wash out against an
+   arbitrary brand background (confirmed on el-camino's tan bg). Falls
+   through to --line on every other page, where --cs-border is never set. */
 .header-spacer {
   display: grid;
   grid-template-columns: 1fr;
   height: var(--topbar-h);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--cs-border, var(--line));
   position: relative;
 }
 
@@ -203,11 +209,11 @@ html[data-motion="off"] .topbar__toggle {
     }
     &::before {
       left: 25%;
-      border-right: 1px solid var(--line);
+      border-right: 1px solid var(--cs-border, var(--line));
     }
     &::after {
       right: 25%;
-      border-left: 1px solid var(--line);
+      border-left: 1px solid var(--cs-border, var(--line));
     }
   }
 }
@@ -552,7 +558,7 @@ html[data-motion="off"] .cs-hero-image {
 .cs-container {
   max-width: var(--maxw);
   margin-inline: auto;
-  padding-inline: var(--gut);
+  padding: var(--gut);
 }
 
 /* ── Hero — tagline + services, next to the existing eyebrow/headline
@@ -703,6 +709,26 @@ html[data-motion="off"] .cs-hero-image {
 }
 .cs-split__text {
   color: var(--cs-fg, var(--ink));
+}
+
+/* ── CASE-STUDY NAV — "Related Projects" ─────────────────────────────────── */
+/* Sits between the page's own content and the global SiteFooter (rendered
+   inside <main>, right before it closes — see CaseStudyNav.tsx and
+   app/work/[slug]/page.tsx). Text stays in the site's own ink tokens, not
+   --cs-fg — every card here points at a *different* project than the one
+   whose theme is active, so the current page's brand color doesn't apply to
+   copy describing another project (see components.css's .case-card comment
+   for the same reasoning applied to the cards themselves). */
+.case-nav {
+  padding-block: clamp(3rem, 8vh, 5rem);
+  border-top: 1px solid var(--cs-border, var(--line));
+}
+.case-nav__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
 }
 
 /*
@@ -1297,8 +1323,14 @@ html[data-theme="light"] .about-portrait__fallback {
 }
 
 /* ── SITE FOOTER ─────────────────────────────────────────────────────────── */
+/* --cs-border first, same reasoning as .header-spacer above — but .site-footer
+   is a sibling of the case-study <main>, not a descendant (app/layout.tsx
+   renders it after {children} closes), so it can't inherit that inline
+   custom property through the DOM tree the way .header-spacer does. Site-
+   Footer.tsx resolves the current route's case-study theme itself and sets
+   --cs-border directly on this element to work around that. */
 .site-footer {
-  border: 1px solid var(--line);
+  border-top: 1px solid var(--cs-border, var(--line));
   padding: 28px var(--gut);
   display: flex;
   flex-direction: row-reverse;

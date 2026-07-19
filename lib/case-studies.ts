@@ -367,3 +367,38 @@ export const caseStudies: CaseStudy[] = [
     comingSoon: true,
   },
 ];
+
+/** The 2 preceding + 2 subsequent case studies for a "Related Projects"-style
+ *  nav on a case-study page — not an actual relatedness match (no shared
+ *  tags/sectors involved), just positional neighbors in this array, circular
+ *  so a study at either end still gets a full set. comingSoon entries are
+ *  excluded (no page to link to) and never counted as one of the 4 slots.
+ *  Deduped against the current slug and each other — with only 4 published
+ *  case studies today, preceding/subsequent wrap into the same 3 others; a
+ *  genuine 4 distinct picks only appears once a 5th is published. */
+export function getRelatedCaseStudies(currentSlug: string, count = 2): CaseStudy[] {
+  const linkable = caseStudies.filter((s) => !s.comingSoon);
+  const index = linkable.findIndex((s) => s.slug === currentSlug);
+  if (index === -1) return [];
+
+  const n = linkable.length;
+  const seen = new Set([currentSlug]);
+  const related: CaseStudy[] = [];
+
+  for (let offset = count; offset >= 1; offset--) {
+    const study = linkable[(index - offset + n) % n];
+    if (!seen.has(study.slug)) {
+      seen.add(study.slug);
+      related.push(study);
+    }
+  }
+  for (let offset = 1; offset <= count; offset++) {
+    const study = linkable[(index + offset) % n];
+    if (!seen.has(study.slug)) {
+      seen.add(study.slug);
+      related.push(study);
+    }
+  }
+
+  return related;
+}
