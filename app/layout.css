@@ -414,6 +414,64 @@ html[data-motion="off"] .intro-section__cue {
   view-transition-name: fw-brand;
 }
 
+/* Case-study hero — eyebrow/headline/image entrance-exit choreography,
+   mirroring FeatureWipe's row-0 image reveal and IntroSection's hero
+   statement (see plans 024/025/027). Hidden by default so a full page load
+   of a case-study URL never paints the hero before hydration hides it — same
+   full-page-load flash prevention as those two. Reduced-motion / mobile
+   overrides below force everything back to visible. */
+.cs-hero-eyebrow .eyebrow-inner {
+  display: inline-block;
+  opacity: 0;
+}
+.cs-hero-headline {
+  opacity: 0;
+}
+.cs-hero-image {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  margin: 2rem 0;
+  clip-path: inset(0% 0% 0% 100%);
+}
+.cs-hero-image__img,
+.cs-hero-image__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cs-hero-image__img {
+  transition: opacity 0.4s var(--ease);
+}
+.cs-hero-image.is-gl .cs-hero-image__img {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-hero-eyebrow .eyebrow-inner {
+    opacity: 1 !important;
+  }
+  .cs-hero-headline {
+    opacity: 1 !important;
+  }
+  .cs-hero-image {
+    clip-path: none !important;
+  }
+}
+html[data-motion="off"] .cs-hero-eyebrow .eyebrow-inner {
+  opacity: 1 !important;
+}
+html[data-motion="off"] .cs-hero-headline {
+  opacity: 1 !important;
+}
+html[data-motion="off"] .cs-hero-image {
+  clip-path: none !important;
+}
+
 /*
  * Dwell buffers — scroll into the section before the first row is visible;
  * scroll past all rows before exiting. 20vh each gives a comfortable

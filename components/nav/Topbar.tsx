@@ -29,6 +29,8 @@ import { prefersReducedMotion, triggerRipple } from "@/components/ui/ripple";
 import { createTextReveal } from "@/lib/text-reveal";
 import { siteConfig } from "@/lib/site-config";
 import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
+import "@/lib/view-transition";
+import { tryPageExit } from "@/lib/page-exit";
 
 const RIPPLE_BRAND = { strength: 9, size: 90, duration: 600 };
 const RIPPLE_TOGGLE = { strength: 8, size: 80, duration: 550 };
@@ -155,9 +157,31 @@ export function Topbar() {
           onClick={(e: MouseEvent<HTMLAnchorElement>) => {
             if (!prefersReducedMotion())
               triggerRipple(e.currentTarget, e, RIPPLE_BRAND);
-            // Already home — close the menu without re-running the route
-            // transition/fade for a same-page "navigation".
-            if (pathname === "/") e.preventDefault();
+
+            if (pathname === "/") {
+              // Already home — close the menu without re-running the route
+              // transition/fade for a same-page "navigation".
+              e.preventDefault();
+            } else if (
+              !(
+                e.metaKey ||
+                e.ctrlKey ||
+                e.shiftKey ||
+                e.altKey ||
+                e.button !== 0
+              ) &&
+              tryPageExit("/")
+            ) {
+              // The current page has its own exit animation registered
+              // (e.g. a case-study page, via CaseStudyHero) — hand off to
+              // it instead of navigating immediately; it animates out, then
+              // navigates itself. Modifier / non-primary clicks are left
+              // alone (tryPageExit is never even called for them, so
+              // next-view-transitions' own Link handles "open in new tab"
+              // etc normally) — see lib/page-exit.ts.
+              e.preventDefault();
+            }
+
             close();
           }}
         >

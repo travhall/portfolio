@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { BackHomeButton } from "@/components/nav/BackHomeButton";
+import { CaseStudyHero } from "@/components/features/CaseStudyHero";
 import { caseStudies } from "@/lib/case-studies";
 import { createMetadata } from "@/lib/metadata";
 
@@ -55,19 +55,12 @@ export default async function CaseStudyPage({ params }: Props) {
           padding: "var(--gut)",
         }}
       >
-        <p className="type-eyebrow text-ink-muted">{study.eyebrow}</p>
-        <h1 className="type-h1 text-ink">{study.headline}</h1>
-
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={study.image}
-          alt={study.imageAlt ?? ""}
-          width={756}
-          height={910}
-          style={{ width: "100%", height: "auto", margin: "2rem 0" }}
+        <CaseStudyHero
+          eyebrow={study.eyebrow}
+          headline={study.headline}
+          image={study.image}
+          imageAlt={study.imageAlt}
         />
-
-        <BackHomeButton>Let&apos;s get you back home</BackHomeButton>
       </section>
     </main>
   );
