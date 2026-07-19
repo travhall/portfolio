@@ -425,6 +425,24 @@ html[data-motion="off"] .intro-section__cue {
   display: inline-block;
   opacity: 0;
 }
+/* The one moment a case study's actual accent color shows up as itself,
+   not just a bg/fg register — a plain dot, not a filled badge. Real sites
+   sampled for this data mostly use their accent as filled UI (buttons,
+   badges), but text-on-accent contrast isn't reliably safe generically:
+   checked directly, wylie-dog's blue clears only 4.49:1 against its best
+   candidate text color in dark mode — under the 4.5:1 floor for small
+   text. A dot needs no text on top of it, so the accent can be used at
+   full strength with no contrast risk at all. Mirrors a pattern already
+   observed firsthand — antibroadcasting's own hero ends in a gold dot. */
+.cs-hero-eyebrow__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: var(--cs-accent, var(--water));
+  vertical-align: middle;
+}
 .cs-hero-headline {
   opacity: 0;
 }
