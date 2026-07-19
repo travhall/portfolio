@@ -203,6 +203,9 @@ export class MediaGL {
   private prog!:   WebGLProgram;
   private vao!:    WebGLVertexArrayObject;
   private tex!:    WebGLTexture;
+  private posBuf!: WebGLBuffer;
+  private uvBuf!:  WebGLBuffer;
+  private idxBuf!: WebGLBuffer;
 
   // Uniform locations (populated in _build)
   private uTime!:      WebGLUniformLocation;
@@ -236,6 +239,13 @@ export class MediaGL {
   private _boundResize!: () => void;
   private resizeObserver: ResizeObserver | null = null;
 
+  // Cached so a context restore can re-upload the texture without refetching
+  // the network image. Null means the image failed to load (or hasn't
+  // resolved yet) — _build's 1×1 fallback path handles that case either way.
+  private img: HTMLImageElement | null = null;
+  private _boundContextLost!: (e: Event) => void;
+  private _boundContextRestored!: () => void;
+
   constructor(canvas: HTMLCanvasElement, opts: MediaGLOptions) {
     this.canvas = canvas;
     this.opts   = { effect: 'parallax', intensity: 1.5, onReady: () => {}, externalScroll: false, ...opts };
@@ -262,6 +272,7 @@ export class MediaGL {
 
     const img = new Image();
     img.onload = () => {
+      this.img  = img;
       this.imgW = img.naturalWidth;
       this.imgH = img.naturalHeight;
       this._build(img);
@@ -283,6 +294,21 @@ export class MediaGL {
       this.resizeObserver = new ResizeObserver(() => this._resize());
       this.resizeObserver.observe(parent);
     }
+
+    // A lost context invalidates every GL object (program, buffers, texture,
+    // VAO) even though the canvas element and its JS-side `gl` reference
+    // survive — preventDefault() on 'lost' is what tells the browser this
+    // context is worth restoring at all; without it 'restored' never fires.
+    // Rebuilding on restore reuses the cached `this.img` instead of
+    // refetching the network image.
+    this._boundContextLost = (e: Event) => {
+      e.preventDefault();
+      this.ready = false;
+      this.stop();
+    };
+    this._boundContextRestored = () => this._build(this.img);
+    this.canvas.addEventListener('webglcontextlost', this._boundContextLost, false);
+    this.canvas.addEventListener('webglcontextrestored', this._boundContextRestored, false);
   }
 
   private _build(img: HTMLImageElement | null) {
@@ -316,22 +342,22 @@ export class MediaGL {
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
 
-    const posBuf = gl.createBuffer()!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+    this.posBuf = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuf);
     gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
     const aPos = gl.getAttribLocation(this.prog, 'a_pos');
     gl.enableVertexAttribArray(aPos);
     gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
-    const uvBuf = gl.createBuffer()!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuf);
+    this.uvBuf = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuf);
     gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
     const aUv = gl.getAttribLocation(this.prog, 'a_uv');
     gl.enableVertexAttribArray(aUv);
     gl.vertexAttribPointer(aUv, 2, gl.FLOAT, false, 0, 0);
 
-    const idxBuf = gl.createBuffer()!;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
+    this.idxBuf = gl.createBuffer()!;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.idxBuf);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
@@ -531,10 +557,29 @@ export class MediaGL {
     this.stop();
     window.removeEventListener('scroll', this._boundScroll);
     window.removeEventListener('resize', this._boundResize);
+    this.canvas.removeEventListener('webglcontextlost', this._boundContextLost);
+    this.canvas.removeEventListener('webglcontextrestored', this._boundContextRestored);
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
-    // Do not call loseContext — it permanently breaks the canvas element for
-    // React remounts (StrictMode or navigation). The GPU resources are freed
+
+    // Free the individual GL objects — this is unrelated to (and much
+    // narrower than) the WEBGL_lose_context extension: deleting a program,
+    // texture, VAO, or buffer doesn't touch the context itself, so the
+    // canvas element stays reusable for a React remount (StrictMode or a
+    // client-side navigation back to the same route) exactly as before.
+    // Guarded by `ready` too — if dispose() runs while the source image is
+    // still loading, _build() never ran and prog/tex/vao/bufs were never
+    // created, so there's nothing to free yet. Skipped if the context is
+    // already lost — every name below is already invalid GPU-side in that
+    // case, and gl.delete* would just no-op anyway.
+    if (this.ready && this.gl && !this.gl.isContextLost()) {
+      this.gl.deleteProgram(this.prog);
+      this.gl.deleteTexture(this.tex);
+      this.gl.deleteVertexArray(this.vao);
+      this.gl.deleteBuffer(this.posBuf);
+      this.gl.deleteBuffer(this.uvBuf);
+      this.gl.deleteBuffer(this.idxBuf);
+    }
   }
 }
 
