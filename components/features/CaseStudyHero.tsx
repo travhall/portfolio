@@ -213,12 +213,12 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt }: Props) {
 
   return (
     <>
-      <p className="type-eyebrow text-ink-muted cs-hero-eyebrow">
+      <p className="type-eyebrow cs-hero-eyebrow">
         <span ref={eyebrowInnerRef} className="eyebrow-inner">
           {eyebrow}
         </span>
       </p>
-      <h1 ref={headlineRef} className="type-h1 text-ink cs-hero-headline">
+      <h1 ref={headlineRef} className="type-h1 cs-hero-headline">
         {headline}
       </h1>
       <div ref={imageColRef} className="cs-hero-image">

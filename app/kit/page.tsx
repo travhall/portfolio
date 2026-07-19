@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { MotionToggle } from "@/components/ui/MotionToggle";
 import { ContrastSwatch } from "./ContrastSwatch";
 import { caseStudies } from "@/lib/case-studies";
-import { resolveAccentBg } from "@/lib/brand-accent";
+import { resolveThemeVars } from "@/lib/case-study-theme";
 import "./kit.css";
 
 // /kit — internal style guide. Unlinked: not in nav, not in sitemap.
@@ -92,42 +92,39 @@ const COLOR_PAIRINGS = [
   },
 ];
 
-// Every case study's accent, run through the exact same contrast check as
-// the fixed design-system pairings above — the accessibility audit for
+// Every case study's real theme, run through the exact same contrast check
+// as the fixed design-system pairings above — the accessibility audit for
 // content data (one-off per-project colors), not just tokens. Adding a new
-// case study or changing an accent surfaces a pass/fail here automatically;
-// there's no separate process to remember. See lib/brand-accent.ts for why
-// these are called "accent," not "brand." AAA is dropped here (see
-// showAAA below) — 7:1 isn't a realistic bar for text on a saturated accent
-// and every pairing failing it read as noise; AA is the actual gate.
+// case study or changing a theme surfaces a pass/fail here automatically;
+// there's no separate process to remember. See lib/case-study-theme.ts for
+// why this isn't called "brand." AAA is dropped here (see showAAA below) —
+// 7:1 isn't a realistic bar for text on a saturated background and every
+// pairing failing it read as noise; AA is the actual gate.
 //
-// Both eyebrow and headline use --ink, not --ink-muted/--ink-faint — the
-// muted tokens are tuned for contrast against --surface only (see
-// base.css) and aren't safe against an arbitrary accent. See the
-// ".cs-brand-bg ~ section" override in layout.css that forces this in
-// practice; these pairings mirror what actually renders, not the default
-// .text-ink-muted class CaseStudyHero's eyebrow carries.
+// Both eyebrow and headline use each project's own --cs-fg (not our --ink)
+// — see the .cs-hero-eyebrow/.cs-hero-headline rules in layout.css. These
+// pairings audit what actually renders, not an approximation of it.
 const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
-  .filter((study) => study.accent)
+  .filter((study) => study.theme)
   .flatMap((study) => {
-    const bg = resolveAccentBg(study.accent)!;
+    const vars = resolveThemeVars(study.theme)!;
     return [
       {
-        fgVar: "--ink",
-        bgVar: bg,
-        bgLabel: `${study.headline} accent`,
+        fgVar: vars["--cs-fg"],
+        bgVar: vars["--cs-bg"],
+        bgLabel: `${study.headline} background`,
         sample: study.headline,
         sampleClassName: "type-h3",
-        context: `Case-study headline — .text-ink on ${study.slug}'s accent`,
+        context: `Case-study headline — --cs-fg on ${study.slug}'s background`,
         showAAA: false,
       },
       {
-        fgVar: "--ink",
-        bgVar: bg,
-        bgLabel: `${study.headline} accent`,
+        fgVar: vars["--cs-fg"],
+        bgVar: vars["--cs-bg"],
+        bgLabel: `${study.headline} background`,
         sample: study.eyebrow,
         sampleClassName: "type-eyebrow",
-        context: `Case-study eyebrow — forced .text-ink on ${study.slug}'s accent (overrides .text-ink-muted)`,
+        context: `Case-study eyebrow — --cs-fg on ${study.slug}'s background`,
         showAAA: false,
       },
     ];
@@ -243,8 +240,8 @@ export default function KitPage() {
       </Section>
 
       <Section
-        title="Case study accents"
-        note="Each project's one-off accent color (content data, not a design-system token) audited the same way as everything above — see lib/brand-accent.ts. Values here are placeholders; re-check this section once each project's true accent lands."
+        title="Case study themes"
+        note="Each project's real bg/fg (content data, not a design-system token) audited the same way as everything above — see lib/case-study-theme.ts."
       >
         <div className="kit-pairings">
           {CASE_STUDY_ACCENT_PAIRINGS.map((pairing) => (

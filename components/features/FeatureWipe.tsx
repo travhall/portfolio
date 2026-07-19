@@ -34,7 +34,7 @@ import { useMotionPref, readMotionPref } from "@/lib/motion-pref";
 import { DESKTOP_BP } from "@/lib/breakpoints";
 import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
 import type { CaseStudy } from "@/lib/case-studies";
-import { resolveAccentBg } from "@/lib/brand-accent";
+import { resolveThemeBg } from "@/lib/case-study-theme";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -652,7 +652,7 @@ export function FeatureWipe({ features, id }: Props) {
         // off the same color-scheme the anti-FOUC script sets pre-hydration,
         // so server and client always agree (see lib/use-theme.ts comment
         // for why a React-read theme value can't drive this safely).
-        const rowBrand = resolveAccentBg(f.accent);
+        const rowBrand = resolveThemeBg(f.theme);
         return (
           <div
             key={f.slug}

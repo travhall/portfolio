@@ -1,7 +1,8 @@
+import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { CaseStudyHero } from "@/components/features/CaseStudyHero";
 import { caseStudies } from "@/lib/case-studies";
-import { resolveAccentBg } from "@/lib/brand-accent";
+import { resolveThemeVars } from "@/lib/case-study-theme";
 import { createMetadata } from "@/lib/metadata";
 
 // Scaffold only — case study page design isn't settled yet. This uses
@@ -30,20 +31,20 @@ export default async function CaseStudyPage({ params }: Props) {
   const study = caseStudies.find((s) => s.slug === slug && !s.comingSoon);
   if (!study) notFound();
 
-  const brand = resolveAccentBg(study.accent);
+  const themeVars = resolveThemeVars(study.theme);
 
   return (
-    <main id="main-content">
+    <main
+      id="main-content"
+      style={themeVars as CSSProperties}
+    >
       {/* Full-bleed brand background — the shared element the home page's
           featured panel morphs into (view-transition-name: fw-brand, in
-          layout.css), so the color is seamless across the transition. */}
-      {brand && (
-        <div
-          className="cs-brand-bg"
-          aria-hidden="true"
-          style={{ background: brand }}
-        />
-      )}
+          layout.css), so the color is seamless across the transition.
+          Reads var(--cs-bg) via CSS (layout.css) rather than an inline
+          background here, so it inherits from the --cs-* vars set on this
+          <main> above instead of needing its own copy of the resolved value. */}
+      {themeVars && <div className="cs-brand-bg" aria-hidden="true" />}
 
       <div className="header-spacer" aria-hidden="true" />
 
