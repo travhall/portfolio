@@ -52,6 +52,7 @@ interface Props {
 export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, services }: Props) {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const eyebrowInnerRef = useRef<HTMLSpanElement>(null);
+  const metaRef = useRef<HTMLDivElement>(null);
   const imageColRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<MediaGL | null>(null);
@@ -64,10 +65,12 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, ser
 
     const headlineEl = headlineRef.current;
     const eyebrowInner = eyebrowInnerRef.current;
+    const meta = metaRef.current;
     const imageCol = imageColRef.current;
     if (!headlineEl) return;
 
     if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 0, x: -14 });
+    if (meta) gsap.set(meta, { opacity: 0, y: 14 });
     if (imageCol) gsap.set(imageCol, { clipPath: HIDDEN_CLIP });
 
     const reveal = createTextReveal(headlineEl, {
@@ -84,6 +87,13 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, ser
           eyebrowInner,
           { opacity: 1, x: 0, ease: "power2.out", duration: 0.5 },
           0,
+        );
+      }
+      if (meta) {
+        reveal.tl.to(
+          meta,
+          { opacity: 1, y: 0, ease: "power2.out", duration: 0.6 },
+          0.15,
         );
       }
       if (imageCol) {
@@ -186,6 +196,9 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, ser
     if (eyebrowInnerRef.current) {
       tl.to(eyebrowInnerRef.current, { opacity: 0, x: -14, duration: 0.35 }, 0);
     }
+    if (metaRef.current) {
+      tl.to(metaRef.current, { opacity: 0, y: 14, duration: 0.35 }, 0);
+    }
     if (imageColRef.current) {
       tl.to(imageColRef.current, { clipPath: HIDDEN_CLIP, duration: 0.6 }, 0);
       // Chromatic-aberration burst on exit — the entrance's mirror: starts
@@ -234,7 +247,7 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, ser
           </h1>
         </div>
         {hasMeta && (
-          <div className="cs-hero__meta">
+          <div ref={metaRef} className="cs-hero__meta">
             {tagline && <p className="type-lead cs-hero__tagline">{tagline}</p>}
             {services && services.length > 0 && (
               <ul className="cs-hero__services">

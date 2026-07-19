@@ -29,29 +29,35 @@ export function SiteFooter() {
   // reads correctly against a themed page while the footer's own links,
   // icons, and text stay in the site's own voice, as before.
   const pathname = usePathname();
-  const slug = pathname?.startsWith("/work/") ? pathname.slice("/work/".length) : undefined;
-  const study = slug ? caseStudies.find((s) => s.slug === slug && !s.comingSoon) : undefined;
+  const slug = pathname?.startsWith("/work/")
+    ? pathname.slice("/work/".length)
+    : undefined;
+  const study = slug
+    ? caseStudies.find((s) => s.slug === slug && !s.comingSoon)
+    : undefined;
   const csBorder = resolveThemeVars(study?.theme)?.["--cs-border"];
 
   return (
     <footer
       className="site-footer"
-      style={csBorder ? ({ "--cs-border": csBorder } as CSSProperties) : undefined}
+      style={
+        csBorder ? ({ "--cs-border": csBorder } as CSSProperties) : undefined
+      }
     >
       <div className="site-footer__social">
         <Button
-          variant="ghost"
+          variant="glass"
           iconOnly="github"
           aria-label="GitHub"
           href={siteConfig.links.github}
         />
         <Button
-          variant="ghost"
+          variant="glass"
           iconOnly="linkedin"
           aria-label="LinkedIn"
           href={siteConfig.links.linkedin}
         />
-        <EmailButton variant="ghost" icon="mail" iconPos="right">
+        <EmailButton variant="glass" icon="mail" iconPos="right">
           {siteConfig.email}
         </EmailButton>
       </div>

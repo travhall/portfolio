@@ -544,6 +544,9 @@ html[data-motion="off"] .intro-section__cue {
   .cs-hero-image {
     clip-path: none !important;
   }
+  .cs-hero__meta {
+    opacity: 1 !important;
+  }
 }
 html[data-motion="off"] .cs-hero-eyebrow .eyebrow-inner {
   opacity: 1 !important;
@@ -553,6 +556,9 @@ html[data-motion="off"] .cs-hero-headline {
 }
 html[data-motion="off"] .cs-hero-image {
   clip-path: none !important;
+}
+html[data-motion="off"] .cs-hero__meta {
+  opacity: 1 !important;
 }
 
 /* ── CASE-STUDY PAGE — content patterns ─────────────────────────────────────
@@ -585,10 +591,17 @@ html[data-motion="off"] .cs-hero-image {
   grid-template-columns: 1fr;
   gap: 1.5rem;
 }
+/* Hidden by default, same flash-prevention convention as the eyebrow/
+   headline/image above (CaseStudyHero.tsx sets it back to visible as part
+   of the same entrance timeline — see that file's useLayoutEffect). Reduced-
+   motion / data-motion="off" overrides live alongside the other cs-hero-*
+   ones near .cs-hero-image above. */
 .cs-hero__meta {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  margin-top: calc(var(--gut) * 0.5);
+  opacity: 0;
 }
 .cs-hero__tagline {
   max-width: 42ch;
