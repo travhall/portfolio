@@ -451,6 +451,26 @@ html[data-motion="off"] .intro-section__cue {
   pointer-events: none;
 }
 
+/* On-accent contrast — .text-ink-muted and .btn--ghost's resting state
+   (border-control, ink-muted) are tuned for contrast against --surface (see
+   base.css), not against an arbitrary per-project accent filling the whole
+   viewport behind them. Confirmed failing in practice: /kit's case-study
+   accent audit flags eyebrow text below AA, and the ghost "back home"
+   button reads as barely-there at rest against a saturated accent. --ink
+   already measures 10:1+ against every current accent (again, see /kit) —
+   reuse it here rather than invent a new token. Scoped via the sibling
+   combinator off .cs-brand-bg (only rendered when the case study has an
+   accent) rather than a class on CaseStudyHero itself, so a case study
+   with no accent — sitting on plain --surface — keeps the original muted
+   tuning that's actually correct there. */
+.cs-brand-bg ~ section .cs-hero-eyebrow {
+  color: var(--ink);
+}
+.cs-brand-bg ~ section .btn--ghost {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cs-hero-eyebrow .eyebrow-inner {
     opacity: 1 !important;

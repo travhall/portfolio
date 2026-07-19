@@ -24,6 +24,10 @@ interface Props {
   sample: string;
   sampleClassName?: string;
   context: string;
+  /** Hide the AAA badge — for contexts where AAA (7:1) isn't a realistic or
+   *  relevant bar, e.g. text on a saturated accent color, so the badge row
+   *  doesn't read as a wall of "fail" for a target nobody's aiming for. */
+  showAAA?: boolean;
 }
 
 let sharedCtx: CanvasRenderingContext2D | null = null;
@@ -69,7 +73,7 @@ function toCSSColor(value: string): string {
   return value.startsWith('--') ? `var(${value})` : value;
 }
 
-export function ContrastSwatch({ fgVar, bgVar, bgLabel, sample, sampleClassName = '', context }: Props) {
+export function ContrastSwatch({ fgVar, bgVar, bgLabel, sample, sampleClassName = '', context, showAAA = true }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [ratio, setRatio] = useState<number | null>(null);
 
@@ -118,9 +122,11 @@ export function ContrastSwatch({ fgVar, bgVar, bgLabel, sample, sampleClassName 
           <span className={`kit-badge ${aa ? 'kit-badge--pass' : 'kit-badge--fail'}`}>
             AA {aa ? 'pass' : 'fail'}
           </span>
-          <span className={`kit-badge ${aaa ? 'kit-badge--pass' : 'kit-badge--fail'}`}>
-            AAA {aaa ? 'pass' : 'fail'}
-          </span>
+          {showAAA && (
+            <span className={`kit-badge ${aaa ? 'kit-badge--pass' : 'kit-badge--fail'}`}>
+              AAA {aaa ? 'pass' : 'fail'}
+            </span>
+          )}
           <span className={`kit-badge ${aaLarge ? 'kit-badge--pass' : 'kit-badge--fail'}`}>
             Large/UI {aaLarge ? 'pass' : 'fail'}
           </span>

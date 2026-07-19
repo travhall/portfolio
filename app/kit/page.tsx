@@ -97,7 +97,16 @@ const COLOR_PAIRINGS = [
 // content data (one-off per-project colors), not just tokens. Adding a new
 // case study or changing an accent surfaces a pass/fail here automatically;
 // there's no separate process to remember. See lib/brand-accent.ts for why
-// these are called "accent," not "brand."
+// these are called "accent," not "brand." AAA is dropped here (see
+// showAAA below) — 7:1 isn't a realistic bar for text on a saturated accent
+// and every pairing failing it read as noise; AA is the actual gate.
+//
+// Both eyebrow and headline use --ink, not --ink-muted/--ink-faint — the
+// muted tokens are tuned for contrast against --surface only (see
+// base.css) and aren't safe against an arbitrary accent. See the
+// ".cs-brand-bg ~ section" override in layout.css that forces this in
+// practice; these pairings mirror what actually renders, not the default
+// .text-ink-muted class CaseStudyHero's eyebrow carries.
 const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
   .filter((study) => study.accent)
   .flatMap((study) => {
@@ -110,14 +119,16 @@ const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
         sample: study.headline,
         sampleClassName: "type-h3",
         context: `Case-study headline — .text-ink on ${study.slug}'s accent`,
+        showAAA: false,
       },
       {
-        fgVar: "--ink-muted",
+        fgVar: "--ink",
         bgVar: bg,
         bgLabel: `${study.headline} accent`,
         sample: study.eyebrow,
         sampleClassName: "type-eyebrow",
-        context: `Case-study eyebrow — .text-ink-muted on ${study.slug}'s accent`,
+        context: `Case-study eyebrow — forced .text-ink on ${study.slug}'s accent (overrides .text-ink-muted)`,
+        showAAA: false,
       },
     ];
   });
