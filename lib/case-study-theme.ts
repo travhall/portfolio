@@ -21,10 +21,19 @@ export interface CaseStudyThemeMode {
   /** Ghost button border at rest. Falls back to a derived fg/bg mix when
    *  the source site doesn't have a distinct border token. */
   border?: string;
-  /** Ghost button's hover accent — the one moment this project's actual
-   *  brand color (not just its neutral bg/fg pair) gets to show up. Falls
-   *  back to fg when the source site doesn't split these out. */
+  /** Ghost button's hover accent, and the eyebrow dot — a filled shape, not
+   *  text, so it carries the accent at full strength with no text-contrast
+   *  requirement. Falls back to fg when the source site doesn't split
+   *  these out. */
   accent?: string;
+  /** The accent, recolored for use as actual text (the eyebrow label) —
+   *  every real site sampled for this data keeps a separate, darker/lighter
+   *  variant of its accent specifically for this, distinct from the
+   *  badge/dot-fill color, because the raw accent frequently doesn't clear
+   *  text contrast against bg (antibroadcasting's gold is 2.26:1 on its own
+   *  cream — nowhere close). Falls back to `accent` when omitted, which is
+   *  only safe to do if that's been checked. */
+  accentText?: string;
 }
 
 export interface CaseStudyTheme {
@@ -46,13 +55,15 @@ const derivedBorder = (mode: CaseStudyThemeMode) =>
   mode.border ?? `color-mix(in oklab, ${mode.fg} 50%, ${mode.bg})`;
 
 const derivedAccent = (mode: CaseStudyThemeMode) => mode.accent ?? mode.fg;
+const derivedAccentText = (mode: CaseStudyThemeMode) =>
+  mode.accentText ?? mode.accent ?? mode.fg;
 
 /** Resolves a theme to the CSS custom properties its case-study page (and,
  *  for --cs-bg only, its home page row) render with — or undefined if the
  *  case study has no theme yet (e.g. a "coming soon" placeholder entry). */
 export function resolveThemeVars(
   theme: CaseStudyTheme | undefined,
-): Record<"--cs-bg" | "--cs-fg" | "--cs-border" | "--cs-accent", string> | undefined {
+): Record<"--cs-bg" | "--cs-fg" | "--cs-border" | "--cs-accent" | "--cs-accent-text", string> | undefined {
   if (!theme) return undefined;
   const dark = theme.dark ?? theme.light;
   return {
@@ -60,6 +71,7 @@ export function resolveThemeVars(
     "--cs-fg": `light-dark(${theme.light.fg}, ${dark.fg})`,
     "--cs-border": `light-dark(${derivedBorder(theme.light)}, ${derivedBorder(dark)})`,
     "--cs-accent": `light-dark(${derivedAccent(theme.light)}, ${derivedAccent(dark)})`,
+    "--cs-accent-text": `light-dark(${derivedAccentText(theme.light)}, ${derivedAccentText(dark)})`,
   };
 }
 

@@ -101,9 +101,11 @@ const COLOR_PAIRINGS = [
 // 7:1 isn't a realistic bar for text on a saturated background and every
 // pairing failing it read as noise; AA is the actual gate.
 //
-// Both eyebrow and headline use each project's own --cs-fg (not our --ink)
-// — see the .cs-hero-eyebrow/.cs-hero-headline rules in layout.css. These
-// pairings audit what actually renders, not an approximation of it.
+// Headline uses each project's own --cs-fg; the eyebrow uses --cs-accent-text
+// — the project's real brand color, recolored to hold up as text (not the
+// raw --cs-accent used for the dot/button-hover, which is frequently unsafe
+// as text — see case-studies.ts). See the .cs-hero-eyebrow/.cs-hero-headline
+// rules in layout.css. These pairings audit what actually renders.
 const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
   .filter((study) => study.theme)
   .flatMap((study) => {
@@ -119,12 +121,12 @@ const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
         showAAA: false,
       },
       {
-        fgVar: vars["--cs-fg"],
+        fgVar: vars["--cs-accent-text"],
         bgVar: vars["--cs-bg"],
         bgLabel: `${study.headline} background`,
         sample: study.eyebrow,
         sampleClassName: "type-eyebrow",
-        context: `Case-study eyebrow — --cs-fg on ${study.slug}'s background`,
+        context: `Case-study eyebrow — --cs-accent-text on ${study.slug}'s background`,
         showAAA: false,
       },
     ];

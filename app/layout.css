@@ -479,9 +479,16 @@ html[data-motion="off"] .intro-section__cue {
    sibling of that <main>, not a descendant) — the site's own chrome stays
    in the system's voice everywhere. Each rule's second argument is the
    var(--ink*) fallback so a case study with no theme yet, or any other
-   page's ghost button, renders exactly as before. */
+   page's ghost button, renders exactly as before.
+
+   The eyebrow specifically uses --cs-accent-text, not --cs-fg — this is
+   where the project's actual brand color shows up as real typography (not
+   just a decorative dot). Checked per project, not assumed: the raw
+   --cs-accent frequently isn't safe as text (antibroadcasting's gold is
+   2.26:1 on its own cream — nowhere close), so --cs-accent-text is each
+   project's own darker/lighter text-safe variant of that same color. */
 .cs-hero-eyebrow {
-  color: var(--cs-fg, var(--ink-muted));
+  color: var(--cs-accent-text, var(--ink-muted));
 }
 .cs-hero-headline {
   color: var(--cs-fg, var(--ink));

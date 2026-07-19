@@ -20,9 +20,9 @@
 //     directly after its live deploy's toggle couldn't be found automatically
 //
 // See lib/case-study-theme.ts for the CaseStudyTheme shape and how it
-// resolves to --cs-bg/--cs-fg/--cs-border/--cs-accent. See /kit's "Case
-// study accents" section for the live contrast audit of every pairing —
-// re-check it if any of these change.
+// resolves to --cs-bg/--cs-fg/--cs-border/--cs-accent/--cs-accent-text. See
+// /kit's "Case study themes" section for the live contrast audit of every
+// pairing — re-check it if any of these change.
 //
 //   wylie-dog        — wylie-dog-ds-showcase.vercel.app (light + dark toggle)
 //   el-camino        — elcaminoskateshop.netlify.app (light + dark toggle)
@@ -64,7 +64,19 @@ export const caseStudies: CaseStudy[] = [
     featured: true,
     theme: {
       light: { bg: "#fbfcfe", fg: "#16181d", border: "#b8b9bc", accent: "#2563eb" },
-      dark: { bg: "#080b10", fg: "#eeeff1", border: "#4c4e52", accent: "#2563eb" },
+      // wylie-dog has no distinct accent-text token of its own (its real
+      // site uses the same blue for both button fills and text) — raw
+      // #2563eb on this dark bg only measures 3.81:1, under 4.5:1 for small
+      // text like the eyebrow. Lightened 20% toward white and re-measured
+      // at 5.67:1 — still clearly blue, no longer borderline. Derived, not
+      // sampled, and the one case in this file that had to be.
+      dark: {
+        bg: "#080b10",
+        fg: "#eeeff1",
+        border: "#4c4e52",
+        accent: "#2563eb",
+        accentText: "color-mix(in oklab, #2563eb 80%, white 20%)",
+      },
     },
   },
   {
@@ -77,9 +89,21 @@ export const caseStudies: CaseStudy[] = [
     featured: true,
     theme: {
       // No distinct border token sampled here — falls back to the derived
-      // fg/bg mix in resolveThemeVars.
-      light: { bg: "oklch(96.5% 0.008 70)", fg: "oklch(18% 0.024 70)", accent: "oklch(38% 0.072 117)" },
-      dark: { bg: "oklch(12.5% 0.042 117)", fg: "oklch(98.5% 0.008 117)", accent: "oklch(68% 0.065 60)" },
+      // fg/bg mix in resolveThemeVars. accentText comes from their real
+      // --content-emphasis (light) / --ui-accent (dark) tokens — a
+      // muted-down variant of the badge accent made specifically for text.
+      light: {
+        bg: "oklch(96.5% 0.008 70)",
+        fg: "oklch(18% 0.024 70)",
+        accent: "oklch(38% 0.072 117)",
+        accentText: "oklch(51.5% 0.075 60)",
+      },
+      dark: {
+        bg: "oklch(12.5% 0.042 117)",
+        fg: "oklch(98.5% 0.008 117)",
+        accent: "oklch(68% 0.065 60)",
+        accentText: "oklch(76% 0.055 60)",
+      },
     },
   },
   {
@@ -91,17 +115,22 @@ export const caseStudies: CaseStudy[] = [
     buttonText: "View Case Study",
     featured: true,
     theme: {
+      // accentText from their real --accent-text tokens (rose-gold-600
+      // light / rose-gold-300 dark) — darker/lighter than the raw accent
+      // (rose-gold-500/300) specifically so it holds up as text.
       light: {
         bg: "oklch(97.12% 0.0074 29.23)",
         fg: "oklch(9.47% 0.0834 29.23)",
         border: "color-mix(in oklab, oklch(14.84% 0.0024 48.79) 12%, transparent)",
         accent: "oklch(54% 0.092 63)",
+        accentText: "oklch(42.47% 0.072 63)",
       },
       dark: {
         bg: "oklch(9.47% 0.0834 29.23)",
         fg: "oklch(97.12% 0.0074 29.23)",
         border: "color-mix(in oklab, oklch(97.12% 0.0074 29.23) 14%, transparent)",
         accent: "oklch(70.18% 0.075 63)",
+        accentText: "oklch(70.18% 0.075 63)",
       },
     },
   },
@@ -114,8 +143,13 @@ export const caseStudies: CaseStudy[] = [
     buttonText: "View Redesign",
     featured: true,
     theme: {
-      light: { bg: "#f7f1e9", fg: "#080504", border: "#766d62", accent: "#de9300" },
-      dark: { bg: "#080504", fg: "#f7f1e9", border: "#342c29", accent: "#de9300" },
+      // accentText from their real --color-accent-text tokens — a much
+      // darker gold (#833e00) in light mode specifically because the raw
+      // gold only measures 2.26:1 on their own cream background, nowhere
+      // close to usable as text; the vivid gold (#de9300, same as accent)
+      // is reused as-is in dark mode where it already clears 8:1.
+      light: { bg: "#f7f1e9", fg: "#080504", border: "#766d62", accent: "#de9300", accentText: "#833e00" },
+      dark: { bg: "#080504", fg: "#f7f1e9", border: "#342c29", accent: "#de9300", accentText: "#de9300" },
     },
   },
   // ── Non-featured archive entries ──────────────────────────────────────
