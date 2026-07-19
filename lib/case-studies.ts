@@ -5,10 +5,35 @@
 // project has no Tailwind theme layer to key off of — see lib/brand-accent.ts.
 //
 // Copy below (eyebrow/headline/buttonText) is carried over from the old
-// portfolio as placeholder — none of it is final. Every `accent` value below
-// is a placeholder too — the true per-project colors live in each project's
-// own brand, not here; swap them in once each case study's design is final,
-// and re-check /kit's case-study accent section for contrast when you do.
+// portfolio as placeholder — none of it is final.
+//
+// `accent` values are each project's real brand color, sampled live from
+// its production site (hue + chroma character preserved) and run through a
+// fixed derivation so every project gets the same lightness ladder — L 0.85
+// for the light-mode fill, L 0.50 for dark, with only hue and chroma
+// varying per project:
+//   light chroma = min(sampled chroma × 0.6, 0.12)
+//   dark  chroma = min(sampled chroma × 0.9, 0.18)
+// Dark started at L 0.55 (mirroring light's symmetric 0.85) but that only
+// cleared AA by ~0.3 against --ink's dark-theme white — too thin a margin
+// given every project measured almost identically there regardless of hue.
+// Dropped to 0.50 for real headroom; see /kit's "Case study accents"
+// section for the live contrast audit of each pairing — re-check it if any
+// of these change.
+//
+//   wylie-dog        — #2563eb sampled from wylie-dog-ds-showcase.vercel.app
+//                       (--color-button-primary-background / interactive blue)
+//   el-camino        — oklch(0.68 0.065 60) sampled from elcaminoskateshop.netlify.app
+//                       (--ui-button-surface, the tag/badge accent)
+//   moxie-beauty     — oklch(0.7018 0.075 63) sampled from moxie-studio-teal.vercel.app
+//                       (--accent custom property)
+//   antibroadcasting — #de9300 sampled from antibroadcasting.vercel.app
+//                       (--color-gold, the full-bleed section + badge accent)
+//
+// Note: el-camino and moxie-beauty land within 3° of hue and similarly low
+// chroma — both are genuinely warm, muted neutral-tan brands in real life,
+// so their case-study rows will read as close to the same color on the
+// home page. That's real, not a derivation bug.
 
 import type { BrandAccent } from "./brand-accent";
 
@@ -42,7 +67,7 @@ export const caseStudies: CaseStudy[] = [
     image: "/images/photo-wyliedog.jpg",
     buttonText: "View Case Study",
     featured: true,
-    accent: { light: "oklch(0.83 0.07 195.9)", dark: "oklch(0.48 0.09 195.9)" },
+    accent: { light: "oklch(0.85 0.12 262.9)", dark: "oklch(0.50 0.18 262.9)" },
   },
   {
     slug: "el-camino",
@@ -52,7 +77,7 @@ export const caseStudies: CaseStudy[] = [
     image: "/images/photo-elcamino.jpg",
     buttonText: "Visit Skate Shop",
     featured: true,
-    accent: { light: "oklch(0.87 0.115 80)", dark: "oklch(0.6 0.16 80)" },
+    accent: { light: "oklch(0.85 0.04 60.0)", dark: "oklch(0.50 0.06 60.0)" },
   },
   {
     slug: "moxie-beauty",
@@ -62,7 +87,7 @@ export const caseStudies: CaseStudy[] = [
     image: "/images/photo-moxie.jpg",
     buttonText: "View Case Study",
     featured: true,
-    accent: { light: "oklch(0.85 0.1 350)", dark: "oklch(0.55 0.15 350)" },
+    accent: { light: "oklch(0.85 0.04 63.0)", dark: "oklch(0.50 0.07 63.0)" },
   },
   {
     slug: "antibroadcasting",
@@ -72,7 +97,7 @@ export const caseStudies: CaseStudy[] = [
     image: "/images/photo-antibroadcasting.jpg",
     buttonText: "View Redesign",
     featured: true,
-    accent: { light: "oklch(0.82 0.12 25)", dark: "oklch(0.52 0.17 25)" },
+    accent: { light: "oklch(0.85 0.09 73.0)", dark: "oklch(0.50 0.14 73.0)" },
   },
   // ── Non-featured archive entries ──────────────────────────────────────
   // Placeholders for the fuller /work archive — no live page or final
