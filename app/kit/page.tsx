@@ -4,6 +4,8 @@ import { Icon, ICON_NAMES } from "@/components/ui/Icon";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { MotionToggle } from "@/components/ui/MotionToggle";
 import { ContrastSwatch } from "./ContrastSwatch";
+import { caseStudies } from "@/lib/case-studies";
+import { resolveAccentBg } from "@/lib/brand-accent";
 import "./kit.css";
 
 // /kit — internal style guide. Unlinked: not in nav, not in sitemap.
@@ -89,6 +91,36 @@ const COLOR_PAIRINGS = [
     context: "btn--solid — --surface on --ink (inverted)",
   },
 ];
+
+// Every case study's accent, run through the exact same contrast check as
+// the fixed design-system pairings above — the accessibility audit for
+// content data (one-off per-project colors), not just tokens. Adding a new
+// case study or changing an accent surfaces a pass/fail here automatically;
+// there's no separate process to remember. See lib/brand-accent.ts for why
+// these are called "accent," not "brand."
+const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
+  .filter((study) => study.accent)
+  .flatMap((study) => {
+    const bg = resolveAccentBg(study.accent)!;
+    return [
+      {
+        fgVar: "--ink",
+        bgVar: bg,
+        bgLabel: `${study.headline} accent`,
+        sample: study.headline,
+        sampleClassName: "type-h3",
+        context: `Case-study headline — .text-ink on ${study.slug}'s accent`,
+      },
+      {
+        fgVar: "--ink-muted",
+        bgVar: bg,
+        bgLabel: `${study.headline} accent`,
+        sample: study.eyebrow,
+        sampleClassName: "type-eyebrow",
+        context: `Case-study eyebrow — .text-ink-muted on ${study.slug}'s accent`,
+      },
+    ];
+  });
 
 const TYPE_ROWS = [
   { cls: "type-display",   label: "Display",   token: "--text-display · light 300" },
@@ -195,6 +227,17 @@ export default function KitPage() {
         <div className="kit-pairings">
           {COLOR_PAIRINGS.map((pairing) => (
             <ContrastSwatch key={`${pairing.fgVar}-on-${pairing.bgVar}-${pairing.context}`} {...pairing} />
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        title="Case study accents"
+        note="Each project's one-off accent color (content data, not a design-system token) audited the same way as everything above — see lib/brand-accent.ts. Values here are placeholders; re-check this section once each project's true accent lands."
+      >
+        <div className="kit-pairings">
+          {CASE_STUDY_ACCENT_PAIRINGS.map((pairing) => (
+            <ContrastSwatch key={pairing.context} {...pairing} />
           ))}
         </div>
       </Section>

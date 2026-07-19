@@ -1,11 +1,16 @@
 // Centralized case study data — single source of truth for every place
 // that lists or links to a project (home page feature list, /work/[slug]
-// pages, etc.). Mirrors the old portfolio's brandLight/brandDark +
+// pages, etc.). The `accent` field mirrors the old portfolio's light/dark +
 // dark-mode-image pattern, expressed as raw OKLCH strings since this
-// project has no Tailwind theme layer to key off of.
+// project has no Tailwind theme layer to key off of — see lib/brand-accent.ts.
 //
 // Copy below (eyebrow/headline/buttonText) is carried over from the old
-// portfolio as placeholder — none of it is final.
+// portfolio as placeholder — none of it is final. Every `accent` value below
+// is a placeholder too — the true per-project colors live in each project's
+// own brand, not here; swap them in once each case study's design is final,
+// and re-check /kit's case-study accent section for contrast when you do.
+
+import type { BrandAccent } from "./brand-accent";
 
 export interface CaseStudy {
   slug: string;
@@ -22,11 +27,10 @@ export interface CaseStudy {
   /** No case-study page or assets yet — listed as "Coming soon" instead
    *  of a link in /work and the Menu, and excluded from generateStaticParams. */
   comingSoon?: boolean;
-  /** OKLCH string used as the row's tint in light mode. */
-  brandLight?: string;
-  /** OKLCH string used as the row's tint in dark mode. Falls back to
-   *  brandLight. */
-  brandDark?: string;
+  /** This project's one-off accent color — the row tint on the home page
+   *  and the full-bleed background on its case-study page. See
+   *  lib/brand-accent.ts for why this isn't called "brand." */
+  accent?: BrandAccent;
 }
 
 export const caseStudies: CaseStudy[] = [
@@ -38,8 +42,7 @@ export const caseStudies: CaseStudy[] = [
     image: "/images/photo-wyliedog.jpg",
     buttonText: "View Case Study",
     featured: true,
-    brandLight: "oklch(0.83 0.07 195.9)",
-    brandDark: "oklch(0.48 0.09 195.9)",
+    accent: { light: "oklch(0.83 0.07 195.9)", dark: "oklch(0.48 0.09 195.9)" },
   },
   {
     slug: "el-camino",
@@ -49,8 +52,7 @@ export const caseStudies: CaseStudy[] = [
     image: "/images/photo-elcamino.jpg",
     buttonText: "Visit Skate Shop",
     featured: true,
-    brandLight: "oklch(0.87 0.115 80)",
-    brandDark: "oklch(0.6 0.16 80)",
+    accent: { light: "oklch(0.87 0.115 80)", dark: "oklch(0.6 0.16 80)" },
   },
   {
     slug: "moxie-beauty",
@@ -60,8 +62,7 @@ export const caseStudies: CaseStudy[] = [
     image: "/images/photo-moxie.jpg",
     buttonText: "View Case Study",
     featured: true,
-    brandLight: "oklch(0.85 0.1 350)",
-    brandDark: "oklch(0.55 0.15 350)",
+    accent: { light: "oklch(0.85 0.1 350)", dark: "oklch(0.55 0.15 350)" },
   },
   {
     slug: "antibroadcasting",
@@ -71,8 +72,7 @@ export const caseStudies: CaseStudy[] = [
     image: "/images/photo-antibroadcasting.jpg",
     buttonText: "View Redesign",
     featured: true,
-    brandLight: "oklch(0.82 0.12 25)",
-    brandDark: "oklch(0.52 0.17 25)",
+    accent: { light: "oklch(0.82 0.12 25)", dark: "oklch(0.52 0.17 25)" },
   },
   // ── Non-featured archive entries ──────────────────────────────────────
   // Placeholders for the fuller /work archive — no live page or final

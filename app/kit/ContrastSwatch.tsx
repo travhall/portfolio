@@ -1,11 +1,16 @@
 'use client';
 
 /**
- * ContrastSwatch — renders a text/background token pairing *as it's actually
- * used* (real type class, real CSS vars) and measures the live WCAG contrast
+ * ContrastSwatch — renders a text/background pairing *as it's actually
+ * used* (real type class, real color) and measures the live WCAG contrast
  * ratio via a 1×1 canvas (handles oklch/color-mix by letting the browser
  * resolve to sRGB). Re-measures whenever the theme changes — toggle the
  * ThemeToggle above and every ratio + pass/fail badge updates in place.
+ *
+ * fgVar/bgVar accept either a design-system CSS variable name (e.g.
+ * "--ink", resolved via var()) or a raw color value (e.g. a case study's
+ * resolved light-dark() accent, which isn't a token) — anything starting
+ * with "--" is treated as a variable, everything else is used as-is.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -13,6 +18,9 @@ import { useEffect, useRef, useState } from 'react';
 interface Props {
   fgVar: string;
   bgVar: string;
+  /** Overrides the displayed bgVar text — for a raw color value (e.g. a
+   *  resolved accent) where printing the full CSS string would be noise. */
+  bgLabel?: string;
   sample: string;
   sampleClassName?: string;
   context: string;
@@ -57,7 +65,11 @@ function contrastRatio(fg: string, bg: string) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-export function ContrastSwatch({ fgVar, bgVar, sample, sampleClassName = '', context }: Props) {
+function toCSSColor(value: string): string {
+  return value.startsWith('--') ? `var(${value})` : value;
+}
+
+export function ContrastSwatch({ fgVar, bgVar, bgLabel, sample, sampleClassName = '', context }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [ratio, setRatio] = useState<number | null>(null);
 
@@ -91,12 +103,12 @@ export function ContrastSwatch({ fgVar, bgVar, sample, sampleClassName = '', con
 
   return (
     <div className="kit-pairing">
-      <div ref={ref} className="kit-pairing__demo" style={{ background: `var(${bgVar})`, color: `var(${fgVar})` }}>
+      <div ref={ref} className="kit-pairing__demo" style={{ background: toCSSColor(bgVar), color: toCSSColor(fgVar) }}>
         <p className={`${sampleClassName} kit-pairing__sample`}>{sample}</p>
       </div>
       <div className="kit-pairing__meta">
         <span className="type-mono text-ink kit-pairing__tokens">
-          {fgVar} <span className="text-ink-muted">on</span> {bgVar}
+          {fgVar} <span className="text-ink-muted">on</span> {bgLabel ?? bgVar}
         </span>
         <span className="type-caption text-ink-muted">{context}</span>
         <div className="kit-pairing__ratio" aria-live="polite">

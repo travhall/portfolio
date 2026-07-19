@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { CaseStudyHero } from "@/components/features/CaseStudyHero";
 import { caseStudies } from "@/lib/case-studies";
+import { resolveAccentBg } from "@/lib/brand-accent";
 import { createMetadata } from "@/lib/metadata";
 
 // Scaffold only — case study page design isn't settled yet. This uses
@@ -29,9 +30,7 @@ export default async function CaseStudyPage({ params }: Props) {
   const study = caseStudies.find((s) => s.slug === slug && !s.comingSoon);
   if (!study) notFound();
 
-  const brand = study.brandLight
-    ? `light-dark(${study.brandLight}, ${study.brandDark ?? study.brandLight})`
-    : undefined;
+  const brand = resolveAccentBg(study.accent);
 
   return (
     <main id="main-content">
