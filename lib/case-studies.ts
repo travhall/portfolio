@@ -32,6 +32,53 @@
 
 import type { CaseStudyTheme } from "./case-study-theme";
 
+/** A credited role and the name(s) who filled it — one row in the Overview
+ *  panel's Credits list. Plural `names` (not one row per person) because
+ *  the reference pattern this is modeled on groups multiple names under one
+ *  role (e.g. "Design & Development" naming two people). */
+export interface CaseStudyCredit {
+  role: string;
+  names: string[];
+}
+
+/** One row in the Overview panel's Awards & Recognition list. `href` is
+ *  optional — an award can be just a label with no link out. */
+export interface CaseStudyAward {
+  label: string;
+  href?: string;
+}
+
+/** The case-study page's second section, right under the hero: a lead
+ *  paragraph plus an optional meta panel (sectors/credits/awards). Every
+ *  field past `body` is optional — a project with no awards yet just omits
+ *  that list rather than rendering an empty heading. */
+export interface CaseStudyOverview {
+  body: string;
+  sectors?: string[];
+  credits?: CaseStudyCredit[];
+  awards?: CaseStudyAward[];
+}
+
+/** One half of a `split` section. `wordmark` is a large, centered display
+ *  of a short string (a project's name/logotype treatment) — for the
+ *  pattern where a section pairs an image against plain brand type instead
+ *  of another photo or a paragraph. */
+export type CaseStudySectionSlot =
+  | { kind: "image"; image: string; alt?: string }
+  | { kind: "wordmark"; text: string }
+  | { kind: "text"; eyebrow?: string; body: string };
+
+/** A repeatable content block below the Overview. `full-image` is a single
+ *  full-bleed image; `split` is two slots side by side (image+image,
+ *  image+text, image+wordmark, in either order) — see
+ *  components/features/CaseStudyMedia.tsx. This is the same three-pattern
+ *  set (50/50 images, 50/50 image+text, full-width images) called out as
+ *  the target layout language, expressed as one flexible shape rather than
+ *  a fixed template per combination. */
+export type CaseStudySection =
+  | { type: "full-image"; image: string; alt?: string }
+  | { type: "split"; left: CaseStudySectionSlot; right: CaseStudySectionSlot };
+
 export interface CaseStudy {
   slug: string;
   eyebrow: string;
@@ -51,6 +98,17 @@ export interface CaseStudy {
    *  full-bleed background + hero content colors on its case-study page.
    *  See lib/case-study-theme.ts for why this isn't called "brand." */
   theme?: CaseStudyTheme;
+  /** Hero sub-statement, next to the eyebrow/headline lockup — not part of
+   *  it, so CaseStudyHero's existing entrance/exit choreography for that
+   *  lockup is untouched. Placeholder copy throughout; none of this is
+   *  final content. */
+  tagline?: string;
+  /** Short service/discipline tags, rendered next to the tagline. */
+  services?: string[];
+  /** The lead paragraph + sectors/credits/awards meta panel below the hero. */
+  overview?: CaseStudyOverview;
+  /** Repeatable body content below the Overview — see CaseStudySection. */
+  sections?: CaseStudySection[];
 }
 
 export const caseStudies: CaseStudy[] = [
@@ -91,6 +149,26 @@ export const caseStudies: CaseStudy[] = [
         button: { bg: "#2563eb", fg: "#fbfcfe" },
       },
     },
+    // Mock content — copy and structure below are placeholders standing in
+    // for real case-study content, exercising the section patterns
+    // (Overview with no awards yet; a split image+image using the real
+    // light/dark screenshots of the live showcase).
+    tagline:
+      "A typed component library and OKLCH token system built to close the gap between design and code.",
+    services: ["Design Systems", "Component Architecture", "Design Tokens", "Documentation"],
+    overview: {
+      body:
+        "Wylie Dog is a production design system built for a growing product team shipping across web and native surfaces. The work spans a three-tier token architecture, a Figma-synced pipeline, and a component library built on accessible primitives — replacing a patchwork of one-off styles with a single source of truth every team can build from.",
+      sectors: ["Software", "Design Tooling"],
+      credits: [{ role: "Design & Development", names: ["Travis Hall"] }],
+    },
+    sections: [
+      {
+        type: "split",
+        left: { kind: "image", image: "/images/work-img-wyliedog-light.jpg", alt: "The design system's overview page in light mode" },
+        right: { kind: "image", image: "/images/work-img-wyliedog-dark.jpg", alt: "The same overview page in dark mode" },
+      },
+    ],
   },
   {
     slug: "el-camino",
@@ -132,6 +210,29 @@ export const caseStudies: CaseStudy[] = [
         button: { bg: "oklch(68% 0.065 60)", fg: "oklch(12.5% 0.042 117)" },
       },
     },
+    // Exercises: awards present, multiple sectors, a full-bleed image
+    // followed by a split(text+image) — text on the left this time, image
+    // on the right (antibroadcasting below reverses that order).
+    tagline: "A ground-up rebuild for a skater-owned shop, from storefront to checkout.",
+    services: ["Strategy", "E-commerce", "Art Direction", "Front-End Development"],
+    overview: {
+      body:
+        "El Camino needed a shop that felt as considered as the boards on its walls. The rebuild covers the full storefront experience — category browsing, product pages, and checkout — built on a design system tuned for a fast-moving catalog with frequent drops.",
+      sectors: ["Retail", "E-commerce"],
+      credits: [
+        { role: "Design & Development", names: ["Travis Hall"] },
+        { role: "Photography", names: ["El Camino Skate Shop"] },
+      ],
+      awards: [{ label: "Visionary Impact Award", href: "https://elcaminoskateshop.netlify.app/" }],
+    },
+    sections: [
+      { type: "full-image", image: "/images/work-img-elcamino-light.jpg", alt: "The storefront homepage in light mode" },
+      {
+        type: "split",
+        left: { kind: "text", eyebrow: "Approach", body: "A dark, weathered palette and bold condensed type carry the shop's skate-culture identity across every surface, from the homepage down to individual product cards." },
+        right: { kind: "image", image: "/images/work-img-elcamino-dark.jpg", alt: "The storefront homepage in dark mode" },
+      },
+    ],
   },
   {
     slug: "moxie-beauty",
@@ -165,6 +266,24 @@ export const caseStudies: CaseStudy[] = [
         button: { bg: "oklch(97.31% 0.028 63)", fg: "oklch(17.15% 0.038 63)" },
       },
     },
+    // Exercises: single sector, one credited role, no awards yet, and a
+    // split(image+wordmark) followed by a full-bleed image.
+    tagline: "An elevated brand identity for a lash and brow studio built on quiet, considered luxury.",
+    services: ["Brand Identity", "Art Direction", "Web Design"],
+    overview: {
+      body:
+        "Moxie asked for a space that felt like the treatment itself: unhurried, personal, and a little indulgent. The identity leans on a warm, low-contrast palette and a serif/sans pairing that reads as considered rather than clinical, carried through the site, booking flow, and in-studio signage.",
+      sectors: ["Beauty & Wellness"],
+      credits: [{ role: "Design & Development", names: ["Travis Hall"] }],
+    },
+    sections: [
+      {
+        type: "split",
+        left: { kind: "image", image: "/images/work-img-moxie-light.jpg", alt: "The Moxie homepage" },
+        right: { kind: "wordmark", text: "Moxie" },
+      },
+      { type: "full-image", image: "/images/work-img-moxie-dark.jpg", alt: "The Moxie homepage, evening variant" },
+    ],
   },
   {
     slug: "antibroadcasting",
@@ -200,6 +319,30 @@ export const caseStudies: CaseStudy[] = [
         button: { bg: "#de9300", fg: "#080504", border: "transparent" },
       },
     },
+    // Exercises: multiple credited roles under one, external award link,
+    // split(wordmark+image) — the mirror of moxie-beauty's image+wordmark
+    // order — followed by split(image+text) with the image on the left.
+    tagline: "A visual identity and site rebuild for a Minneapolis screen-printing shop, artist-run since 2005.",
+    services: ["Brand Identity", "Web Design", "Packaging & Seeding"],
+    overview: {
+      body:
+        "Twenty years of client work, zero design consistency across it. The redesign gives Antibroadcasting a print-shop identity as considered as the work it ships — a gold-and-ink palette, a condensed display face for headlines, and a site structure built around the portfolio, not the pitch.",
+      sectors: ["Screen Printing", "Apparel"],
+      credits: [{ role: "Design & Development", names: ["Travis Hall", "Antibroadcasting Team"] }],
+      awards: [{ label: "Indigo Design Award", href: "https://antibroadcasting.vercel.app/" }],
+    },
+    sections: [
+      {
+        type: "split",
+        left: { kind: "wordmark", text: "AB" },
+        right: { kind: "image", image: "/images/work-img-antibroadcasting-light.jpg", alt: "The Antibroadcasting homepage in light mode" },
+      },
+      {
+        type: "split",
+        left: { kind: "image", image: "/images/work-img-antibroadcasting-dark.jpg", alt: "The Antibroadcasting homepage in dark mode" },
+        right: { kind: "text", eyebrow: "Palette", body: "A single gold accent carries across both themes without changing hue — the one constant in a site that otherwise inverts wholesale between light and dark." },
+      },
+    ],
   },
   // ── Non-featured archive entries ──────────────────────────────────────
   // Placeholders for the fuller /work archive — no live page or final

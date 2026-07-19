@@ -507,13 +507,15 @@ html[data-motion="off"] .intro-section__cue {
    a two-layer gradient-plus-color value, not a single color — a fallback
    pattern here would replace that gradient with a flat fill on every solid
    button sitewide the moment --cs-button-bg is unset, which is everywhere
-   except a themed case study. This selector only ever matches inside one. */
-.cs-brand-bg ~ section .btn--solid {
+   except a themed case study. Targets .cs-container specifically (not a
+   bare `section` tag) — the page wraps each of its own sections in that
+   class, not a semantic <section> element. */
+.cs-brand-bg ~ .cs-container .btn--solid {
   background: var(--cs-button-bg);
   color: var(--cs-button-fg);
   border-color: var(--cs-button-border);
 }
-.cs-brand-bg ~ section .btn--solid:hover {
+.cs-brand-bg ~ .cs-container .btn--solid:hover {
   background: var(--cs-button-bg);
   border-color: var(--cs-button-border);
 }
@@ -537,6 +539,170 @@ html[data-motion="off"] .cs-hero-headline {
 }
 html[data-motion="off"] .cs-hero-image {
   clip-path: none !important;
+}
+
+/* ── CASE-STUDY PAGE — content patterns ─────────────────────────────────────
+   Mockup pass (plans/README.md-style scaffold, not final design). Two
+   registers: .cs-container is the constrained reading column (hero,
+   overview — anything with running text), .cs-section is full-bleed
+   (media blocks) — matching the reference's own contrast between a padded
+   nav-width column and edge-to-edge imagery. Desktop threshold kept in
+   sync with lib/breakpoints.ts DESKTOP_BP (900), same as every other
+   breakpoint in this file. */
+.cs-container {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+}
+
+/* ── Hero — tagline + services, next to the existing eyebrow/headline
+   lockup (untouched: see CaseStudyHero.tsx for why they're kept separate
+   elements). Single column until 900px; --cs-hero-gap gives .cs-hero-image
+   below the same rhythm as the two-column row above it. */
+.cs-hero {
+  --cs-hero-gap: clamp(2rem, 5vh, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-hero-gap);
+  padding-block: clamp(2rem, 6vh, 4rem) 0;
+}
+.cs-hero__top {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+.cs-hero__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.cs-hero__tagline {
+  max-width: 42ch;
+}
+.cs-hero__services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+@media (min-width: 900px) {
+  .cs-hero__top {
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+}
+
+/* ── Overview — lead paragraph + Sectors/Credits/Awards meta panel.
+   Mirrors the hero's single-column-until-900px pattern; the meta panel's
+   own groups always stack (there's no room to go two-up within an
+   already-narrow third of the page at any width this site supports). */
+.cs-overview {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  padding-block: clamp(3rem, 8vh, 5rem);
+  border-top: 1px solid var(--line);
+}
+.cs-overview__label {
+  margin-bottom: 0.75rem;
+}
+.cs-overview__text {
+  max-width: 60ch;
+}
+.cs-overview__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.cs-overview__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.cs-overview__credits {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.cs-overview__credit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.cs-overview__award {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+.cs-overview__award:hover {
+  text-decoration-color: currentColor;
+}
+@media (min-width: 900px) {
+  .cs-overview {
+    grid-template-columns: 2fr 1fr;
+    gap: clamp(3rem, 6vw, 6rem);
+  }
+}
+
+/* ── Media sections — full-bleed, edge to edge of the page. .cs-split's
+   two slots stack on narrow viewports (an image next to another image, or
+   next to a wordmark/paragraph, both read fine stacked — no content is
+   lost the way a data table or nav would be). */
+.cs-section {
+  margin-block: clamp(1px, 0.3vh, 2px);
+}
+.cs-section:first-of-type {
+  margin-top: clamp(3rem, 8vh, 5rem);
+}
+.cs-full-image {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+.cs-full-image__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cs-split {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .cs-split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.cs-split__media {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+.cs-split__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cs-split__wordmark,
+.cs-split__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  aspect-ratio: 4 / 3;
+  padding: clamp(2rem, 5vw, 4rem);
+  background: var(--cs-bg, var(--surface));
+}
+.cs-split__wordmark {
+  align-items: center;
+  text-align: center;
+}
+.cs-split__wordmark .type-display {
+  color: var(--cs-fg, var(--ink));
+}
+.cs-split__text {
+  color: var(--cs-fg, var(--ink));
 }
 
 /*

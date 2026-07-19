@@ -1,13 +1,15 @@
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { CaseStudyHero } from "@/components/features/CaseStudyHero";
+import { CaseStudyOverview } from "@/components/features/CaseStudyOverview";
+import { CaseStudyMedia } from "@/components/features/CaseStudyMedia";
 import { caseStudies } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
 import { createMetadata } from "@/lib/metadata";
 
-// Scaffold only — case study page design isn't settled yet. This uses
-// nothing but the type scale and existing components so it doesn't lock in
-// any layout decisions; expect this to be rebuilt once that design lands.
+// Mockup pass — content below (tagline/services/overview/sections) is
+// placeholder copy, not final. The goal here is coverage of the content
+// patterns (see lib/case-studies.ts's CaseStudySection), not final design.
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -48,20 +50,31 @@ export default async function CaseStudyPage({ params }: Props) {
 
       <div className="header-spacer" aria-hidden="true" />
 
-      <section
-        style={{
-          maxWidth: "var(--maxw)",
-          margin: "0 auto",
-          padding: "var(--gut)",
-        }}
-      >
+      <div className="cs-container">
         <CaseStudyHero
           eyebrow={study.eyebrow}
           headline={study.headline}
           image={study.image}
           imageAlt={study.imageAlt}
+          tagline={study.tagline}
+          services={study.services}
         />
-      </section>
+      </div>
+
+      {study.overview && (
+        <div className="cs-container">
+          <CaseStudyOverview {...study.overview} />
+        </div>
+      )}
+
+      {/* Media sections are full-bleed (no .cs-container) — they run edge
+          to edge of the page, matching the reference's 50/50 and
+          full-width image patterns. */}
+      {study.sections?.map((section, i) => (
+        <div key={i} className="cs-section">
+          <CaseStudyMedia section={section} />
+        </div>
+      ))}
     </main>
   );
 }

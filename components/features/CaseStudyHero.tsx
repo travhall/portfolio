@@ -15,6 +15,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { useTransitionRouter } from "next-view-transitions";
 import { gsap } from "gsap";
 import { Button } from "@/components/ui/Button";
+import { Tag } from "@/components/ui/Tag";
 import { createTextReveal } from "@/lib/text-reveal";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { waitForActiveViewTransition } from "@/lib/view-transition";
@@ -41,9 +42,14 @@ interface Props {
   headline: string;
   image: string;
   imageAlt?: string;
+  /** Sub-statement next to the eyebrow/headline lockup — deliberately not
+   *  part of it, so the existing entrance/exit choreography for that
+   *  lockup (createTextReveal, the exit timeline below) stays untouched. */
+  tagline?: string;
+  services?: string[];
 }
 
-export function CaseStudyHero({ eyebrow, headline, image, imageAlt }: Props) {
+export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, services }: Props) {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const eyebrowInnerRef = useRef<HTMLSpanElement>(null);
   const imageColRef = useRef<HTMLDivElement>(null);
@@ -211,17 +217,37 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const hasMeta = Boolean(tagline) || Boolean(services?.length);
+
   return (
-    <>
-      <p className="type-eyebrow cs-hero-eyebrow">
-        <span ref={eyebrowInnerRef} className="eyebrow-inner">
-          <span className="cs-hero-eyebrow__dot" aria-hidden="true" />
-          {eyebrow}
-        </span>
-      </p>
-      <h1 ref={headlineRef} className="type-h1 cs-hero-headline">
-        {headline}
-      </h1>
+    <div className="cs-hero">
+      <div className="cs-hero__top">
+        <div className="cs-hero__intro">
+          <p className="type-eyebrow cs-hero-eyebrow">
+            <span ref={eyebrowInnerRef} className="eyebrow-inner">
+              <span className="cs-hero-eyebrow__dot" aria-hidden="true" />
+              {eyebrow}
+            </span>
+          </p>
+          <h1 ref={headlineRef} className="type-h1 cs-hero-headline">
+            {headline}
+          </h1>
+        </div>
+        {hasMeta && (
+          <div className="cs-hero__meta">
+            {tagline && <p className="type-lead cs-hero__tagline">{tagline}</p>}
+            {services && services.length > 0 && (
+              <ul className="cs-hero__services">
+                {services.map((service) => (
+                  <li key={service}>
+                    <Tag variant="ghost">{service}</Tag>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
       <div ref={imageColRef} className="cs-hero-image">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -255,6 +281,6 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt }: Props) {
       >
         Let&apos;s get you back home
       </Button>
-    </>
+    </div>
   );
 }
