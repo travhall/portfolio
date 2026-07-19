@@ -788,7 +788,14 @@ html[data-motion="off"] .email-action__panel {
   gap: 0.75rem;
   color: inherit;
   text-decoration: none;
-  padding: var(--gut);
+  /* Bottom-only — a full `padding: var(--gut)` here wraps the media too,
+     insetting it from every side (defeating the mobile edge-to-edge rule
+     below, since its negative margin only cancels .cs-container's own
+     padding, not this) and stacking with .case-grid's gap to bloat the
+     desktop column gutter well past the reference's denser grid. Bottom
+     padding alone still gives stacked mobile cards row-like breathing room,
+     matching FeatureWipe's .fw-text-fixed bottom padding. */
+  padding-bottom: var(--gut);
 }
 .case-card__media {
   aspect-ratio: 3/4;
@@ -814,19 +821,11 @@ html[data-motion="off"] .email-action__panel {
   cursor: default;
 }
 
-/* Mobile — matches FeatureWipe's own mobile treatment (layout.css's
-   `@container fw-section (max-width: 899px)`): the image bleeds edge-to-edge
-   while the eyebrow/title keep a readable inset. .case-grid's single column
-   at this width (auto-fit's minmax(280px, 1fr) already collapses to 1 col
-   well before 900px) means each card is the full row, so breaking just the
-   media out of .cs-container's padding — not the whole card — reads as one
-   continuous edge-to-edge photo per row, same as .fw-media on mobile.
-   Negative margin exactly cancels .cs-container's own padding (both read
-   the same --gut fraction, so they stay in sync if that value ever changes).
-   Desktop threshold kept in sync with lib/breakpoints.ts DESKTOP_BP (900),
-   same as every other breakpoint in this codebase. */
-@media (max-width: 899px) {
-  .case-card__media {
-    margin-inline: calc(-1 * var(--gut) * 0.25);
-  }
-}
+/* No mobile full-bleed override here (on purpose, corrected from an earlier
+   pass) — FeatureWipe's own mobile image is NOT edge-to-edge either: its
+   .fw-media keeps a real padding: 1rem inset even on mobile (.fw-media__inner
+   switches to position: static there, so it actually respects that padding
+   instead of escaping it the way the absolute-positioned desktop version
+   does — see layout.css's `@container fw-section (max-width: 899px)` block).
+   .case-card__media matches that spirit by just staying inside
+   .cs-container's own padding, unbroken. */

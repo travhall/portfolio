@@ -27,6 +27,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Button } from "@/components/ui/Button";
 import { MediaGL } from "@/lib/media-gl";
+import { createTextReveal } from "@/lib/text-reveal";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { useTheme, resolveTheme } from "@/lib/use-theme";
@@ -75,6 +76,11 @@ export function FeatureWipe({ features, id }: Props) {
   // First-image entrance reveal plays once per mount (guarded so a resize
   // re-init doesn't replay it — see the row-0 branch in the timeline effect).
   const entrancePlayedRef = useRef(false);
+  // Mobile per-row entrance (see the timeline effect's initMobileEntrances) —
+  // one flag per row, a useRef (not an effect-local var) so it survives a
+  // motionPref/features dep change without replaying an already-seen row,
+  // same reasoning as entrancePlayedRef above.
+  const mobileEntrancePlayedRef = useRef<boolean[]>([]);
   // True once a page-exit animation has begun, so a second click during the
   // exit can't start a competing timeline or fire a second router.push.
   const isExitingRef = useRef(false);
@@ -96,6 +102,11 @@ export function FeatureWipe({ features, id }: Props) {
     let splits: SplitText[] = [];
     let perFeatureChars: Element[][] = [];
     let currentWidth = window.innerWidth;
+    // Mobile entrance state — see initMobileEntrances/cleanupMobileEntrances
+    // below. Kept outside init() (like ctx/splits above) so repeated resize-
+    // triggered init() calls within the same effect lifetime share them.
+    let mobileObserver: IntersectionObserver | null = null;
+    let mobileReveals: (ReturnType<typeof createTextReveal> | null)[] = [];
     // readMotionPref() (direct DOM read), not the motionPref closure value —
     // same reasoning as resolveTheme() in lib/use-theme.ts: on the very first
     // mount, useSyncExternalStore's getServerSnapshot() must lie and report
@@ -111,6 +122,154 @@ export function FeatureWipe({ features, id }: Props) {
     // drawn canvas. Reading the DOM directly sidesteps the lag entirely.
     const reduced = readMotionPref() === "off";
 
+    // ── Mobile entrance (below DESKTOP_BP) ─────────────────────────────────
+    // Desktop's scroll-scrubbed wipe (fixed-position text + clip-path mask
+    // keyed to scroll position) doesn't map onto mobile's stacked flex
+    // layout, so mobile gets its own, simpler mechanism instead: each row
+    // plays a one-time entrance — eyebrow slide, headline char cascade
+    // (createTextReveal, the same helper CaseStudyHero.tsx uses), image
+    // un-clip, and a matching chromatic-aberration burst — triggered by an
+    // IntersectionObserver as the row scrolls into view, rather than a
+    // ScrollTrigger scrub. Row 0 gets ENTRANCE_DELAY.firstImage so it doesn't
+    // race the wordmark/hero-statement entrance still playing elsewhere.
+
+    // Hides eyebrow/button/image and builds (but does not play) this row's
+    // reveal timeline. .fw-text-fixed's own opacity comes from the base CSS
+    // rule's default (opacity: 0, pre-JS flash prevention) — flipped to 1
+    // here since its children below are all independently still hidden, so
+    // nothing leaks visible before the timeline plays.
+    function setupMobileEntrance(i: number) {
+      const textEl = textRefs.current[i];
+      const headlineEl = headlineRefs.current[i];
+      if (!textEl || !headlineEl) return null;
+
+      const f = features[i];
+      const eyebrowInner = textEl.querySelector<HTMLElement>(".eyebrow-inner");
+      const buttonEl = textEl.querySelector<HTMLElement>(".fw-button");
+      const mediaInner = mediaRefs.current[i];
+      const mediaCol = mediaInner?.parentElement as HTMLElement | null;
+
+      gsap.set(textEl, { opacity: 1 });
+      if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 0, x: -14 });
+      if (buttonEl) gsap.set(buttonEl, { opacity: 0, y: 20 });
+      if (mediaCol) {
+        const exitRight = f.side === "right";
+        gsap.set(mediaCol, {
+          clipPath: exitRight ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)",
+        });
+      }
+
+      const reveal = createTextReveal(headlineEl, { duration: 0.75, stagger: 0.5 });
+
+      reveal.ready.then(() => {
+        if (eyebrowInner) {
+          reveal.tl.to(
+            eyebrowInner,
+            { opacity: 1, x: 0, ease: "power2.out", duration: 0.5 },
+            0,
+          );
+        }
+        if (buttonEl) {
+          reveal.tl.to(
+            buttonEl,
+            { opacity: 1, y: 0, ease: "power2.out", duration: 0.5 },
+            0.15,
+          );
+        }
+        if (mediaCol) {
+          reveal.tl.to(
+            mediaCol,
+            { clipPath: "inset(0% 0% 0% 0%)", ease: "power3.out", duration: 0.9 },
+            0.1,
+          );
+          // Chromatic-aberration burst, matching the desktop row-0 entrance
+          // and CaseStudyHero's own image reveal exactly.
+          const burst = { vel: 1 };
+          reveal.tl.to(
+            burst,
+            {
+              vel: 0,
+              duration: 1.0,
+              ease: "power2.out",
+              onUpdate: () => glInstancesRef.current[i]?.setScrollState(burst.vel, 0.5),
+            },
+            0.1,
+          );
+        }
+      });
+
+      return reveal;
+    }
+
+    // Forces a row straight to its fully-revealed end state, with no
+    // animation — used for a row whose entrance already played (per
+    // mobileEntrancePlayedRef) by the time initMobileEntrances runs again.
+    // In practice this is mainly a React StrictMode dev safety net: the
+    // double-invoked mount/cleanup/mount can flip the ref true and then kill
+    // the in-flight reveal before it lands, and without this the row would
+    // otherwise be silently skipped (setupMobileEntrance never called again,
+    // per the ref guard) and left stuck mid-animation from the aborted first
+    // pass. Mirrors the desktop row-0 entrance's own "already played? just
+    // show it" else-branch below.
+    function snapRevealed(i: number) {
+      const textEl = textRefs.current[i];
+      if (!textEl) return;
+      gsap.set(textEl, { opacity: 1 });
+      const eyebrowInner = textEl.querySelector<HTMLElement>(".eyebrow-inner");
+      if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 1, x: 0 });
+      const buttonEl = textEl.querySelector<HTMLElement>(".fw-button");
+      if (buttonEl) gsap.set(buttonEl, { opacity: 1, y: 0 });
+      const mediaCol = mediaRefs.current[i]?.parentElement as HTMLElement | null;
+      if (mediaCol) gsap.set(mediaCol, { clipPath: "inset(0% 0% 0% 0%)" });
+    }
+
+    // Disconnects the observer and reverts any not-yet-played reveals.
+    // Reverting an already-*played* reveal is harmless — createTextReveal's
+    // cleanup() just swaps the finished, fully-visible split back to plain
+    // text, which looks identical once the cascade has landed — so this is
+    // safe to call unconditionally whenever mobile entrance state needs to
+    // be torn down (leaving mobile for desktop, reduced motion kicking in
+    // mid-session, or effect teardown), not just on already-played rows.
+    function cleanupMobileEntrances() {
+      mobileObserver?.disconnect();
+      mobileObserver = null;
+      mobileReveals.forEach((r) => r?.cleanup());
+      mobileReveals = [];
+    }
+
+    function initMobileEntrances() {
+      cleanupMobileEntrances();
+      mobileReveals = bandRefs.current.map((_, i) => {
+        if (mobileEntrancePlayedRef.current[i]) {
+          snapRevealed(i);
+          return null;
+        }
+        return setupMobileEntrance(i);
+      });
+
+      mobileObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const i = bandRefs.current.indexOf(entry.target as HTMLDivElement);
+            if (i === -1 || !entry.isIntersecting) return;
+            if (mobileEntrancePlayedRef.current[i]) return;
+            mobileEntrancePlayedRef.current[i] = true;
+            mobileObserver?.unobserve(entry.target);
+
+            const reveal = mobileReveals[i];
+            if (!reveal) return;
+            if (i === 0) {
+              gsap.delayedCall(ENTRANCE_DELAY.firstImage, () => reveal.tl.play());
+            } else {
+              reveal.tl.play();
+            }
+          });
+        },
+        { threshold: 0.2 },
+      );
+      bandRefs.current.forEach((el) => el && mobileObserver?.observe(el));
+    }
+
     function init() {
       if (ctx) ctx.revert();
       splits.forEach((s) => s.revert());
@@ -118,9 +277,11 @@ export function FeatureWipe({ features, id }: Props) {
       perFeatureChars = [];
 
       if (reduced) {
-        // No scroll-driven cascade — CSS (layout.css, the reduced-motion +
-        // data-motion="off" blocks) collapses every row to the same static
-        // stacked layout used on mobile, regardless of width.
+        // No scroll-driven cascade, no mobile entrance either — CSS
+        // (layout.css, the reduced-motion + data-motion="off" blocks)
+        // collapses every row to the same static, fully-visible stacked
+        // layout regardless of width.
+        cleanupMobileEntrances();
         centersRef.current = [];
         mainTriggerRef.current = null;
         return;
@@ -128,12 +289,17 @@ export function FeatureWipe({ features, id }: Props) {
 
       const isDesktop = window.innerWidth >= DESKTOP_BP;
       if (!isDesktop) {
-        // Mobile layout forces .fw-text-fixed visible via CSS (no scrubbed
-        // timeline at all), so there's no scroll-progress target to reuse.
+        // No scroll-progress target to reuse below 900px — see
+        // initMobileEntrances above for mobile's own per-row entrance.
         centersRef.current = [];
         mainTriggerRef.current = null;
+        initMobileEntrances();
         return;
       }
+
+      // Reaching this point means desktop — tear down any mobile entrance
+      // state left over from a resize that just crossed the breakpoint.
+      cleanupMobileEntrances();
 
       ctx = gsap.context(() => {
         // SplitText on headlines — lines as overflow:hidden masks, chars as
@@ -449,6 +615,7 @@ export function FeatureWipe({ features, id }: Props) {
       window.removeEventListener("resize", handleResize);
       if (ctx) ctx.revert();
       splits.forEach((s) => s.revert());
+      cleanupMobileEntrances();
     };
   }, [features, motionPref]);
 

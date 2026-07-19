@@ -459,6 +459,14 @@ html[data-motion="off"] .intro-section__cue {
   margin: 2rem 0;
   clip-path: inset(0% 0% 0% 100%);
 }
+/* Portrait on mobile, matching .case-card__media's 3/4 exactly (components.css)
+   — landscape 16:9 only really reads once there's enough width for it.
+   Desktop threshold kept in sync with lib/breakpoints.ts DESKTOP_BP (900). */
+@media (max-width: 899px) {
+  .cs-hero-image {
+    aspect-ratio: 3 / 4;
+  }
+}
 .cs-hero-image__img,
 .cs-hero-image__canvas {
   position: absolute;
@@ -959,11 +967,17 @@ html[data-theme="light"] .fw-media__inner img.fw-img--dark {
     order: 1;
   }
 
+  /* opacity/visibility/transform deliberately NOT forced visible here anymore
+     — FeatureWipe.tsx now plays a per-row entrance (IntersectionObserver +
+     createTextReveal, mirroring CaseStudyHero's mount-time reveal) on mobile
+     instead of skipping animation entirely. The base rule above this
+     container query already defaults .fw-text-fixed to opacity: 0 pre-JS
+     (flash prevention, same as every other entrance element on this site);
+     removing the !important overrides here lets that default stand until
+     JS reveals it. Reduced-motion / data-motion="off" below still force full
+     visibility — those are the real fallback now, not this rule. */
   .fw-text-fixed {
     position: static;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
     padding: var(--gut) var(--gut) 3.5rem;
     align-items: flex-start;
     text-align: left;
@@ -977,11 +991,13 @@ html[data-theme="light"] .fw-media__inner img.fw-img--dark {
     padding-bottom: 1rem;
   }
 
+  /* clip-path likewise no longer forced open — JS clips/un-clips .fw-media
+     per row on mobile now (same element the existing row-0 desktop entrance
+     already animates), instead of a scroll-scrubbed .fw-media__inner reveal. */
   .fw-media {
     min-height: auto;
     aspect-ratio: 3 / 4;
     order: 2;
-    clip-path: none !important;
   }
 
   .fw-row--right .fw-media,
@@ -1028,7 +1044,10 @@ html[data-theme="light"] .fw-media__inner img.fw-img--dark {
     clip-path: none !important;
     transform: none !important;
   }
-  .fw-row:first-child .fw-media {
+  /* Every row now gets a JS-driven .fw-media clip-path on mobile (not just
+     row 0 — see the entrance-reveal comment above the mobile container
+     query), so this fallback covers all rows, not only :first-child. */
+  .fw-media {
     clip-path: none !important;
   }
 }
@@ -1047,6 +1066,9 @@ html[data-motion="off"] .fw-text-fixed {
 html[data-motion="off"] .fw-media__inner {
   clip-path: none !important;
   transform: none !important;
+}
+html[data-motion="off"] .fw-media {
+  clip-path: none !important;
 }
 html[data-motion="off"] .fw-row:first-child .fw-media {
   clip-path: none !important;
