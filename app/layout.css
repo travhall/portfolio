@@ -493,13 +493,29 @@ html[data-motion="off"] .intro-section__cue {
 .cs-hero-headline {
   color: var(--cs-fg, var(--ink));
 }
-.btn--ghost {
-  border-color: var(--cs-border, var(--border-control));
-  color: var(--cs-fg, var(--ink-muted));
+/* The "back home" CTA is a solid, filled button using the project's own
+   real button colors (--cs-button-*) — not our --ink/--surface, and not a
+   derived tint of --cs-accent: every project sampled for this data has its
+   own dedicated button tokens, sometimes a genuinely different shade from
+   the accent dot (Moxie's button is rose-gold-800/50, not the rose-gold-
+   500/300 used for its accent). Background is a flat override, not the
+   system's gradient sheen — layering our own highlight treatment on top of
+   an arbitrary brand color read as muddier than just the flat fill.
+
+   Scoped via the .cs-brand-bg sibling combinator (not a bare .btn--solid
+   rule with var(...,fallback)) because .btn--solid's real `background` is
+   a two-layer gradient-plus-color value, not a single color — a fallback
+   pattern here would replace that gradient with a flat fill on every solid
+   button sitewide the moment --cs-button-bg is unset, which is everywhere
+   except a themed case study. This selector only ever matches inside one. */
+.cs-brand-bg ~ section .btn--solid {
+  background: var(--cs-button-bg);
+  color: var(--cs-button-fg);
+  border-color: var(--cs-button-border);
 }
-.btn--ghost:hover {
-  border-color: var(--cs-accent, var(--ink));
-  color: var(--cs-accent, var(--ink));
+.cs-brand-bg ~ section .btn--solid:hover {
+  background: var(--cs-button-bg);
+  border-color: var(--cs-button-border);
 }
 
 @media (prefers-reduced-motion: reduce) {

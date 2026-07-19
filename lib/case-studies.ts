@@ -63,7 +63,19 @@ export const caseStudies: CaseStudy[] = [
     buttonText: "View Case Study",
     featured: true,
     theme: {
-      light: { bg: "#fbfcfe", fg: "#16181d", border: "#b8b9bc", accent: "#2563eb" },
+      // bg values are --color-background-primary straight from the design
+      // system's own tokens file, more precise than an earlier hex sampling
+      // pass. Button is its own real token (--color-button-primary-*), not
+      // derived — same blue bg + near-white text in both modes; it's a
+      // fixed, self-contained "on-brand-blue" pairing, not tied to the
+      // page's own light/dark bg the way el-camino's is.
+      light: {
+        bg: "oklch(0.991 0.003 264.45)",
+        fg: "#16181d",
+        border: "#b8b9bc",
+        accent: "#2563eb",
+        button: { bg: "#2563eb", fg: "#fbfcfe" },
+      },
       // wylie-dog has no distinct accent-text token of its own (its real
       // site uses the same blue for both button fills and text) — raw
       // #2563eb on this dark bg only measures 3.81:1, under 4.5:1 for small
@@ -71,11 +83,12 @@ export const caseStudies: CaseStudy[] = [
       // at 5.67:1 — still clearly blue, no longer borderline. Derived, not
       // sampled, and the one case in this file that had to be.
       dark: {
-        bg: "#080b10",
+        bg: "oklch(0.149 0.012 259.72)",
         fg: "#eeeff1",
         border: "#4c4e52",
         accent: "#2563eb",
         accentText: "color-mix(in oklab, #2563eb 80%, white 20%)",
+        button: { bg: "#2563eb", fg: "#fbfcfe" },
       },
     },
   },
@@ -92,17 +105,24 @@ export const caseStudies: CaseStudy[] = [
       // fg/bg mix in resolveThemeVars. accentText comes from their real
       // --content-emphasis (light) / --ui-accent (dark) tokens — a
       // muted-down variant of the badge accent made specifically for text.
+      // Their real <button> elements (the tag/filter chips) use
+      // --ui-button-surface (same value as accent) with --ui-button-text,
+      // which is literally that mode's own bg color — spelled out
+      // explicitly below even though it matches this file's fallback
+      // defaults, so it reads as confirmed, not coincidental.
       light: {
         bg: "oklch(96.5% 0.008 70)",
         fg: "oklch(18% 0.024 70)",
         accent: "oklch(38% 0.072 117)",
         accentText: "oklch(51.5% 0.075 60)",
+        button: { bg: "oklch(38% 0.072 117)", fg: "oklch(96.5% 0.008 70)" },
       },
       dark: {
         bg: "oklch(12.5% 0.042 117)",
         fg: "oklch(98.5% 0.008 117)",
         accent: "oklch(68% 0.065 60)",
         accentText: "oklch(76% 0.055 60)",
+        button: { bg: "oklch(68% 0.065 60)", fg: "oklch(12.5% 0.042 117)" },
       },
     },
   },
@@ -117,13 +137,17 @@ export const caseStudies: CaseStudy[] = [
     theme: {
       // accentText from their real --accent-text tokens (rose-gold-600
       // light / rose-gold-300 dark) — darker/lighter than the raw accent
-      // (rose-gold-500/300) specifically so it holds up as text.
+      // (rose-gold-500/300) specifically so it holds up as text. Button is
+      // its own real --button/--button-foreground pair — genuinely
+      // different shades (rose-gold-800/50) from the accent dot, not the
+      // same color reused.
       light: {
         bg: "oklch(97.12% 0.0074 29.23)",
         fg: "oklch(9.47% 0.0834 29.23)",
         border: "color-mix(in oklab, oklch(14.84% 0.0024 48.79) 12%, transparent)",
         accent: "oklch(54% 0.092 63)",
         accentText: "oklch(42.47% 0.072 63)",
+        button: { bg: "oklch(25.42% 0.042 63)", fg: "oklch(97.31% 0.028 63)" },
       },
       dark: {
         bg: "oklch(9.47% 0.0834 29.23)",
@@ -131,6 +155,7 @@ export const caseStudies: CaseStudy[] = [
         border: "color-mix(in oklab, oklch(97.12% 0.0074 29.23) 14%, transparent)",
         accent: "oklch(70.18% 0.075 63)",
         accentText: "oklch(70.18% 0.075 63)",
+        button: { bg: "oklch(97.31% 0.028 63)", fg: "oklch(17.15% 0.038 63)" },
       },
     },
   },
@@ -147,9 +172,26 @@ export const caseStudies: CaseStudy[] = [
       // darker gold (#833e00) in light mode specifically because the raw
       // gold only measures 2.26:1 on their own cream background, nowhere
       // close to usable as text; the vivid gold (#de9300, same as accent)
-      // is reused as-is in dark mode where it already clears 8:1.
-      light: { bg: "#f7f1e9", fg: "#080504", border: "#766d62", accent: "#de9300", accentText: "#833e00" },
-      dark: { bg: "#080504", fg: "#f7f1e9", border: "#342c29", accent: "#de9300", accentText: "#de9300" },
+      // is reused as-is in dark mode where it already clears 8:1. Their
+      // real --button-primary-* is gold bg + near-black text in both
+      // modes (button-primary-border is that same dark #833e00 in light,
+      // transparent in dark — no border at all, not "none sampled").
+      light: {
+        bg: "#f7f1e9",
+        fg: "#080504",
+        border: "#766d62",
+        accent: "#de9300",
+        accentText: "#833e00",
+        button: { bg: "#de9300", fg: "#080504", border: "#833e00" },
+      },
+      dark: {
+        bg: "#080504",
+        fg: "#f7f1e9",
+        border: "#342c29",
+        accent: "#de9300",
+        accentText: "#de9300",
+        button: { bg: "#de9300", fg: "#080504", border: "transparent" },
+      },
     },
   },
   // ── Non-featured archive entries ──────────────────────────────────────

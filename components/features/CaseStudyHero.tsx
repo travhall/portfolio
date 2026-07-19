@@ -234,7 +234,7 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt }: Props) {
         <canvas ref={canvasRef} className="cs-hero-image__canvas" aria-hidden="true" />
       </div>
       <Button
-        variant="ghost"
+        variant="solid"
         href="/"
         onClick={(e) => {
           // Leave modifier / non-primary clicks alone so "open in new tab",

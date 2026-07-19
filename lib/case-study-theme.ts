@@ -34,6 +34,13 @@ export interface CaseStudyThemeMode {
    *  cream — nowhere close). Falls back to `accent` when omitted, which is
    *  only safe to do if that's been checked. */
   accentText?: string;
+  /** The project's real primary-button colors — a filled surface + its own
+   *  contrasting text, not derived from bg/fg/accent. Every project sampled
+   *  for this data has its own dedicated button tokens, often genuinely
+   *  different from `accent` (Moxie's button is rose-gold-800/50, not the
+   *  same rose-gold-500/300 used for the accent dot). Falls back to
+   *  `accent`/`fg` when omitted. */
+  button?: { bg: string; fg: string; border?: string };
 }
 
 export interface CaseStudyTheme {
@@ -57,13 +64,26 @@ const derivedBorder = (mode: CaseStudyThemeMode) =>
 const derivedAccent = (mode: CaseStudyThemeMode) => mode.accent ?? mode.fg;
 const derivedAccentText = (mode: CaseStudyThemeMode) =>
   mode.accentText ?? mode.accent ?? mode.fg;
+const derivedButtonBg = (mode: CaseStudyThemeMode) => mode.button?.bg ?? derivedAccent(mode);
+const derivedButtonFg = (mode: CaseStudyThemeMode) => mode.button?.fg ?? mode.bg;
+const derivedButtonBorder = (mode: CaseStudyThemeMode) => mode.button?.border ?? derivedButtonBg(mode);
+
+type ThemeVars = Record<
+  | "--cs-bg"
+  | "--cs-fg"
+  | "--cs-border"
+  | "--cs-accent"
+  | "--cs-accent-text"
+  | "--cs-button-bg"
+  | "--cs-button-fg"
+  | "--cs-button-border",
+  string
+>;
 
 /** Resolves a theme to the CSS custom properties its case-study page (and,
  *  for --cs-bg only, its home page row) render with — or undefined if the
  *  case study has no theme yet (e.g. a "coming soon" placeholder entry). */
-export function resolveThemeVars(
-  theme: CaseStudyTheme | undefined,
-): Record<"--cs-bg" | "--cs-fg" | "--cs-border" | "--cs-accent" | "--cs-accent-text", string> | undefined {
+export function resolveThemeVars(theme: CaseStudyTheme | undefined): ThemeVars | undefined {
   if (!theme) return undefined;
   const dark = theme.dark ?? theme.light;
   return {
@@ -72,6 +92,9 @@ export function resolveThemeVars(
     "--cs-border": `light-dark(${derivedBorder(theme.light)}, ${derivedBorder(dark)})`,
     "--cs-accent": `light-dark(${derivedAccent(theme.light)}, ${derivedAccent(dark)})`,
     "--cs-accent-text": `light-dark(${derivedAccentText(theme.light)}, ${derivedAccentText(dark)})`,
+    "--cs-button-bg": `light-dark(${derivedButtonBg(theme.light)}, ${derivedButtonBg(dark)})`,
+    "--cs-button-fg": `light-dark(${derivedButtonFg(theme.light)}, ${derivedButtonFg(dark)})`,
+    "--cs-button-border": `light-dark(${derivedButtonBorder(theme.light)}, ${derivedButtonBorder(dark)})`,
   };
 }
 
