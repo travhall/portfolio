@@ -1,0 +1,44 @@
+{
+  "order": 2,
+  "side": "left",
+  "image": "/images/photo-elcamino.jpg",
+  "featured": true,
+  "eyebrow": "New Site",
+  "headline": "El Camino Skate Shop",
+  "buttonText": "Visit Skate Shop",
+  "tagline": "A ground-up rebuild for a skater-owned shop, from storefront to checkout.",
+  "services": ["Strategy", "E-commerce", "Art Direction", "Front-End Development"],
+  "overview": {
+    "body": "El Camino needed a shop that felt as considered as the boards on its walls. The rebuild covers the full storefront experience — category browsing, product pages, and checkout — built on a design system tuned for a fast-moving catalog with frequent drops.",
+    "sectors": ["Retail", "E-commerce"],
+    "credits": [
+      { "role": "Design & Development", "names": ["Travis Hall"] },
+      { "role": "Photography", "names": ["El Camino Skate Shop"] }
+    ],
+    "awards": [{ "label": "Visionary Impact Award", "href": "https://elcaminoskateshop.netlify.app/" }]
+  },
+  "sections": [
+    { "type": "full-image", "image": "/images/work-img-elcamino-light.jpg", "alt": "The storefront homepage in light mode" },
+    {
+      "type": "split",
+      "left": { "kind": "text", "eyebrow": "Approach", "heading": "Built for weekly drops.", "body": "A dark, weathered palette and bold condensed type carry the shop's skate-culture identity across every surface, from the homepage down to individual product cards.", "cta": { "label": "Visit the shop", "href": "https://elcaminoskateshop.netlify.app/", "icon": "arrow-up-right" } },
+      "right": { "kind": "image", "image": "/images/work-img-elcamino-dark.jpg", "alt": "The storefront homepage in dark mode" }
+    }
+  ],
+  "theme": {
+    "light": {
+      "bg": "oklch(92% 0.012 70)",
+      "fg": "oklch(18% 0.024 70)",
+      "accent": "oklch(38% 0.072 117)",
+      "accentText": "color-mix(in oklab, oklch(51.5% 0.075 60) 80%, oklch(18% 0.024 70) 20%)",
+      "button": { "bg": "oklch(38% 0.072 117)", "fg": "oklch(96.5% 0.008 70)" }
+    },
+    "dark": {
+      "bg": "oklch(22% 0.052 117)",
+      "fg": "oklch(98.5% 0.008 117)",
+      "accent": "oklch(68% 0.065 60)",
+      "accentText": "oklch(76% 0.055 60)",
+      "button": { "bg": "oklch(68% 0.065 60)", "fg": "oklch(12.5% 0.042 117)" }
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { Icon, ICON_NAMES } from "@/components/ui/Icon";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { MotionToggle } from "@/components/ui/MotionToggle";
 import { ContrastSwatch } from "./ContrastSwatch";
-import { caseStudies } from "@/lib/case-studies";
+import { getCaseStudies } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
 import "./kit.css";
 
@@ -92,66 +92,6 @@ const COLOR_PAIRINGS = [
   },
 ];
 
-// Every case study's real theme, run through the exact same contrast check
-// as the fixed design-system pairings above — the accessibility audit for
-// content data (one-off per-project colors), not just tokens. Adding a new
-// case study or changing a theme surfaces a pass/fail here automatically;
-// there's no separate process to remember. See lib/case-study-theme.ts for
-// why this isn't called "brand." AAA is dropped here (see showAAA below) —
-// 7:1 isn't a realistic bar for text on a saturated background and every
-// pairing failing it read as noise; AA is the actual gate.
-//
-// Headline uses each project's own --cs-fg; the eyebrow uses --cs-accent-text
-// — the project's real brand color, recolored to hold up as text (not the
-// raw --cs-accent used for the dot/button-hover, which is frequently unsafe
-// as text — see case-studies.ts). See the .cs-hero-eyebrow/.cs-hero-headline
-// rules in layout.css. These pairings audit what actually renders.
-const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
-  .filter((study) => study.theme)
-  .flatMap((study) => {
-    const vars = resolveThemeVars(study.theme)!;
-    return [
-      {
-        fgVar: vars["--cs-fg"],
-        bgVar: vars["--cs-bg"],
-        bgLabel: `${study.headline} background`,
-        sample: study.headline,
-        sampleClassName: "type-h3",
-        context: `Case-study headline — --cs-fg on ${study.slug}'s background`,
-        showAAA: false,
-      },
-      {
-        fgVar: vars["--cs-accent-text"],
-        bgVar: vars["--cs-bg"],
-        bgLabel: `${study.headline} background`,
-        sample: study.eyebrow,
-        sampleClassName: "type-eyebrow",
-        context: `Case-study eyebrow — --cs-accent-text on ${study.slug}'s background`,
-        showAAA: false,
-      },
-    ];
-  });
-
-// Every case study's real button colors — the filled "back home" CTA on
-// its case-study page (see .btn--solid's --cs-button-* override in
-// layout.css), not a derived tint. Same living-audit logic as the pairings
-// above: adding a project or changing its button colors surfaces a
-// pass/fail here automatically.
-const CASE_STUDY_BUTTON_PAIRINGS = caseStudies
-  .filter((study) => study.theme)
-  .map((study) => {
-    const vars = resolveThemeVars(study.theme)!;
-    return {
-      fgVar: vars["--cs-button-fg"],
-      bgVar: vars["--cs-button-bg"],
-      bgLabel: `${study.headline} button`,
-      sample: study.buttonText ?? "Let's get you back home",
-      sampleClassName: "type-small",
-      context: `Case-study button — --cs-button-fg on ${study.slug}'s --cs-button-bg`,
-      showAAA: false,
-    };
-  });
-
 const TYPE_ROWS = [
   { cls: "type-display",   label: "Display",   token: "--text-display · light 300" },
   { cls: "type-h1",        label: "Heading 1", token: "--text-h1 · light 300" },
@@ -178,7 +118,69 @@ function Section({ title, note, children }: { title: string; note?: string; chil
   );
 }
 
-export default function KitPage() {
+export default async function KitPage() {
+  const caseStudies = await getCaseStudies();
+
+  // Every case study's real theme, run through the exact same contrast check
+  // as the fixed design-system pairings above — the accessibility audit for
+  // content data (one-off per-project colors), not just tokens. Adding a new
+  // case study or changing a theme surfaces a pass/fail here automatically;
+  // there's no separate process to remember. See lib/case-study-theme.ts for
+  // why this isn't called "brand." AAA is dropped here (see showAAA below) —
+  // 7:1 isn't a realistic bar for text on a saturated background and every
+  // pairing failing it read as noise; AA is the actual gate.
+  //
+  // Headline uses each project's own --cs-fg; the eyebrow uses --cs-accent-text
+  // — the project's real brand color, recolored to hold up as text (not the
+  // raw --cs-accent used for the dot/button-hover, which is frequently unsafe
+  // as text — see case-studies.ts). See the .cs-hero-eyebrow/.cs-hero-headline
+  // rules in layout.css. These pairings audit what actually renders.
+  const CASE_STUDY_ACCENT_PAIRINGS = caseStudies
+    .filter((study) => study.theme)
+    .flatMap((study) => {
+      const vars = resolveThemeVars(study.theme)!;
+      return [
+        {
+          fgVar: vars["--cs-fg"],
+          bgVar: vars["--cs-bg"],
+          bgLabel: `${study.headline} background`,
+          sample: study.headline,
+          sampleClassName: "type-h3",
+          context: `Case-study headline — --cs-fg on ${study.slug}'s background`,
+          showAAA: false,
+        },
+        {
+          fgVar: vars["--cs-accent-text"],
+          bgVar: vars["--cs-bg"],
+          bgLabel: `${study.headline} background`,
+          sample: study.eyebrow,
+          sampleClassName: "type-eyebrow",
+          context: `Case-study eyebrow — --cs-accent-text on ${study.slug}'s background`,
+          showAAA: false,
+        },
+      ];
+    });
+
+  // Every case study's real button colors — the filled "back home" CTA on
+  // its case-study page (see .btn--solid's --cs-button-* override in
+  // layout.css), not a derived tint. Same living-audit logic as the pairings
+  // above: adding a project or changing its button colors surfaces a
+  // pass/fail here automatically.
+  const CASE_STUDY_BUTTON_PAIRINGS = caseStudies
+    .filter((study) => study.theme)
+    .map((study) => {
+      const vars = resolveThemeVars(study.theme)!;
+      return {
+        fgVar: vars["--cs-button-fg"],
+        bgVar: vars["--cs-button-bg"],
+        bgLabel: `${study.headline} button`,
+        sample: study.buttonText ?? "Let's get you back home",
+        sampleClassName: "type-small",
+        context: `Case-study button — --cs-button-fg on ${study.slug}'s --cs-button-bg`,
+        showAAA: false,
+      };
+    });
+
   return (
     <main className="kit-page">
       <header className="kit-header">

@@ -520,16 +520,19 @@ html[data-motion="off"] .intro-section__cue {
    rule with var(...,fallback)) because .btn--solid's real `background` is
    a two-layer gradient-plus-color value, not a single color — a fallback
    pattern here would replace that gradient with a flat fill on every solid
-   button sitewide the moment --cs-button-bg is unset, which is everywhere
-   except a themed case study. Targets .cs-container specifically (not a
-   bare `section` tag) — the page wraps each of its own sections in that
-   class, not a semantic <section> element. */
-.cs-brand-bg ~ .cs-container .btn--solid {
+   button site-wide the moment --cs-button-bg is unset, which is everywhere
+   except a themed case study. Targets .cs-container AND .cs-section — the
+   hero/overview/nav wrap in the former, media sections (where an author can
+   now place a solid CTA — see CaseStudyTextBlockCta in lib/case-studies.ts)
+   are full-bleed in the latter, not a bare `section` tag. */
+.cs-brand-bg ~ .cs-container .btn--solid,
+.cs-brand-bg ~ .cs-section .btn--solid {
   background: var(--cs-button-bg);
   color: var(--cs-button-fg);
   border-color: var(--cs-button-border);
 }
-.cs-brand-bg ~ .cs-container .btn--solid:hover {
+.cs-brand-bg ~ .cs-container .btn--solid:hover,
+.cs-brand-bg ~ .cs-section .btn--solid:hover {
   background: var(--cs-button-bg);
   border-color: var(--cs-button-border);
 }
@@ -676,8 +679,8 @@ html[data-motion="off"] .cs-hero__meta {
 
 /* ── Media sections — full-bleed, edge to edge of the page. .cs-split's
    two slots stack on narrow viewports (an image next to another image, or
-   next to a wordmark/paragraph, both read fine stacked — no content is
-   lost the way a data table or nav would be). */
+   next to a paragraph, both read fine stacked — no content is lost the way
+   a data table or nav would be). */
 .cs-section {
   margin-block: clamp(1px, 0.3vh, 2px);
 }
@@ -711,7 +714,6 @@ html[data-motion="off"] .cs-hero__meta {
   height: 100%;
   object-fit: cover;
 }
-.cs-split__wordmark,
 .cs-split__text {
   display: flex;
   flex-direction: column;
@@ -720,16 +722,57 @@ html[data-motion="off"] .cs-hero__meta {
   aspect-ratio: 4 / 3;
   padding: clamp(2rem, 5vw, 4rem);
   background: var(--cs-bg, var(--surface));
+  color: var(--cs-fg, var(--ink));
 }
-.cs-split__wordmark {
+/* A CaseStudyTextBlock's markdown body can be several paragraphs — .type-lead
+   is applied per-<p> (see CaseStudyMedia.tsx), so they need their own gap
+   distinct from the flex column's gap around eyebrow/heading/cta. */
+.cs-split__text p + p,
+.cs-full-text p + p {
+  margin-top: 1rem;
+}
+
+/* Full-width text block — same CaseStudyTextBlock as a split slot's "text"
+   kind (see lib/case-studies.ts), just centered at full bleed instead of
+   boxed in a grid column. */
+.cs-full-text {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 1rem;
   text-align: center;
-}
-.cs-split__wordmark .type-display {
+  padding: clamp(3rem, 10vw, 7rem) clamp(1.5rem, 6vw, 4rem);
+  background: var(--cs-bg, var(--surface));
   color: var(--cs-fg, var(--ink));
 }
-.cs-split__text {
+.cs-full-text .type-eyebrow,
+.cs-full-text .type-display,
+.cs-full-text p {
+  max-width: 40rem;
+}
+
+/* .btn--link's and .btn--ghost's own colors (components.css) are the
+   system --ink/--ink-muted/--border-control, not theme-aware — override
+   them here, scoped to inside a text block, so an author-chosen CTA
+   variant (see CaseStudyTextBlockCta) matches the surrounding themed copy
+   instead of reverting to system ink. Safe as a bare fallback (unlike
+   .btn--solid's background — see .cs-brand-bg ~ .cs-container .btn--solid
+   above) because every property overridden here is single-value, not a
+   compound one. */
+.cs-split__text .btn--link,
+.cs-full-text .btn--link,
+.cs-split__text .btn--ghost,
+.cs-full-text .btn--ghost {
   color: var(--cs-fg, var(--ink));
+}
+.cs-split__text .btn--ghost,
+.cs-full-text .btn--ghost {
+  border-color: var(--cs-border, var(--border-control));
+}
+.cs-split__text .btn--ghost:hover,
+.cs-full-text .btn--ghost:hover {
+  color: var(--cs-fg, var(--ink));
+  border-color: var(--cs-fg, var(--ink));
 }
 
 /* ── CASE-STUDY NAV — "Related Projects" ─────────────────────────────────── */
@@ -750,6 +793,14 @@ html[data-motion="off"] .cs-hero__meta {
   justify-content: space-between;
   gap: 1.5rem;
   margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
+}
+
+/* The page's closing "back home" CTA (CaseStudyBackHome.tsx) — centered,
+   own beat below the related-projects nav, before SiteFooter. */
+.cs-back-home {
+  display: flex;
+  justify-content: center;
+  padding-bottom: clamp(3rem, 8vh, 5rem);
 }
 
 /*

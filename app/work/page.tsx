@@ -1,4 +1,4 @@
-import { caseStudies } from "@/lib/case-studies";
+import { getCaseStudies } from "@/lib/case-studies";
 import { createMetadata } from "@/lib/metadata";
 import { CaseStudyCard } from "@/components/features/CaseStudyCard";
 
@@ -12,7 +12,8 @@ export const metadata = createMetadata({
   path: "/work",
 });
 
-export default function WorkPage() {
+export default async function WorkPage() {
+  const caseStudies = await getCaseStudies();
   return (
     <main id="main-content">
       <div className="header-spacer" aria-hidden="true" />

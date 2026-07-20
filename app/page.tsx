@@ -1,11 +1,12 @@
 import { IntroSection } from "@/components/features/IntroSection";
 import { FeatureWipe } from "@/components/features/FeatureWipe";
 import { createMetadata } from "@/lib/metadata";
-import { caseStudies } from "@/lib/case-studies";
+import { getCaseStudies } from "@/lib/case-studies";
 
 export const metadata = createMetadata({ path: "/" });
 
-export default function HomePage() {
+export default async function HomePage() {
+  const caseStudies = await getCaseStudies();
   return (
     <main id="main-content">
       {/* ── Header spacer ─────────────────────────────────────────────────

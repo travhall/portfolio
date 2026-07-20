@@ -5,6 +5,7 @@ import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Topbar } from "@/components/nav/Topbar"; //cSpell:ignore Topbar
 import { SiteFooter } from "@/components/nav/SiteFooter";
 import { siteConfig } from "@/lib/site-config";
+import { getCaseStudies } from "@/lib/case-studies";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -56,11 +57,12 @@ const personJsonLd = {
   sameAs: [siteConfig.links.github, siteConfig.links.linkedin],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const caseStudies = await getCaseStudies();
   return (
     <ViewTransitions>
       <html
@@ -99,7 +101,7 @@ export default function RootLayout({
           <SmoothScroll>
             <Topbar />
             {children}
-            <SiteFooter />
+            <SiteFooter caseStudies={caseStudies} />
           </SmoothScroll>
         </body>
       </html>

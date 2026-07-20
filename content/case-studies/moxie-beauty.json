@@ -1,0 +1,42 @@
+{
+  "order": 3,
+  "side": "right",
+  "image": "/images/photo-moxie.jpg",
+  "featured": true,
+  "eyebrow": "New Site",
+  "headline": "Moxie Beauty",
+  "buttonText": "View Case Study",
+  "tagline": "An elevated brand identity for a lash and brow studio built on quiet, considered luxury.",
+  "services": ["Brand Identity", "Art Direction", "Web Design"],
+  "overview": {
+    "body": "Moxie asked for a space that felt like the treatment itself: unhurried, personal, and a little indulgent. The identity leans on a warm, low-contrast palette and a serif/sans pairing that reads as considered rather than clinical, carried through the site, booking flow, and in-studio signage.",
+    "sectors": ["Beauty & Wellness"],
+    "credits": [{ "role": "Design & Development", "names": ["Travis Hall"] }]
+  },
+  "sections": [
+    {
+      "type": "split",
+      "left": { "kind": "image", "image": "/images/work-img-moxie-light.jpg", "alt": "The Moxie homepage" },
+      "right": { "kind": "text", "eyebrow": "Identity", "body": "A warm rose-gold palette and a considered serif/sans pairing carry the Moxie name on their own, without leaning on a literal logotype." }
+    },
+    { "type": "full-image", "image": "/images/work-img-moxie-dark.jpg", "alt": "The Moxie homepage, evening variant" }
+  ],
+  "theme": {
+    "light": {
+      "bg": "oklch(97.12% 0.0074 29.23)",
+      "fg": "oklch(9.47% 0.0834 29.23)",
+      "border": "color-mix(in oklab, oklch(14.84% 0.0024 48.79) 12%, transparent)",
+      "accent": "oklch(54% 0.092 63)",
+      "accentText": "oklch(42.47% 0.072 63)",
+      "button": { "bg": "oklch(25.42% 0.042 63)", "fg": "oklch(97.31% 0.028 63)" }
+    },
+    "dark": {
+      "bg": "oklch(9.47% 0.0834 29.23)",
+      "fg": "oklch(97.12% 0.0074 29.23)",
+      "border": "color-mix(in oklab, oklch(97.12% 0.0074 29.23) 14%, transparent)",
+      "accent": "oklch(70.18% 0.075 63)",
+      "accentText": "oklch(70.18% 0.075 63)",
+      "button": { "bg": "oklch(97.31% 0.028 63)", "fg": "oklch(17.15% 0.038 63)" }
+    }
+  }
+}

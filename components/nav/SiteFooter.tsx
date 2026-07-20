@@ -15,10 +15,14 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { EmailButton } from "@/components/ui/EmailButton";
 import { siteConfig } from "@/lib/site-config";
-import { caseStudies } from "@/lib/case-studies";
+import type { CaseStudy } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
 
-export function SiteFooter() {
+// caseStudies comes in as a prop, not an import — this is a client
+// component (usePathname), and the data now lives behind a server-only
+// filesystem read (see lib/case-studies.ts's getCaseStudies). The root
+// layout loads it once and passes it down.
+export function SiteFooter({ caseStudies }: { caseStudies: CaseStudy[] }) {
   const year = new Date().getFullYear();
 
   // The footer is a sibling of the case-study page's themed <main> (see

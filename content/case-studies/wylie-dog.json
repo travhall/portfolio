@@ -1,0 +1,47 @@
+{
+  "order": 1,
+  "side": "right",
+  "image": "/images/photo-wyliedog.jpg",
+  "featured": true,
+  "eyebrow": "Featured Project",
+  "headline": "Wylie Dog Design System",
+  "buttonText": "View Case Study",
+  "tagline": "A typed component library and OKLCH token system built to close the gap between design and code.",
+  "services": ["Design Systems", "Component Architecture", "Design Tokens", "Documentation"],
+  "overview": {
+    "body": "Wylie Dog is a production design system built for a growing product team shipping across web and native surfaces. The work spans a three-tier token architecture, a Figma-synced pipeline, and a component library built on accessible primitives — replacing a patchwork of one-off styles with a single source of truth every team can build from.",
+    "sectors": ["Software", "Design Tooling"],
+    "credits": [{ "role": "Design & Development", "names": ["Travis Hall"] }]
+  },
+  "sections": [
+    {
+      "type": "split",
+      "left": { "kind": "image", "image": "/images/work-img-wyliedog-light.jpg", "alt": "The design system's overview page in light mode" },
+      "right": { "kind": "image", "image": "/images/work-img-wyliedog-dark.jpg", "alt": "The same overview page in dark mode" }
+    },
+    {
+      "type": "full-text",
+      "eyebrow": "Outcome",
+      "heading": "One system, every surface.",
+      "body": "Every button, input, and layout primitive now traces back to the same token set — in Figma and in code. New features ship faster because the underlying pieces no longer need to be re-invented per screen.",
+      "cta": { "label": "View the live showcase", "href": "https://wylie-dog-ds-showcase.vercel.app", "icon": "arrow-up-right" }
+    }
+  ],
+  "theme": {
+    "light": {
+      "bg": "oklch(0.991 0.003 264.45)",
+      "fg": "#16181d",
+      "border": "#b8b9bc",
+      "accent": "#2563eb",
+      "button": { "bg": "#2563eb", "fg": "#fbfcfe" }
+    },
+    "dark": {
+      "bg": "oklch(0.149 0.012 259.72)",
+      "fg": "#eeeff1",
+      "border": "#4c4e52",
+      "accent": "#2563eb",
+      "accentText": "color-mix(in oklab, #2563eb 80%, white 20%)",
+      "button": { "bg": "#2563eb", "fg": "#fbfcfe" }
+    }
+  }
+}

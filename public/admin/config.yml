@@ -1,0 +1,217 @@
+# Sveltia CMS config (Decap-compatible), against the real
+# content/case-studies/*.json files. Every case study is fully authored
+# here — lib/case-studies.ts derives each one's slug from its filename
+# (getCaseStudies reads the whole directory), so creating a new entry in
+# this collection produces a real, working case study with no code change.
+#
+# Color fields below use `string`, not Sveltia's `color` widget — the color
+# widget only stores hex, and this project's palette (including every
+# existing theme value) is OKLCH plus the occasional color-mix() expression.
+# A hex-only picker would silently downgrade or corrupt those on save.
+#
+# "Work with Local Repository" (File System Access API, Chrome/Edge) is
+# built into Sveltia CMS's backend picker automatically — unlike Decap,
+# it needs no local_backend flag or proxy server. Open localhost:3000/admin,
+# click it, and pick this repo's working directory when prompted.
+
+backend:
+  name: github
+  repo: travhall/portfolio
+  branch: main
+
+media_folder: "public/images"
+public_folder: "/images"
+
+collections:
+  - name: case_studies
+    label: Case Studies
+    folder: content/case-studies
+    format: json
+    extension: json
+    identifier_field: headline
+    # New entries are named from Headline — this filename becomes the
+    # case study's slug (and its URL, /work/<slug>), so it can't be
+    # changed later without also renaming the file.
+    slug: "{{fields.headline}}"
+    create: true
+    delete: false
+    fields:
+      - name: featured
+        label: Show on Home Page
+        widget: boolean
+        default: false
+        hint: "Every case study appears in /work and the menu regardless — this only controls the home page's feature list."
+
+      - name: comingSoon
+        label: Coming Soon (no live page yet)
+        widget: boolean
+        default: false
+        hint: "Lists as \"Coming soon\" instead of a link, and won't get a real page until this is off and Image is set."
+
+      - name: order
+        label: Sort Position
+        widget: number
+        required: false
+        hint: "Lower numbers show first (home page row order, related-projects order). Leave blank to sort after every ordered entry."
+
+      - name: side
+        label: Home Page Image Side
+        widget: select
+        options: [left, right]
+        default: right
+
+      - { name: image, label: Home Page Image, widget: image }
+      - { name: imageDark, label: Home Page Image (Dark Mode), widget: image, required: false }
+      - { name: imageAlt, label: Home Page Image Alt Text, widget: string, required: false }
+
+      - { name: eyebrow, label: Eyebrow, widget: string }
+      - { name: headline, label: Headline, widget: string }
+      - name: buttonText
+        label: Button Text
+        widget: string
+        required: false
+        hint: >-
+          Label only, no URL field — this button appears on the HOME PAGE's
+          project row, not on this case study's own page, and always links
+          to this project's page (/work/<slug>). It can't point anywhere
+          else, so there's nothing else to configure here.
+
+      - { name: tagline, label: Tagline, widget: text, required: false }
+      - name: services
+        label: Services
+        widget: list
+        required: false
+        field: { name: service, label: Service, widget: string }
+
+      - name: overview
+        label: Overview
+        widget: object
+        required: false
+        fields:
+          - { name: body, label: Body, widget: text }
+          - name: sectors
+            label: Sectors
+            widget: list
+            required: false
+            field: { name: sector, label: Sector, widget: string }
+          - name: credits
+            label: Credits
+            widget: list
+            required: false
+            fields:
+              - { name: role, label: Role, widget: string }
+              - name: names
+                label: Names
+                widget: list
+                field: { name: name, label: Name, widget: string }
+          - name: awards
+            label: Awards
+            widget: list
+            required: false
+            fields:
+              - { name: label, label: Label, widget: string }
+              - { name: href, label: Link, widget: string, required: false }
+
+      - name: sections
+        label: Sections
+        widget: list
+        required: false
+        # Matches CaseStudySection's discriminant field name (type) in
+        # lib/case-studies.ts, so JSON round-trips without a mapping step.
+        types:
+          - name: full-image
+            label: Full-width Image
+            widget: object
+            fields:
+              - { name: image, label: Image, widget: image }
+              - { name: alt, label: Alt Text, widget: string, required: false }
+
+          - name: full-text
+            label: Full-width Text
+            widget: object
+            # Same CaseStudyTextBlock shape as a split slot's "text" kind
+            # (see lib/case-studies.ts) — the anchor is reused below so
+            # both places stay identical without duplicating the field list.
+            fields: &text_block_fields
+              - { name: eyebrow, label: Eyebrow, widget: string, required: false }
+              - { name: heading, label: Heading, widget: string, required: false }
+              - name: body
+                label: Body
+                widget: markdown
+                # Restricted to what CaseStudyMedia.tsx actually renders —
+                # paragraphs, bold/italic, and inline links via react-markdown.
+                buttons: [bold, italic, link]
+              - name: cta
+                label: CTA Link
+                widget: object
+                required: false
+                fields:
+                  - { name: label, label: Label, widget: string }
+                  - { name: href, label: URL, widget: string }
+                  - { name: variant, label: Button Style, widget: select, options: [solid, ghost, link], default: link, required: false }
+                  - { name: icon, label: Icon, widget: select, options: [arrow-right, arrow-up-right, arrow-down, download, external, mail], default: arrow-up-right, required: false, hint: "Leave blank for no icon." }
+                  - { name: iconPos, label: Icon Position, widget: select, options: [left, right], default: left, required: false }
+                  - { name: newTab, label: Open in a New Tab, widget: boolean, default: true, hint: "Off for links to another page on this site; on for links to a project's live site." }
+
+          - name: split
+            label: Split (Two Columns)
+            widget: object
+            fields:
+              - name: left
+                label: Left
+                widget: object
+                # CaseStudySectionSlot's discriminant is named `kind`, not
+                # Sveltia's default `type` — typeKey renames it so the
+                # JSON this writes matches the existing TS union exactly.
+                typeKey: kind
+                types: &slot_types
+                  - name: image
+                    label: Image
+                    widget: object
+                    fields:
+                      - { name: image, label: Image, widget: image }
+                      - { name: alt, label: Alt Text, widget: string, required: false }
+                  - name: text
+                    label: Text
+                    widget: object
+                    fields: *text_block_fields
+              - name: right
+                label: Right
+                widget: object
+                typeKey: kind
+                types: *slot_types
+
+      - name: theme
+        label: "Theme (Background & Brand Colors)"
+        widget: object
+        required: false
+        hint: >-
+          Optional — leave unset to render in the site's own default look.
+          Any valid CSS color works: hex, oklch(), rgb(), color-mix(), etc.
+          Within a mode, only Background and Text are required; Border,
+          Accent, Accent Text, and Button are all safe to leave blank and
+          are derived automatically (see lib/case-study-theme.ts).
+        fields:
+          - name: light
+            label: Light Mode
+            widget: object
+            fields: &theme_mode_fields
+              - { name: bg, label: Background, widget: string, hint: "e.g. oklch(97% 0.01 250) or #f7f3ee" }
+              - { name: fg, label: Text, widget: string }
+              - { name: border, label: Border, widget: string, required: false }
+              - { name: accent, label: Accent, widget: string, required: false }
+              - { name: accentText, label: Accent Text, widget: string, required: false }
+              - name: button
+                label: Button
+                widget: object
+                required: false
+                fields:
+                  - { name: bg, label: Button Background, widget: string }
+                  - { name: fg, label: Button Text, widget: string }
+                  - { name: border, label: Button Border, widget: string, required: false }
+          - name: dark
+            label: Dark Mode
+            widget: object
+            required: false
+            hint: "Leave unset to reuse Light Mode's values in dark mode too."
+            fields: *theme_mode_fields

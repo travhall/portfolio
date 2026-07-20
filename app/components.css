@@ -20,6 +20,7 @@
   font-weight: var(--fw-light);
   letter-spacing: var(--track-tight);
   line-height: var(--leading-none);
+  text-wrap: balance;
 }
 .type-h1 {
   font-size: var(--text-h1);

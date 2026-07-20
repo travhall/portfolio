@@ -5,7 +5,7 @@
  * can play the entrance reveal on load: the statement's characters cascade up
  * out of their clip masks (the same reveal the FeatureWipe headlines use),
  * then the scroll cue fades up under it. Replays whenever the home page
- * mounts (return visits); the once-only chrome reveal lives in Topbar.
+ * mounts (return visits); the once-only chrome reveal lives in Topbar. cSpell:ignore Topbar
  */
 
 import { useLayoutEffect, useRef } from "react";

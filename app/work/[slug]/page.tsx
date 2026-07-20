@@ -4,7 +4,8 @@ import { CaseStudyHero } from "@/components/features/CaseStudyHero";
 import { CaseStudyOverview } from "@/components/features/CaseStudyOverview";
 import { CaseStudyMedia } from "@/components/features/CaseStudyMedia";
 import { CaseStudyNav } from "@/components/features/CaseStudyNav";
-import { caseStudies } from "@/lib/case-studies";
+import { CaseStudyBackHome } from "@/components/features/CaseStudyBackHome";
+import { getCaseStudies, getRelatedCaseStudies } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
 import { createMetadata } from "@/lib/metadata";
 
@@ -16,7 +17,8 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const caseStudies = await getCaseStudies();
   return caseStudies
     .filter((study) => !study.comingSoon)
     .map((study) => ({ slug: study.slug }));
@@ -24,6 +26,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
+  const caseStudies = await getCaseStudies();
   const study = caseStudies.find((s) => s.slug === slug && !s.comingSoon);
   if (!study) return createMetadata({ path: `/work/${slug}` });
   return createMetadata({ title: study.headline, path: `/work/${study.slug}` });
@@ -31,8 +34,10 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function CaseStudyPage({ params }: Props) {
   const { slug } = await params;
+  const caseStudies = await getCaseStudies();
   const study = caseStudies.find((s) => s.slug === slug && !s.comingSoon);
   if (!study) notFound();
+  const related = getRelatedCaseStudies(caseStudies, study.slug);
 
   const themeVars = resolveThemeVars(study.theme);
 
@@ -77,7 +82,11 @@ export default async function CaseStudyPage({ params }: Props) {
         </div>
       ))}
 
-      <CaseStudyNav currentSlug={study.slug} />
+      <CaseStudyNav related={related} />
+
+      <div className="cs-container cs-back-home">
+        <CaseStudyBackHome />
+      </div>
     </main>
   );
 }

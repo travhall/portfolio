@@ -2,19 +2,20 @@
 
 /**
  * CaseStudyHero — the case-study page's animated header: eyebrow, headline,
- * hero image, and the "back to home" CTA. Plays an entrance reveal on mount
- * and its exact inverse before navigating home, reusing the same mechanics
- * FeatureWipe's row entrance/exit and IntroSection's hero statement already
- * use (see components/features/FeatureWipe.tsx's row-0 image reveal +
- * runExit, and lib/text-reveal.ts). Supersedes the old BackHomeButton — this
- * component owns the "back home" navigation itself so it can play the exit
- * animation first.
+ * and hero image. Plays an entrance reveal on mount and registers an exit
+ * animation (exitHome, via registerPageExit) that plays before navigating
+ * home, reusing the same mechanics FeatureWipe's row entrance/exit and
+ * IntroSection's hero statement already use (see
+ * components/features/FeatureWipe.tsx's row-0 image reveal + runExit, and
+ * lib/text-reveal.ts). The visible "back home" button itself lives at the
+ * end of the page (see CaseStudyBackHome.tsx) — it triggers this
+ * component's registered exit animation via tryPageExit rather than owning
+ * it, the same way the topbar wordmark does (see lib/page-exit.ts). cSpell:ignore topbar wordmark
  */
 
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useTransitionRouter } from "next-view-transitions";
 import { gsap } from "gsap";
-import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
 import { createTextReveal } from "@/lib/text-reveal";
 import { prefersReducedMotion } from "@/components/ui/ripple";
@@ -49,7 +50,14 @@ interface Props {
   services?: string[];
 }
 
-export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, services }: Props) {
+export function CaseStudyHero({
+  eyebrow,
+  headline,
+  image,
+  imageAlt,
+  tagline,
+  services,
+}: Props) {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const eyebrowInnerRef = useRef<HTMLSpanElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
@@ -151,7 +159,7 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, ser
       // drive the aberration — externalScroll disables MediaGL's internal
       // window-scroll listener, which would otherwise also react to the
       // page's own scroll position and produce an unrequested continuous
-      // effect while scrolling the case-study page.
+      // effect while scrolling the case-study page. cSpell:ignore unrequested
       externalScroll: true,
       onReady: () => imageColRef.current?.classList.add("is-gl"),
     });
@@ -189,7 +197,11 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, ser
     if (chars && chars.length > 0) {
       tl.to(
         chars,
-        { yPercent: 105, duration: 0.45, stagger: { amount: 0.2, from: "end" } },
+        {
+          yPercent: 105,
+          duration: 0.45,
+          stagger: { amount: 0.2, from: "end" },
+        },
         0,
       );
     }
@@ -270,30 +282,12 @@ export function CaseStudyHero({ eyebrow, headline, image, imageAlt, tagline, ser
           height={910}
           className="cs-hero-image__img"
         />
-        <canvas ref={canvasRef} className="cs-hero-image__canvas" aria-hidden="true" />
+        <canvas
+          ref={canvasRef}
+          className="cs-hero-image__canvas"
+          aria-hidden="true"
+        />
       </div>
-      <Button
-        variant="solid"
-        href="/"
-        onClick={(e) => {
-          // Leave modifier / non-primary clicks alone so "open in new tab",
-          // "open in new window", etc. still work — same passthrough
-          // BackHomeButton and FeatureWipe.tsx's case-study buttons use.
-          if (
-            e.metaKey ||
-            e.ctrlKey ||
-            e.shiftKey ||
-            e.altKey ||
-            e.button !== 0
-          ) {
-            return;
-          }
-          e.preventDefault();
-          exitHome("/");
-        }}
-      >
-        Let&apos;s get you back home
-      </Button>
     </div>
   );
 }

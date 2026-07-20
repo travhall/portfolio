@@ -1,0 +1,90 @@
+{
+  "order": 4,
+  "side": "left",
+  "image": "/images/photo-antibroadcasting.jpg",
+  "featured": true,
+  "eyebrow": "Redesign",
+  "headline": "Anti-broadcasting",
+  "buttonText": "View Redesign",
+  "tagline": "A visual identity and site rebuild for a Minneapolis screen-printing shop, artist-run since 2005.",
+  "services": [
+    "Brand Identity",
+    "Web Design",
+    "Web Development"
+  ],
+  "overview": {
+    "body": "Twenty years of client work, zero design consistency across it. The redesign gives Antibroadcasting a print-shop identity as considered as the work it ships — a gold-and-ink palette, a condensed display face for headlines, and a site structure built around the portfolio, not the pitch.",
+    "sectors": [
+      "Screen Printing",
+      "Apparel"
+    ],
+    "credits": [
+      {
+        "role": "Design & Development",
+        "names": [
+          "Travis Hall"
+        ]
+      }
+    ],
+    "awards": []
+  },
+  "sections": [
+    {
+      "type": "split",
+      "left": {
+        "kind": "text",
+        "eyebrow": "Identity",
+        "body": "A condensed display face and a single gold accent carry the Antibroadcasting mark across print and screen alike."
+      },
+      "right": {
+        "kind": "image",
+        "image": "/images/work-img-antibroadcasting-light.jpg",
+        "alt": "The Antibroadcasting homepage in light mode"
+      }
+    },
+    {
+      "type": "split",
+      "left": {
+        "kind": "image",
+        "image": "/images/work-img-antibroadcasting-dark.jpg",
+        "alt": "The Antibroadcasting homepage in dark mode"
+      },
+      "right": {
+        "kind": "text",
+        "eyebrow": "Palette",
+        "body": "A single gold accent carries across both themes without changing hue — the one constant in a site that otherwise inverts wholesale between light and dark.",
+        "cta": {
+          "label": "View the redesign",
+          "href": "https://antibroadcasting.vercel.app/",
+          "icon": "arrow-up-right"
+        }
+      }
+    }
+  ],
+  "theme": {
+    "light": {
+      "bg": "#f7f1e9",
+      "fg": "#080504",
+      "border": "#766d62",
+      "accent": "#de9300",
+      "accentText": "#833e00",
+      "button": {
+        "bg": "#de9300",
+        "fg": "#080504",
+        "border": "#833e00"
+      }
+    },
+    "dark": {
+      "bg": "#080504",
+      "fg": "#f7f1e9",
+      "border": "#342c29",
+      "accent": "#de9300",
+      "accentText": "#de9300",
+      "button": {
+        "bg": "#de9300",
+        "fg": "#080504",
+        "border": "transparent"
+      }
+    }
+  }
+}
