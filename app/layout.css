@@ -587,7 +587,7 @@ html[data-motion="off"] .cs-hero__meta {
   display: flex;
   flex-direction: column;
   gap: var(--cs-hero-gap);
-  padding-block: clamp(2rem, 6vh, 4rem) 0;
+  padding-top: var(--gut);
 }
 .cs-hero__top {
   display: grid;
@@ -699,6 +699,7 @@ html[data-motion="off"] .cs-hero__meta {
 .cs-split {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 0.5rem;
 }
 @media (min-width: 900px) {
   .cs-split {
@@ -718,6 +719,7 @@ html[data-motion="off"] .cs-hero__meta {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
   gap: 1rem;
   aspect-ratio: 4 / 3;
   padding: clamp(2rem, 5vw, 4rem);
@@ -784,7 +786,7 @@ html[data-motion="off"] .cs-hero__meta {
    copy describing another project (see components.css's .case-card comment
    for the same reasoning applied to the cards themselves). */
 .case-nav {
-  padding-block: clamp(3rem, 8vh, 5rem);
+  padding-top: clamp(3rem, 8vh, 5rem);
   border-top: 1px solid var(--cs-border, var(--line));
 }
 .case-nav__header {
@@ -800,7 +802,7 @@ html[data-motion="off"] .cs-hero__meta {
 .cs-back-home {
   display: flex;
   justify-content: center;
-  padding-bottom: clamp(3rem, 8vh, 5rem);
+  padding-top: 0;
 }
 
 /*

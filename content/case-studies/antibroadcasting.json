@@ -1,8 +1,9 @@
 {
+  "featured": true,
   "order": 4,
   "side": "left",
   "image": "/images/photo-antibroadcasting.jpg",
-  "featured": true,
+  "imageAlt": "",
   "eyebrow": "Redesign",
   "headline": "Anti-broadcasting",
   "buttonText": "View Redesign",
@@ -34,6 +35,7 @@
       "left": {
         "kind": "text",
         "eyebrow": "Identity",
+        "heading": "",
         "body": "A condensed display face and a single gold accent carry the Antibroadcasting mark across print and screen alike."
       },
       "right": {
@@ -52,10 +54,12 @@
       "right": {
         "kind": "text",
         "eyebrow": "Palette",
+        "heading": "",
         "body": "A single gold accent carries across both themes without changing hue — the one constant in a site that otherwise inverts wholesale between light and dark.",
         "cta": {
           "label": "View the redesign",
           "href": "https://antibroadcasting.vercel.app/",
+          "variant": "solid",
           "icon": "arrow-up-right"
         }
       }

@@ -34,6 +34,7 @@ import { useTheme, resolveTheme } from "@/lib/use-theme";
 import { useMotionPref, readMotionPref } from "@/lib/motion-pref";
 import { DESKTOP_BP } from "@/lib/breakpoints";
 import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
+import { waitForActiveViewTransition } from "@/lib/view-transition";
 import type { CaseStudy } from "@/lib/case-studies";
 import { resolveThemeBg } from "@/lib/case-study-theme";
 
@@ -530,9 +531,7 @@ export function FeatureWipe({ features, id }: Props) {
               // hides it through the delay so the un-clipped image never
               // flashes before the reveal starts.
               gsap.set(mediaCol, { clipPath: clipped });
-              const introTl = gsap.timeline({
-                delay: ENTRANCE_DELAY.firstImage,
-              });
+              const introTl = gsap.timeline({ paused: true });
               introTl.to(
                 mediaCol,
                 {
@@ -554,6 +553,19 @@ export function FeatureWipe({ features, id }: Props) {
                 },
                 0,
               );
+              // Waits for any in-flight view transition (a client-side
+              // navigation arriving at home) to genuinely finish before
+              // starting — on a full page load this resolves immediately
+              // (no transition exists), so ENTRANCE_DELAY.firstImage below
+              // is still the only thing controlling timing there,
+              // preserving the existing load sequence exactly. Matches
+              // CaseStudyHero.tsx's identical use of this same utility.
+              waitForActiveViewTransition().then(() => {
+                if (disposed) return;
+                gsap.delayedCall(ENTRANCE_DELAY.firstImage, () =>
+                  introTl.play(),
+                );
+              });
             } else {
               // A resize re-init after the entrance already played — just show it
               // fully rather than replaying. Explicit set, not clearProps: .fw-media

@@ -14,6 +14,7 @@ import { ScrollCue } from "@/components/nav/ScrollCue";
 import { createTextReveal } from "@/lib/text-reveal";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
+import { waitForActiveViewTransition } from "@/lib/view-transition";
 
 export function IntroSection() {
   const statementRef = useRef<HTMLHeadingElement>(null);
@@ -39,7 +40,7 @@ export function IntroSection() {
     }
 
     let cancelled = false;
-    reveal.ready.then(() => {
+    Promise.all([reveal.ready, waitForActiveViewTransition()]).then(() => {
       if (cancelled) return;
       // Re-append the cue fade after any re-split cleared the timeline.
       if (cue) {

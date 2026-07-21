@@ -5,9 +5,15 @@
 // component — presentation only here) — positional neighbors, not a
 // tag/sector match. Sits between the page's own content and the global
 // SiteFooter (rendered inside <main>, right before it closes).
+//
+// The card grid itself (hover/entrance/exit coordination, including the
+// page-level-exit-sync and sibling-exit-on-click behavior) lives in
+// CaseStudyCardGrid.tsx, a Client Component — this file is a plain Server
+// Component again (it has no hooks of its own after plan 035 moved them
+// into that shared grid).
 
 import type { CaseStudy } from "@/lib/case-studies";
-import { CaseStudyCard } from "./CaseStudyCard";
+import { CaseStudyCardGrid } from "./CaseStudyCardGrid";
 import { Button } from "@/components/ui/Button";
 
 export function CaseStudyNav({ related }: { related: CaseStudy[] }) {
@@ -22,11 +28,7 @@ export function CaseStudyNav({ related }: { related: CaseStudy[] }) {
             All Projects
           </Button>
         </div>
-        <div className="case-grid">
-          {related.map((study) => (
-            <CaseStudyCard key={study.slug} study={study} />
-          ))}
-        </div>
+        <CaseStudyCardGrid studies={related} />
       </nav>
     </div>
   );

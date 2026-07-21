@@ -799,27 +799,86 @@ html[data-motion="off"] .email-action__panel {
   padding-bottom: var(--gut);
 }
 .case-card__media {
+  position: relative;
   aspect-ratio: 3/4;
   overflow: hidden;
   background: var(--surface-dim);
 }
-.case-card__img {
+/* Hidden by default (clipped shut) so a full page load never paints the
+   image before CaseStudyCard.tsx's entrance JS has clipped it itself — same
+   full-page-load flash prevention as .cs-hero-image (app/layout.css).
+   Scoped to exclude .case-card--disabled (the comingSoon variant): that
+   variant shares this class on its empty placeholder box but never runs the
+   entrance JS that would reveal it again — see this file's own comment
+   above .case-card--disabled. Reduced-motion overrides below. */
+.case-card:not(.case-card--disabled) .case-card__media {
+  clip-path: inset(0% 0% 0% 100%);
+}
+/* Both <img> and <canvas> (MediaGL) fill the media box identically —
+   matching .fw-media__inner img/canvas and .cs-hero-image__img/__canvas. */
+.case-card__img,
+.case-card__canvas {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--btn-dur) var(--ease);
+  display: block;
 }
-.case-card:hover .case-card__img {
-  transform: scale(1.03);
+/* <img> is the no-JS/no-WebGL fallback — shown until MediaGL's onReady adds
+   .is-gl, then faded out in favour of the shader canvas. Replaces the old
+   CSS hover-scale (removed): that would have doubled up with (and, once
+   is-gl fades the <img> to opacity 0, become invisible against) the new
+   WebGL hover wave. */
+.case-card__img {
+  transition: opacity 0.4s var(--ease);
+}
+.case-card__media.is-gl .case-card__img {
+  opacity: 0;
+  pointer-events: none;
 }
 .case-card__eyebrow {
   margin-top: 0.25rem;
 }
+/* Hidden by default, same reasoning as .case-card__media above. Unscoped —
+   .eyebrow-inner only ever exists in the animated variant's markup (the
+   comingSoon branch renders .case-card__eyebrow's text directly, with no
+   inner span), so there's no equivalent trap here. */
+.case-card__eyebrow .eyebrow-inner {
+  display: inline-block;
+  opacity: 0;
+}
 .case-card__title {
   margin: 0;
 }
+/* Hidden by default, same reasoning and same .case-card--disabled exclusion
+   as .case-card__media above — comingSoon's <h3> also carries this class. */
+.case-card:not(.case-card--disabled) .case-card__title {
+  opacity: 0;
+}
 .case-card--disabled {
   cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-card__media {
+    clip-path: none !important;
+  }
+  .case-card__eyebrow .eyebrow-inner {
+    opacity: 1 !important;
+  }
+  .case-card__title {
+    opacity: 1 !important;
+  }
+}
+html[data-motion="off"] .case-card__media {
+  clip-path: none !important;
+}
+html[data-motion="off"] .case-card__eyebrow .eyebrow-inner {
+  opacity: 1 !important;
+}
+html[data-motion="off"] .case-card__title {
+  opacity: 1 !important;
 }
 
 /* No mobile full-bleed override here (on purpose, corrected from an earlier
