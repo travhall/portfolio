@@ -18,7 +18,7 @@
 import { useEffect, useRef } from "react";
 import type { CaseStudy } from "@/lib/case-studies";
 import { CaseStudyCard, type CaseStudyCardHandle } from "./CaseStudyCard";
-import { registerExitObserver } from "@/lib/page-exit";
+import { registerExitObserver, notifyExitObservers } from "@/lib/page-exit";
 
 export function CaseStudyCardGrid({ studies }: { studies: CaseStudy[] }) {
   const cardRefs = useRef<(CaseStudyCardHandle | null)[]>([]);
@@ -40,11 +40,7 @@ export function CaseStudyCardGrid({ studies }: { studies: CaseStudy[] }) {
           ref={(el) => {
             cardRefs.current[i] = el;
           }}
-          onExitStart={() => {
-            cardRefs.current.forEach((card, j) => {
-              if (j !== i) card?.playExit();
-            });
-          }}
+          onExitStart={notifyExitObservers}
         />
       ))}
     </div>

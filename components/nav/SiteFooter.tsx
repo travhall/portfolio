@@ -10,13 +10,16 @@
  * long page. cSpell:ignore topbar
  */
 
-import type { CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
+import { gsap } from "gsap";
 import { Button } from "@/components/ui/Button";
 import { EmailButton } from "@/components/ui/EmailButton";
 import { siteConfig } from "@/lib/site-config";
 import type { CaseStudy } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
+import { prefersReducedMotion } from "@/components/ui/ripple";
+import { registerExitObserver } from "@/lib/page-exit";
 
 // caseStudies comes in as a prop, not an import — this is a client
 // component (usePathname), and the data now lives behind a server-only
@@ -41,8 +44,45 @@ export function SiteFooter({ caseStudies }: { caseStudies: CaseStudy[] }) {
     : undefined;
   const csBorder = resolveThemeVars(study?.theme)?.["--cs-border"];
 
+  const footerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    return registerExitObserver(() => {
+      if (prefersReducedMotion() || !footerRef.current) return;
+      gsap.to(footerRef.current, {
+        opacity: 0,
+        y: 14,
+        ease: "power2.in",
+        duration: 0.35,
+      });
+    });
+  }, []);
+
+  // Resets the exit fade above on every new page arrival — SiteFooter is a
+  // persistent root-layout singleton (never unmounts/remounts across
+  // client-side navigation, unlike CaseStudyBody/CaseStudyBackHome, which
+  // are inside <main> and get a fresh mount on every page). Without this,
+  // once the fade-out tween above runs once, the footer stays invisible
+  // for the rest of the client-side session — there's no natural "new
+  // page mounted" moment to undo it, the way there is for the page-scoped
+  // exit participants. useLayoutEffect (not useEffect) so this resolves
+  // synchronously before paint, avoiding a visible "pops back in a beat
+  // late" flash on the arriving page. clearProps (not an explicit
+  // opacity:1/y:0 tween) removes the inline styles GSAP set entirely,
+  // falling back to the CSS default — matching the clearProps idiom
+  // already used elsewhere in this codebase (e.g. Topbar.tsx's toggle
+  // button) rather than leaving stray inline styles in place. Safe to run
+  // unconditionally on every pathname change, including the very first
+  // mount and any navigation that never triggered a fade at all —
+  // clearing already-absent inline styles is a harmless no-op.
+  useLayoutEffect(() => {
+    if (!footerRef.current) return;
+    gsap.set(footerRef.current, { clearProps: "opacity,transform" });
+  }, [pathname]);
+
   return (
     <footer
+      ref={footerRef}
       className="site-footer"
       style={
         csBorder ? ({ "--cs-border": csBorder } as CSSProperties) : undefined

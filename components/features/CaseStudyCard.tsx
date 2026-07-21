@@ -53,14 +53,16 @@ interface Props {
   /** This card's position in its parent's list — drives the entrance
    *  stagger delay. Both call sites pass their .map() index. */
   index: number;
-  /** Called once when this card's own click starts its exit — lets the
-   *  parent grid (CaseStudyCardGrid) trigger every OTHER card's
-   *  playExit() too, so the whole grid wipes away together instead of
-   *  just this one card. Not called when this card's own exit is
+  /** Called once when this card's own click starts its exit, with the
+   *  href it's navigating to — lets the owning grid
+   *  (CaseStudyCardGrid) notify every page-level exit observer (sibling
+   *  cards, CaseStudyBody, the back-home button, the site footer — see
+   *  lib/page-exit.ts's notifyExitObservers, plan 037), not just this
+   *  card's own siblings. Not called when this card's own exit is
    *  triggered externally via playExit() itself (the page-level-exit
    *  path, plan 034) — that path is already "someone else decided I
    *  should exit," no further fan-out needed from here. */
-  onExitStart?: () => void;
+  onExitStart?: (href: string) => void;
 }
 
 export interface CaseStudyCardHandle {
@@ -247,8 +249,17 @@ export const CaseStudyCard = forwardRef<CaseStudyCardHandle, Props>(function Cas
       return;
     }
     e.preventDefault();
-    onExitStart?.();
-    buildExitTimeline(() => router.push(`/work/${study.slug}`));
+    const href = `/work/${study.slug}`;
+    // buildExitTimeline MUST run before onExitStart: it's what claims
+    // isExitingRef and wires this card's own navigation. onExitStart (via
+    // CaseStudyCardGrid's own registered observer, plan 034) loops back
+    // over EVERY card including this one — calling it first would let
+    // that loop's playExit() claim isExitingRef via a no-onComplete call
+    // before this line ever runs, silently dropping navigation. Reversing
+    // this order is the one thing plan 037 depends on getting right — see
+    // that plan's "Why this matters" for the full trace.
+    buildExitTimeline(() => router.push(href));
+    onExitStart?.(href);
   };
 
   if (study.comingSoon) {

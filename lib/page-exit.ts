@@ -18,6 +18,13 @@
 //     navigation themselves. See plan 034: CaseStudyNav uses this so its
 //     "More Work" cards wipe away alongside CaseStudyHero's own exit,
 //     instead of just disappearing when the route changes underneath them.
+//
+// notifyExitObservers (plan 037) is the piece of that firing logic pulled
+// out on its own, so a trigger that ISN'T going through the primary
+// activeHandler at all — a related-project CaseStudyCard's own click,
+// which owns its own navigation directly — can still notify every
+// observer (CaseStudyCardGrid's sibling fan-out, CaseStudyBody, the
+// back-home button, the global footer) that the page is leaving.
 
 type ExitHandler = (href: string) => void;
 
@@ -52,6 +59,18 @@ export function registerExitObserver(handler: ExitHandler): () => void {
 }
 
 /**
+ * Fires every registered observer (fire-and-forget — none of them
+ * navigate) without touching the primary activeHandler at all. For a
+ * trigger that owns its own navigation directly (e.g. a CaseStudyCard's
+ * own click, which calls router.push itself once its own exit tween
+ * completes) but still wants every other page-level exit participant to
+ * play along.
+ */
+export function notifyExitObservers(href: string): void {
+  observers.forEach((observer) => observer(href));
+}
+
+/**
  * Called by a navigation trigger outside the current page's own component
  * tree (e.g. the topbar wordmark) before navigating to `href`. If the
  * current page has registered an exit handler, fires every registered
@@ -64,7 +83,7 @@ export function registerExitObserver(handler: ExitHandler): () => void {
  */
 export function tryPageExit(href: string): boolean {
   if (!activeHandler) return false;
-  observers.forEach((observer) => observer(href));
+  notifyExitObservers(href);
   activeHandler(href);
   return true;
 }

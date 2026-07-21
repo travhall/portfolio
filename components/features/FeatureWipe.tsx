@@ -138,7 +138,7 @@ export function FeatureWipe({ features, id }: Props) {
     // reveal timeline. .fw-text-fixed's own opacity comes from the base CSS
     // rule's default (opacity: 0, pre-JS flash prevention) — flipped to 1
     // here since its children below are all independently still hidden, so
-    // nothing leaks visible before the timeline plays.
+    // nothing leaks visible before the timeline plays. cSpell:ignore wordmark
     function setupMobileEntrance(i: number) {
       const textEl = textRefs.current[i];
       const headlineEl = headlineRefs.current[i];
@@ -160,7 +160,10 @@ export function FeatureWipe({ features, id }: Props) {
         });
       }
 
-      const reveal = createTextReveal(headlineEl, { duration: 0.75, stagger: 0.5 });
+      const reveal = createTextReveal(headlineEl, {
+        duration: 0.75,
+        stagger: 0.5,
+      });
 
       reveal.ready.then(() => {
         if (eyebrowInner) {
@@ -180,7 +183,11 @@ export function FeatureWipe({ features, id }: Props) {
         if (mediaCol) {
           reveal.tl.to(
             mediaCol,
-            { clipPath: "inset(0% 0% 0% 0%)", ease: "power3.out", duration: 0.9 },
+            {
+              clipPath: "inset(0% 0% 0% 0%)",
+              ease: "power3.out",
+              duration: 0.9,
+            },
             0.1,
           );
           // Chromatic-aberration burst, matching the desktop row-0 entrance
@@ -192,7 +199,8 @@ export function FeatureWipe({ features, id }: Props) {
               vel: 0,
               duration: 1.0,
               ease: "power2.out",
-              onUpdate: () => glInstancesRef.current[i]?.setScrollState(burst.vel, 0.5),
+              onUpdate: () =>
+                glInstancesRef.current[i]?.setScrollState(burst.vel, 0.5),
             },
             0.1,
           );
@@ -220,7 +228,8 @@ export function FeatureWipe({ features, id }: Props) {
       if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 1, x: 0 });
       const buttonEl = textEl.querySelector<HTMLElement>(".fw-button");
       if (buttonEl) gsap.set(buttonEl, { opacity: 1, y: 0 });
-      const mediaCol = mediaRefs.current[i]?.parentElement as HTMLElement | null;
+      const mediaCol = mediaRefs.current[i]
+        ?.parentElement as HTMLElement | null;
       if (mediaCol) gsap.set(mediaCol, { clipPath: "inset(0% 0% 0% 0%)" });
     }
 
@@ -260,7 +269,9 @@ export function FeatureWipe({ features, id }: Props) {
             const reveal = mobileReveals[i];
             if (!reveal) return;
             if (i === 0) {
-              gsap.delayedCall(ENTRANCE_DELAY.firstImage, () => reveal.tl.play());
+              gsap.delayedCall(ENTRANCE_DELAY.firstImage, () =>
+                reveal.tl.play(),
+              );
             } else {
               reveal.tl.play();
             }

@@ -4,6 +4,7 @@ import { CaseStudyHero } from "@/components/features/CaseStudyHero";
 import { CaseStudyOverview } from "@/components/features/CaseStudyOverview";
 import { CaseStudyMedia } from "@/components/features/CaseStudyMedia";
 import { CaseStudyNav } from "@/components/features/CaseStudyNav";
+import { CaseStudyBody } from "@/components/features/CaseStudyBody";
 import { CaseStudyBackHome } from "@/components/features/CaseStudyBackHome";
 import { getCaseStudies, getRelatedCaseStudies } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
@@ -67,20 +68,22 @@ export default async function CaseStudyPage({ params }: Props) {
         />
       </div>
 
-      {study.overview && (
-        <div className="cs-container">
-          <CaseStudyOverview {...study.overview} />
-        </div>
-      )}
+      <CaseStudyBody>
+        {study.overview && (
+          <div className="cs-container">
+            <CaseStudyOverview {...study.overview} />
+          </div>
+        )}
 
-      {/* Media sections are full-bleed (no .cs-container) — they run edge
-          to edge of the page, matching the reference's 50/50 and
-          full-width image patterns. */}
-      {study.sections?.map((section, i) => (
-        <div key={i} className="cs-section">
-          <CaseStudyMedia section={section} />
-        </div>
-      ))}
+        {/* Media sections are full-bleed (no .cs-container) — they run edge
+            to edge of the page, matching the reference's 50/50 and
+            full-width image patterns. */}
+        {study.sections?.map((section, i) => (
+          <div key={i} className="cs-section">
+            <CaseStudyMedia section={section} />
+          </div>
+        ))}
+      </CaseStudyBody>
 
       <CaseStudyNav related={related} />
 
