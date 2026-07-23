@@ -13,7 +13,7 @@
 //     card's exit in sync with CaseStudyHero's own exit.
 //   - Clicking any one card (via its onExitStart callback — see plan 035)
 //     plays every OTHER card's exit too, so the whole grid wipes away
-//     together instead of just the clicked card.
+//     together instead of just the clicked card. cSpell:ignore wordmark topbar
 
 import { useEffect, useRef } from "react";
 import type { CaseStudy } from "@/lib/case-studies";

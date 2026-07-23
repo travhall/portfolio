@@ -5,7 +5,7 @@
 // buttons. See plan 031: CaseStudyHero's "back home" button already plays an
 // exit animation before navigating; this lets the topbar wordmark trigger
 // that same exit when clicked from a case-study page, instead of navigating
-// away with no animation on the page's own content.
+// away with no animation on the page's own content. cSpell:ignore topbar wordmark
 //
 // Two registries, two different jobs:
 //   - activeHandler (registerPageExit/tryPageExit) — a single slot. This

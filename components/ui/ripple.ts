@@ -1,10 +1,9 @@
 // Water-ripple click effect — ported from the prototype's ripple-click.js
-// (itself a GSAP-free take on Codrops "Distorted Button Effects" example 9).
 //
 // A click sends a ripple out from the exact cursor point: an feImage
 // (a radial R/G displacement texture) grows outward while its displacement
 // strength fades, so the element's pixels bow and settle like water. The
-// SVG filter is attached only for the pulse, then removed — zero idle cost.
+// SVG filter is attached only for the pulse, then removed — zero idle cost. cSpell:ignore XLINK
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const XLINK_NS = "http://www.w3.org/1999/xlink";
@@ -21,7 +20,13 @@ export type RippleOptions = {
   onComplete?: () => void;
 };
 
-type RippleParts = { id: string; filter: SVGElement; img: SVGElement; dm: SVGElement; gen: number };
+type RippleParts = {
+  id: string;
+  filter: SVGElement;
+  img: SVGElement;
+  dm: SVGElement;
+  gen: number;
+};
 
 let host: SVGSVGElement | null = null;
 let uid = 0;
@@ -41,7 +46,8 @@ function ensureHost(): SVGSVGElement {
   host = document.createElementNS(SVG_NS, "svg") as SVGSVGElement;
   host.setAttribute("aria-hidden", "true");
   host.setAttribute("class", "ripple-filters");
-  host.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
+  host.style.cssText =
+    "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
   document.body.appendChild(host);
   return host;
 }
@@ -99,7 +105,13 @@ function makeFilter(src: string): RippleParts {
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3); // wave decelerates as it spreads
 
-function run(el: HTMLElement, parts: RippleParts, cx: number, cy: number, opts: RippleOptions) {
+function run(
+  el: HTMLElement,
+  parts: RippleParts,
+  cx: number,
+  cy: number,
+  opts: RippleOptions,
+) {
   const strength = opts.strength ?? 18;
   const maxSize = opts.size ?? Math.max(el.offsetWidth, el.offsetHeight) * 2.4;
   const duration = opts.duration ?? 900;
@@ -155,11 +167,17 @@ export function prefersReducedMotion(): boolean {
     if (explicit === "on") return false;
   }
   if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  return (
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+  );
 }
 
 /** Fire a ripple from the event's point — designed for a React onClick handler. */
-export function triggerRipple(el: HTMLElement, ev: { clientX?: number; clientY?: number } | null, opts: RippleOptions = {}) {
+export function triggerRipple(
+  el: HTMLElement,
+  ev: { clientX?: number; clientY?: number } | null,
+  opts: RippleOptions = {},
+) {
   if (!el || typeof window === "undefined") return;
   if (prefersReducedMotion()) {
     opts.onComplete?.();

@@ -247,7 +247,6 @@ html[data-motion="off"] .topbar__toggle {
 .intro-section__statement {
   max-width: 26ch;
   text-wrap: balance;
-  margin-bottom: 1.5rem;
   /* Hidden by default — same full-page-load flash prevention as
      .topbar__brand (see that rule's comment). Set back to 1 synchronously by
      lib/text-reveal.ts's createTextReveal once characters are hidden.
@@ -404,6 +403,25 @@ html[data-motion="off"] .intro-section__cue {
    independent of :hover so it stays behind the wiping image. */
 .fw-row.is-exiting .fw-row__brand {
   opacity: 1;
+}
+
+/* "View Case Study" button adopts the project's own real button colors
+   (--cs-button-*, set inline per row in FeatureWipe.tsx from the case study's
+   theme) instead of the system's --ink fill — same real per-project tokens
+   the case-study page's own "back home" CTA uses (see .cs-brand-bg ~
+   .cs-container .btn--solid below). Scoped to .fw-row--themed (a marker class
+   set only when the row actually has a theme), not a bare .btn--solid rule
+   with a var(...,fallback) — .btn--solid's real `background` is a two-layer
+   gradient-plus-color value, and a fallback pattern would replace that
+   gradient with a flat fill site-wide the moment these vars are unset. */
+.fw-row--themed .fw-button .btn--solid {
+  background: var(--cs-button-bg);
+  color: var(--cs-button-fg);
+  border-color: var(--cs-button-border);
+}
+.fw-row--themed .fw-button .btn--solid:hover {
+  background: var(--cs-button-bg);
+  border-color: var(--cs-button-border);
 }
 
 /* Case study page brand background — the other half of the fw-brand shared

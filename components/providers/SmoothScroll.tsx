@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * SmoothScroll — Lenis smooth-scroll provider.
@@ -19,12 +19,12 @@ import {
   useRef,
   useState,
   type ReactNode,
-} from 'react';
-import { usePathname } from 'next/navigation';
-import Lenis from 'lenis';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { prefersReducedMotion } from '@/components/ui/ripple';
+} from "react";
+import { usePathname } from "next/navigation";
+import Lenis from "lenis";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { prefersReducedMotion } from "@/components/ui/ripple";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -78,8 +78,8 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     if (prefersReducedMotion()) return;
 
     const instance = new Lenis({
-      duration:    1.2,
-      easing:      (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
     });
 
@@ -88,7 +88,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLenis(instance);
 
-    instance.on('scroll', ScrollTrigger.update);
+    instance.on("scroll", ScrollTrigger.update);
 
     const tick = (time: number) => instance.raf(time * 1000);
     gsap.ticker.add(tick);
@@ -102,19 +102,19 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     // Re-sync Lenis's scroll limit after all subresources (images, fonts)
     // have loaded and the final document height is known. Without this,
     // Lenis can cap scrolling at an earlier position if layout settled
-    // after the instance was created.
+    // after the instance was created. cSpell:ignore subresources
     const handleLoad = () => {
       instance.resize();
       ScrollTrigger.refresh();
     };
-    if (document.readyState === 'complete') {
+    if (document.readyState === "complete") {
       handleLoad();
     } else {
-      window.addEventListener('load', handleLoad);
+      window.addEventListener("load", handleLoad);
     }
 
     return () => {
-      window.removeEventListener('load', handleLoad);
+      window.removeEventListener("load", handleLoad);
       gsap.ticker.remove(tick);
       instance.destroy();
       lenisRef.current = null;
@@ -123,8 +123,6 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <LenisContext.Provider value={lenis}>
-      {children}
-    </LenisContext.Provider>
+    <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>
   );
 }

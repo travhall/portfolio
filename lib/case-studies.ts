@@ -6,7 +6,7 @@
 // editable via Sveltia, see public/admin/config.yml) — the slug is the
 // filename, not a stored field, so creating a new entry entirely through
 // the CMS produces a real, working case study with zero code changes. This
-// module is server-only (reads the filesystem) — see getCaseStudies below.
+// module is server-only (reads the filesystem) — see getCaseStudies below. cSpell:ignore Sveltia
 //
 // Copy below (eyebrow/headline/buttonText) is carried over from the old
 // portfolio as placeholder — none of it is final.

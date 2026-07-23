@@ -1,8 +1,6 @@
 import { AboutPortrait } from "@/components/about/AboutPortrait";
 import { Button } from "@/components/ui/Button";
-import { EmailButton } from "@/components/ui/EmailButton";
 import { Tag } from "@/components/ui/Tag";
-import { siteConfig } from "@/lib/site-config";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
@@ -21,7 +19,7 @@ export default function AboutPage() {
         {/* Left column — sticky portrait + social actions below */}
         <div className="about-rail">
           <AboutPortrait />
-          <div className="about-rail__actions">
+          {/* <div className="about-rail__actions">
             <Button
               variant="ghost"
               iconOnly="github"
@@ -43,14 +41,14 @@ export default function AboutPage() {
             >
               Download CV
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Centre column */}
         <div className="about-content">
           <div className="about-bio">
             <h1 className="type-h1 text-ink">
-            Hi, I&apos;m Travis &amp; I make things people use.
+              Hi, I&apos;m Travis &amp; I make things people use.
             </h1>
 
             <p className="type-lead text-ink">

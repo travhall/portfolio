@@ -17,7 +17,7 @@
  * Layout — a slim header band (nav links, aligned to the same row the fixed
  *          Topbar's wordmark/close occupy above it) sits over an empty
  *          content area reserved for the case-study filmstrip (not designed
- *          yet), with the settings + social row pinned to the bottom.
+ *          yet), with the settings + social row pinned to the bottom. cSpell:ignore wordmark
  *
  * Theme/motion toggles — write data-theme / data-motion attributes on <html>
  *                so the CSS [data-theme]/[data-motion] overrides take effect

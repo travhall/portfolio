@@ -36,7 +36,7 @@ import { DESKTOP_BP } from "@/lib/breakpoints";
 import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
 import { waitForActiveViewTransition } from "@/lib/view-transition";
 import type { CaseStudy } from "@/lib/case-studies";
-import { resolveThemeBg } from "@/lib/case-study-theme";
+import { resolveThemeVars } from "@/lib/case-study-theme";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -842,17 +842,22 @@ export function FeatureWipe({ features, id }: Props) {
         // off the same color-scheme the anti-FOUC script sets pre-hydration,
         // so server and client always agree (see lib/use-theme.ts comment
         // for why a React-read theme value can't drive this safely).
-        const rowBrand = resolveThemeBg(f.theme);
+        const themeVars = resolveThemeVars(f.theme);
         return (
           <div
             key={f.slug}
             ref={(el) => {
               bandRefs.current[i] = el;
             }}
-            className={`fw-row fw-row--${f.side}`}
+            className={`fw-row fw-row--${f.side}${themeVars ? " fw-row--themed" : ""}`}
             style={
-              rowBrand
-                ? ({ "--row-brand": rowBrand } as CSSProperties)
+              themeVars
+                ? ({
+                    "--row-brand": themeVars["--cs-bg"],
+                    "--cs-button-bg": themeVars["--cs-button-bg"],
+                    "--cs-button-fg": themeVars["--cs-button-fg"],
+                    "--cs-button-border": themeVars["--cs-button-border"],
+                  } as CSSProperties)
                 : undefined
             }
           >

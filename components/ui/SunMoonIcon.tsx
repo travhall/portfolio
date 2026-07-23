@@ -10,7 +10,7 @@
  *   — Core circle grows and shifts left (sun radius 2.4 → moon radius 3.4).
  *   — 8 rays collapse via stroke-dashoffset.
  *   — Occluder circle slides in from off-canvas to cut the crescent bite,
- *     filled with CSS var(--surface) so it always matches the background.
+ *     filled with CSS var(--surface) so it always matches the background. cSpell:ignore Occluder
  */
 
 import { forwardRef, useImperativeHandle, useRef } from "react";
@@ -23,62 +23,61 @@ interface Props {
   size?: number;
 }
 
-const EASE    = "cubic-bezier(0.22,1,0.36,1)";
-const DUR     = "0.42s";
+const EASE = "cubic-bezier(0.22,1,0.36,1)";
+const DUR = "0.42s";
 const RAY_DUR = "0.25s";
 
 // Ray endpoints — 8 spokes at 45° on a 16px viewBox
 const RAYS: [number, number, number, number][] = [
-  [8,    3.5,  8,     2    ],
-  [11.3, 4.7,  12.36, 3.64 ],
-  [12.5, 8,    14,    8    ],
+  [8, 3.5, 8, 2],
+  [11.3, 4.7, 12.36, 3.64],
+  [12.5, 8, 14, 8],
   [11.3, 11.3, 12.36, 12.36],
-  [8,    12.5, 8,     14   ],
-  [4.7,  11.3, 3.64,  12.36],
-  [3.5,  8,    2,     8    ],
-  [4.7,  4.7,  3.64,  3.64 ],
+  [8, 12.5, 8, 14],
+  [4.7, 11.3, 3.64, 12.36],
+  [3.5, 8, 2, 8],
+  [4.7, 4.7, 3.64, 3.64],
 ];
 
 export const SunMoonIcon = forwardRef<SunMoonHandle, Props>(
   function SunMoonIcon({ size = 16 }, ref) {
     const groupRef = useRef<SVGGElement>(null);
-    const coreRef  = useRef<SVGCircleElement>(null);
-    const occRef   = useRef<SVGCircleElement>(null);
-    const rayRefs  = useRef<(SVGLineElement | null)[]>([]);
+    const coreRef = useRef<SVGCircleElement>(null);
+    const occRef = useRef<SVGCircleElement>(null);
+    const rayRefs = useRef<(SVGLineElement | null)[]>([]);
 
     useImperativeHandle(ref, () => ({
       animate(toDark: boolean) {
         const group = groupRef.current;
-        const core  = coreRef.current;
-        const occ   = occRef.current;
-        const rays  = rayRefs.current.filter(Boolean) as SVGLineElement[];
+        const core = coreRef.current;
+        const occ = occRef.current;
+        const rays = rayRefs.current.filter(Boolean) as SVGLineElement[];
         if (!group || !core || !occ) return;
 
         group.style.transition = `transform ${DUR} ${EASE}`;
-        core.style.transition  = `r ${DUR} ${EASE}, cx ${DUR} ${EASE}`;
-        occ.style.transition   = `cx ${DUR} ${EASE}, opacity ${DUR} ${EASE}`;
-        rays.forEach(r => {
-          r.style.transition =
-            `stroke-dashoffset ${RAY_DUR} ${EASE}, opacity 0.2s ease`;
+        core.style.transition = `r ${DUR} ${EASE}, cx ${DUR} ${EASE}`;
+        occ.style.transition = `cx ${DUR} ${EASE}, opacity ${DUR} ${EASE}`;
+        rays.forEach((r) => {
+          r.style.transition = `stroke-dashoffset ${RAY_DUR} ${EASE}, opacity 0.2s ease`;
         });
 
         if (toDark) {
-          group.style.transform    = "rotate(-45deg)";
-          core.setAttribute("cx",  "7.2");
-          core.setAttribute("r",   "3.4");
-          occ.setAttribute("cx",   "10");
+          group.style.transform = "rotate(-45deg)";
+          core.setAttribute("cx", "7.2");
+          core.setAttribute("r", "3.4");
+          occ.setAttribute("cx", "10");
           occ.setAttribute("opacity", "1");
-          rays.forEach(r => {
+          rays.forEach((r) => {
             r.style.strokeDashoffset = "2.2";
             r.style.opacity = "0";
           });
         } else {
           group.style.transform = "rotate(0deg)";
           core.setAttribute("cx", "8");
-          core.setAttribute("r",  "2.4");
-          occ.setAttribute("cx",  "22");
+          core.setAttribute("r", "2.4");
+          occ.setAttribute("cx", "22");
           occ.setAttribute("opacity", "0");
-          rays.forEach(r => {
+          rays.forEach((r) => {
             r.style.strokeDashoffset = "0";
             r.style.opacity = "1";
           });
@@ -117,9 +116,14 @@ export const SunMoonIcon = forwardRef<SunMoonHandle, Props>(
           {RAYS.map(([x1, y1, x2, y2], i) => (
             <line
               key={i}
-              ref={el => { rayRefs.current[i] = el; }}
+              ref={(el) => {
+                rayRefs.current[i] = el;
+              }}
               className="sun-moon-icon__ray"
-              x1={x1} y1={y1} x2={x2} y2={y2}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
               {...rayProps}
               strokeDashoffset="0"
             />
@@ -138,5 +142,5 @@ export const SunMoonIcon = forwardRef<SunMoonHandle, Props>(
         </g>
       </svg>
     );
-  }
+  },
 );

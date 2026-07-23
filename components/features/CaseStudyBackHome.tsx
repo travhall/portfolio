@@ -5,7 +5,7 @@
 // CaseStudyHero still registers that (see its exitHome/registerPageExit) —
 // this just hands off to it via tryPageExit, the same mechanism the topbar
 // wordmark uses to trigger that same animation from outside the page's own
-// component tree (see lib/page-exit.ts).
+// component tree (see lib/page-exit.ts). cSpell:ignore wordmark topbar
 //
 // Also registers its own fade-out (plan 037) — wrapped in a plain <div>
 // rather than animating the <Button> directly, since components/ui/
@@ -44,7 +44,13 @@ export function CaseStudyBackHome() {
           // Leave modifier / non-primary clicks alone so "open in new tab",
           // "open in new window", etc. still work — same passthrough Topbar
           // and FeatureWipe.tsx's case-study buttons use.
-          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
+          if (
+            e.metaKey ||
+            e.ctrlKey ||
+            e.shiftKey ||
+            e.altKey ||
+            e.button !== 0
+          ) {
             return;
           }
           if (tryPageExit("/")) {

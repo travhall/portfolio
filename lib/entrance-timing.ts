@@ -15,7 +15,7 @@
 //
 // Consumed by: components/nav/Topbar.tsx, components/features/IntroSection.tsx,
 // components/features/FeatureWipe.tsx. Reduced motion skips the entrance
-// entirely in every consumer, so these values never apply when motion is off.
+// entirely in every consumer, so these values never apply when motion is off. cSpell:ignore wordmark topbar
 
 export const ENTRANCE_DELAY = {
   wordmark: 0.1,

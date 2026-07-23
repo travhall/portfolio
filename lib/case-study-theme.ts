@@ -57,16 +57,19 @@ export interface CaseStudyTheme {
 // el-camino's real bg/fg (its border has no distinct sample of its own, so
 // it's the one project actually exercising this fallback) — comfortably
 // under the 3:1 UI-contrast floor. 50% measures 4.00:1. Checked directly
-// against el-camino's real colors, not assumed.
+// against el-camino's real colors, not assumed. cSpell:ignore oklab nonlinearly
 const derivedBorder = (mode: CaseStudyThemeMode) =>
   mode.border ?? `color-mix(in oklab, ${mode.fg} 50%, ${mode.bg})`;
 
 const derivedAccent = (mode: CaseStudyThemeMode) => mode.accent ?? mode.fg;
 const derivedAccentText = (mode: CaseStudyThemeMode) =>
   mode.accentText ?? mode.accent ?? mode.fg;
-const derivedButtonBg = (mode: CaseStudyThemeMode) => mode.button?.bg ?? derivedAccent(mode);
-const derivedButtonFg = (mode: CaseStudyThemeMode) => mode.button?.fg ?? mode.bg;
-const derivedButtonBorder = (mode: CaseStudyThemeMode) => mode.button?.border ?? derivedButtonBg(mode);
+const derivedButtonBg = (mode: CaseStudyThemeMode) =>
+  mode.button?.bg ?? derivedAccent(mode);
+const derivedButtonFg = (mode: CaseStudyThemeMode) =>
+  mode.button?.fg ?? mode.bg;
+const derivedButtonBorder = (mode: CaseStudyThemeMode) =>
+  mode.button?.border ?? derivedButtonBg(mode);
 
 type ThemeVars = Record<
   | "--cs-bg"
@@ -83,7 +86,9 @@ type ThemeVars = Record<
 /** Resolves a theme to the CSS custom properties its case-study page (and,
  *  for --cs-bg only, its home page row) render with — or undefined if the
  *  case study has no theme yet (e.g. a "coming soon" placeholder entry). */
-export function resolveThemeVars(theme: CaseStudyTheme | undefined): ThemeVars | undefined {
+export function resolveThemeVars(
+  theme: CaseStudyTheme | undefined,
+): ThemeVars | undefined {
   if (!theme) return undefined;
   const dark = theme.dark ?? theme.light;
   return {
@@ -96,12 +101,4 @@ export function resolveThemeVars(theme: CaseStudyTheme | undefined): ThemeVars |
     "--cs-button-fg": `light-dark(${derivedButtonFg(theme.light)}, ${derivedButtonFg(dark)})`,
     "--cs-button-border": `light-dark(${derivedButtonBorder(theme.light)}, ${derivedButtonBorder(dark)})`,
   };
-}
-
-/** Just the background half, for FeatureWipe's row hover-fill — the home
- *  page row only borrows this project's bg tone as a decorative wash; it
- *  never adopts the project's fg/border/accent (those are reserved for the
- *  case-study page's own content, not our chrome — see CaseStudyHero.tsx). */
-export function resolveThemeBg(theme: CaseStudyTheme | undefined): string | undefined {
-  return resolveThemeVars(theme)?.["--cs-bg"];
 }

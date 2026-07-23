@@ -19,19 +19,21 @@
  */
 
 function reducedMotion(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+  );
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type MediaEffect = 'parallax' | 'gooey';
+export type MediaEffect = "parallax" | "gooey";
 
 export interface MediaGLOptions {
-  src:             string;
-  effect?:         MediaEffect;
-  intensity?:      number;
-  onReady?:        () => void;
+  src: string;
+  effect?: MediaEffect;
+  intensity?: number;
+  onReady?: () => void;
   /** When true, disables the internal window.scroll listener. Use when an
    *  external ScrollTrigger drives setScrollState() — prevents the two
    *  sources from racing and diluting the velocity signal. */
@@ -88,7 +90,10 @@ out vec4 fragColor;
 vec2 cover(vec2 u){u-=.5;u*=u_ratio;u+=.5;return u;}
 `;
 
-const FRAG_PARALLAX = FRAG_PREFIX + NOISE + `
+const FRAG_PARALLAX =
+  FRAG_PREFIX +
+  NOISE +
+  `
 void main(){
   float t = u_time * 0.03;
   vec2 uv = v_uv;
@@ -104,11 +109,11 @@ void main(){
   uv += vec2(wx, wy) * 0.003 * u_intensity;
 
   // hdecay — still used by the chromatic-aberration term below to keep the
-  // colour fringe strongest near the button (u_origin) edge of the image.
+  // color fringe strongest near the button (u_origin) edge of the image.
   vec2  hd     = (uv - u_origin) * u_ratio;
   float hdecay = exp(-length(hd) * 2.2);
 
-  // Hover ROLLING WAVE — a single low-frequency crest travelling down the
+  // Hover ROLLING WAVE — a single low-frequency crest traveling down the
   // image, like a wave rolling to shore, rather than the omnidirectional
   // swirl of noise. It's a directional sine of position-minus-time, so every
   // knob is explicit:
@@ -150,7 +155,10 @@ void main(){
   fragColor = vec4(r, g, b, 1.0);
 }`;
 
-const FRAG_GOOEY = FRAG_PREFIX + NOISE + `
+const FRAG_GOOEY =
+  FRAG_PREFIX +
+  NOISE +
+  `
 void main(){
   float t=u_time*.06;
   float amp=(.006+abs(u_vel)*.05+u_scroll*.012)*u_intensity;
@@ -165,73 +173,92 @@ void main(){
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-export function coverRatio(cw: number, ch: number, iw: number, ih: number): [number, number] {
-  const cAR = cw / ch, iAR = iw / ih;
+export function coverRatio(
+  cw: number,
+  ch: number,
+  iw: number,
+  ih: number,
+): [number, number] {
+  const cAR = cw / ch,
+    iAR = iw / ih;
   return [Math.min(cAR / iAR, 1), Math.min(iAR / cAR, 1)];
 }
 
-function compileShader(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
+function compileShader(
+  gl: WebGL2RenderingContext,
+  type: number,
+  src: string,
+): WebGLShader {
   if (gl.isContextLost()) return null as unknown as WebGLShader;
   const s = gl.createShader(type);
-  if (!s) { console.error('createShader returned null'); return null as unknown as WebGLShader; }
+  if (!s) {
+    console.error("createShader returned null");
+    return null as unknown as WebGLShader;
+  }
   gl.shaderSource(s, src);
   gl.compileShader(s);
   if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-    const typeName = type === gl.VERTEX_SHADER ? 'Vertex' : 'Fragment';
-    const log = gl.getShaderInfoLog(s) ?? '(no log)';
-    console.error(`${typeName} shader compile error:\n${log}\n\nSource:\n${src}`);
+    const typeName = type === gl.VERTEX_SHADER ? "Vertex" : "Fragment";
+    const log = gl.getShaderInfoLog(s) ?? "(no log)";
+    console.error(
+      `${typeName} shader compile error:\n${log}\n\nSource:\n${src}`,
+    );
   }
   return s;
 }
 
-function createProgram(gl: WebGL2RenderingContext, vert: string, frag: string): WebGLProgram {
+function createProgram(
+  gl: WebGL2RenderingContext,
+  vert: string,
+  frag: string,
+): WebGLProgram {
   const p = gl.createProgram()!;
   gl.attachShader(p, compileShader(gl, gl.VERTEX_SHADER, vert));
   gl.attachShader(p, compileShader(gl, gl.FRAGMENT_SHADER, frag));
   gl.linkProgram(p);
   if (!gl.getProgramParameter(p, gl.LINK_STATUS))
-    console.error('Program link error:', gl.getProgramInfoLog(p));
+    console.error("Program link error:", gl.getProgramInfoLog(p));
   return p;
 }
 
 // ─── Class ────────────────────────────────────────────────────────────────────
 
 export class MediaGL {
-  private canvas:  HTMLCanvasElement;
-  private opts:    Required<MediaGLOptions>;
-  private gl!:     WebGL2RenderingContext;
-  private prog!:   WebGLProgram;
-  private vao!:    WebGLVertexArrayObject;
-  private tex!:    WebGLTexture;
+  private canvas: HTMLCanvasElement;
+  private opts: Required<MediaGLOptions>;
+  private gl!: WebGL2RenderingContext;
+  private prog!: WebGLProgram;
+  private vao!: WebGLVertexArrayObject;
+  private tex!: WebGLTexture;
   private posBuf!: WebGLBuffer;
-  private uvBuf!:  WebGLBuffer;
+  private uvBuf!: WebGLBuffer;
   private idxBuf!: WebGLBuffer;
 
   // Uniform locations (populated in _build)
-  private uTime!:      WebGLUniformLocation;
-  private uVel!:       WebGLUniformLocation;
-  private uScroll!:    WebGLUniformLocation;
+  private uTime!: WebGLUniformLocation;
+  private uVel!: WebGLUniformLocation;
+  private uScroll!: WebGLUniformLocation;
   private uIntensity!: WebGLUniformLocation;
-  private uRatio!:     WebGLUniformLocation;
-  private uMap!:       WebGLUniformLocation;
-  private uHover!:     WebGLUniformLocation;
-  private uOrigin!:    WebGLUniformLocation;
+  private uRatio!: WebGLUniformLocation;
+  private uMap!: WebGLUniformLocation;
+  private uHover!: WebGLUniformLocation;
+  private uOrigin!: WebGLUniformLocation;
 
-  private ready    = false;
+  private ready = false;
   private disposed = false;
-  private rafId:  number | null = null;
-  private last    = 0;
-  private imgW    = 1;
-  private imgH    = 1;
-  private time    = 0;
+  private rafId: number | null = null;
+  private last = 0;
+  private imgW = 1;
+  private imgH = 1;
+  private time = 0;
 
-  private vel     = 0;
-  private velT    = 0;
-  private scroll  = 0;
+  private vel = 0;
+  private velT = 0;
+  private scroll = 0;
   private scrollT = 0;
-  private lastY   = 0;
+  private lastY = 0;
 
-  private hover:  number = 0;
+  private hover: number = 0;
   private hoverT: number = 0;
   private origin: [number, number] = [0.5, 0.5];
 
@@ -248,31 +275,37 @@ export class MediaGL {
 
   constructor(canvas: HTMLCanvasElement, opts: MediaGLOptions) {
     this.canvas = canvas;
-    this.opts   = { effect: 'parallax', intensity: 1.5, onReady: () => {}, externalScroll: false, ...opts };
-    this.lastY  = typeof window !== 'undefined' ? window.scrollY : 0;
+    this.opts = {
+      effect: "parallax",
+      intensity: 1.5,
+      onReady: () => {},
+      externalScroll: false,
+      ...opts,
+    };
+    this.lastY = typeof window !== "undefined" ? window.scrollY : 0;
     this._init();
   }
 
   private _init() {
     // If the canvas already has a context (e.g. React StrictMode remount after
     // dispose), reuse it — don't request a new one on a potentially lost context.
-    const existing = this.canvas.getContext('webgl2');
+    const existing = this.canvas.getContext("webgl2");
     if (!existing || existing.isContextLost()) {
-      console.warn('MediaGL: WebGL2 context unavailable or lost');
+      console.warn("MediaGL: WebGL2 context unavailable or lost");
       return;
     }
     this.gl = existing;
 
     const { w, h } = this._size();
     const dpr = Math.min(window.devicePixelRatio ?? 1, 2);
-    this.canvas.width  = w * dpr;
+    this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
 
     this.gl.clearColor(0, 0, 0, 0);
 
     const img = new Image();
     img.onload = () => {
-      this.img  = img;
+      this.img = img;
       this.imgW = img.naturalWidth;
       this.imgH = img.naturalHeight;
       this._build(img);
@@ -285,9 +318,9 @@ export class MediaGL {
     // Only register the internal scroll listener when not externally driven.
     // When externalScroll:true, setScrollState() is the sole scroll input.
     if (!this.opts.externalScroll) {
-      window.addEventListener('scroll', this._boundScroll, { passive: true });
+      window.addEventListener("scroll", this._boundScroll, { passive: true });
     }
-    window.addEventListener('resize', this._boundResize);
+    window.addEventListener("resize", this._boundResize);
 
     const parent = this.canvas.parentElement;
     if (parent) {
@@ -307,15 +340,23 @@ export class MediaGL {
       this.stop();
     };
     this._boundContextRestored = () => this._build(this.img);
-    this.canvas.addEventListener('webglcontextlost', this._boundContextLost, false);
-    this.canvas.addEventListener('webglcontextrestored', this._boundContextRestored, false);
+    this.canvas.addEventListener(
+      "webglcontextlost",
+      this._boundContextLost,
+      false,
+    );
+    this.canvas.addEventListener(
+      "webglcontextrestored",
+      this._boundContextRestored,
+      false,
+    );
   }
 
   private _build(img: HTMLImageElement | null) {
     if (this.disposed) return;
     if (!this.gl || this.gl.isContextLost()) return;
-    const gl   = this.gl;
-    const frag = this.opts.effect === 'parallax' ? FRAG_PARALLAX : FRAG_GOOEY;
+    const gl = this.gl;
+    const frag = this.opts.effect === "parallax" ? FRAG_PARALLAX : FRAG_GOOEY;
 
     // Compile program
     this.prog = createProgram(gl, VERT_SRC, frag);
@@ -323,21 +364,21 @@ export class MediaGL {
     // Cache uniform locations. u_hover/u_origin are null on programs that
     // don't reference them (e.g. gooey) — gl.uniform*(null, ...) is a
     // spec-defined no-op, so that's safe to just always set in _renderOnce.
-    this.uTime      = gl.getUniformLocation(this.prog, 'u_time')!;
-    this.uVel       = gl.getUniformLocation(this.prog, 'u_vel')!;
-    this.uScroll    = gl.getUniformLocation(this.prog, 'u_scroll')!;
-    this.uIntensity = gl.getUniformLocation(this.prog, 'u_intensity')!;
-    this.uRatio     = gl.getUniformLocation(this.prog, 'u_ratio')!;
-    this.uMap       = gl.getUniformLocation(this.prog, 'u_map')!;
-    this.uHover     = gl.getUniformLocation(this.prog, 'u_hover')!;
-    this.uOrigin    = gl.getUniformLocation(this.prog, 'u_origin')!;
+    this.uTime = gl.getUniformLocation(this.prog, "u_time")!;
+    this.uVel = gl.getUniformLocation(this.prog, "u_vel")!;
+    this.uScroll = gl.getUniformLocation(this.prog, "u_scroll")!;
+    this.uIntensity = gl.getUniformLocation(this.prog, "u_intensity")!;
+    this.uRatio = gl.getUniformLocation(this.prog, "u_ratio")!;
+    this.uMap = gl.getUniformLocation(this.prog, "u_map")!;
+    this.uHover = gl.getUniformLocation(this.prog, "u_hover")!;
+    this.uOrigin = gl.getUniformLocation(this.prog, "u_origin")!;
 
     // Fullscreen quad VAO
     // prettier-ignore
     const pos = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
     // prettier-ignore
     const uvs = new Float32Array([0,0, 1,0, 0,1, 1,1]);
-    const idx = new Uint16Array([0,1,2, 1,3,2]);
+    const idx = new Uint16Array([0, 1, 2, 1, 3, 2]);
 
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
@@ -345,14 +386,14 @@ export class MediaGL {
     this.posBuf = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuf);
     gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
-    const aPos = gl.getAttribLocation(this.prog, 'a_pos');
+    const aPos = gl.getAttribLocation(this.prog, "a_pos");
     gl.enableVertexAttribArray(aPos);
     gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
     this.uvBuf = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuf);
     gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
-    const aUv = gl.getAttribLocation(this.prog, 'a_uv');
+    const aUv = gl.getAttribLocation(this.prog, "a_uv");
     gl.enableVertexAttribArray(aUv);
     gl.vertexAttribPointer(aUv, 2, gl.FLOAT, false, 0, 0);
 
@@ -376,7 +417,17 @@ export class MediaGL {
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
     } else {
       // 1×1 transparent fallback
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        1,
+        1,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        new Uint8Array(4),
+      );
     }
     gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -388,14 +439,14 @@ export class MediaGL {
   }
 
   private _measure() {
-    const y  = window.scrollY ?? 0;
+    const y = window.scrollY ?? 0;
     const dy = y - this.lastY;
     this.lastY = y;
     if (reducedMotion()) {
-      this.velT    = 0;
+      this.velT = 0;
       this.scrollT = 0.5;
     } else {
-      this.velT    = Math.max(-1, Math.min(1, dy / 60));
+      this.velT = Math.max(-1, Math.min(1, dy / 60));
       this.scrollT = Math.max(0, Math.min(1, y / (window.innerHeight * 1.4)));
     }
     this.start();
@@ -405,7 +456,7 @@ export class MediaGL {
     if (!this.ready || this.disposed) return;
     const { w, h } = this._size();
     const dpr = Math.min(window.devicePixelRatio ?? 1, 2);
-    this.canvas.width  = w * dpr;
+    this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this._renderOnce();
   }
@@ -413,28 +464,28 @@ export class MediaGL {
   private _size() {
     const p = this.canvas.parentElement;
     return {
-      w: p?.clientWidth  || this.canvas.clientWidth  || 1,
+      w: p?.clientWidth || this.canvas.clientWidth || 1,
       h: p?.clientHeight || this.canvas.clientHeight || 1,
     };
   }
 
   private _renderOnce() {
     if (!this.ready || this.disposed) return;
-    const gl  = this.gl;
+    const gl = this.gl;
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(this.prog);
 
     const { w, h } = this._size();
     const [rx, ry] = coverRatio(w, h, this.imgW, this.imgH);
-    gl.uniform1f(this.uTime,      this.time);
-    gl.uniform1f(this.uVel,       this.vel);
-    gl.uniform1f(this.uScroll,    this.scroll);
+    gl.uniform1f(this.uTime, this.time);
+    gl.uniform1f(this.uVel, this.vel);
+    gl.uniform1f(this.uScroll, this.scroll);
     gl.uniform1f(this.uIntensity, this.opts.intensity);
-    gl.uniform2f(this.uRatio,     rx, ry);
-    gl.uniform1i(this.uMap,       0);
-    gl.uniform1f(this.uHover,     this.hover);
-    gl.uniform2f(this.uOrigin,    this.origin[0], this.origin[1]);
+    gl.uniform2f(this.uRatio, rx, ry);
+    gl.uniform1i(this.uMap, 0);
+    gl.uniform1f(this.uHover, this.hover);
+    gl.uniform2f(this.uOrigin, this.origin[0], this.origin[1]);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.tex);
@@ -452,14 +503,14 @@ export class MediaGL {
     // rather than just easing it slower. 0.5 is the scroll midpoint where the
     // parallax UV offset term cancels to zero (see FRAG_PARALLAX above).
     if (reducedMotion()) {
-      this.velT    = 0;
+      this.velT = 0;
       this.scrollT = 0.5;
       this.start();
       return;
     }
     // Feed velocity into the spring target so the easing in _tick applies
-    this.velT    = Math.max(-1, Math.min(1, vel));
-    this.scrollT = Math.max(0,  Math.min(1, scroll));
+    this.velT = Math.max(-1, Math.min(1, vel));
+    this.scrollT = Math.max(0, Math.min(1, scroll));
     this.start();
   }
 
@@ -489,18 +540,18 @@ export class MediaGL {
   setEffect(name: MediaEffect) {
     if (this.opts.effect === name || !this.ready || this.disposed) return;
     this.opts.effect = name;
-    const gl   = this.gl;
-    const frag = name === 'parallax' ? FRAG_PARALLAX : FRAG_GOOEY;
+    const gl = this.gl;
+    const frag = name === "parallax" ? FRAG_PARALLAX : FRAG_GOOEY;
     gl.deleteProgram(this.prog);
     this.prog = createProgram(gl, VERT_SRC, frag);
-    this.uTime      = gl.getUniformLocation(this.prog, 'u_time')!;
-    this.uVel       = gl.getUniformLocation(this.prog, 'u_vel')!;
-    this.uScroll    = gl.getUniformLocation(this.prog, 'u_scroll')!;
-    this.uIntensity = gl.getUniformLocation(this.prog, 'u_intensity')!;
-    this.uRatio     = gl.getUniformLocation(this.prog, 'u_ratio')!;
-    this.uMap       = gl.getUniformLocation(this.prog, 'u_map')!;
-    this.uHover     = gl.getUniformLocation(this.prog, 'u_hover')!;
-    this.uOrigin    = gl.getUniformLocation(this.prog, 'u_origin')!;
+    this.uTime = gl.getUniformLocation(this.prog, "u_time")!;
+    this.uVel = gl.getUniformLocation(this.prog, "u_vel")!;
+    this.uScroll = gl.getUniformLocation(this.prog, "u_scroll")!;
+    this.uIntensity = gl.getUniformLocation(this.prog, "u_intensity")!;
+    this.uRatio = gl.getUniformLocation(this.prog, "u_ratio")!;
+    this.uMap = gl.getUniformLocation(this.prog, "u_map")!;
+    this.uHover = gl.getUniformLocation(this.prog, "u_hover")!;
+    this.uOrigin = gl.getUniformLocation(this.prog, "u_origin")!;
     this.start();
   }
 
@@ -508,7 +559,7 @@ export class MediaGL {
 
   start() {
     if (this.rafId || !this.ready || this.disposed) return;
-    this.last  = performance.now();
+    this.last = performance.now();
     this.rafId = requestAnimationFrame(this._tick.bind(this));
   }
 
@@ -521,31 +572,37 @@ export class MediaGL {
     this.rafId = null;
     if (this.disposed) return;
 
-    const dt   = Math.min((now - this.last) / 1000, 0.05);
-    this.last  = now;
+    const dt = Math.min((now - this.last) / 1000, 0.05);
+    this.last = now;
     this.time += dt;
 
-    this.velT   *= Math.exp(-dt * 6.0);
-    this.vel    += (this.velT   - this.vel)    * Math.min(1, dt * 9);
+    this.velT *= Math.exp(-dt * 6.0);
+    this.vel += (this.velT - this.vel) * Math.min(1, dt * 9);
     this.scroll += (this.scrollT - this.scroll) * Math.min(1, dt * 6);
-    this.hover  += (this.hoverT - this.hover)   * Math.min(1, dt * 8);
+    this.hover += (this.hoverT - this.hover) * Math.min(1, dt * 8);
 
     this._renderOnce();
 
-    const r       = this.canvas.getBoundingClientRect();
+    const r = this.canvas.getBoundingClientRect();
     const visible = r.bottom > 0 && r.top < window.innerHeight;
     const settling =
-      Math.abs(this.vel)    > 0.001 ||
-      Math.abs(this.velT)   > 0.001 ||
-      Math.abs(this.scroll  - this.scrollT) > 0.001 ||
+      Math.abs(this.vel) > 0.001 ||
+      Math.abs(this.velT) > 0.001 ||
+      Math.abs(this.scroll - this.scrollT) > 0.001 ||
       // hoverT > 0 for the entire hover duration (not just while easing),
       // so this keeps the loop alive for continuous ambient wave motion the
       // whole time the button is hovered — not just during the fade in/out.
       this.hoverT > 0.001 ||
-      this.hover  > 0.001;
+      this.hover > 0.001;
 
-    if (!visible && !settling) { this.stop(); return; }
-    if (visible && !settling && this.opts.effect === 'parallax') { this.stop(); return; }
+    if (!visible && !settling) {
+      this.stop();
+      return;
+    }
+    if (visible && !settling && this.opts.effect === "parallax") {
+      this.stop();
+      return;
+    }
 
     this.rafId = requestAnimationFrame(this._tick.bind(this));
   }
@@ -555,10 +612,13 @@ export class MediaGL {
   dispose(_keepContext = false): void {
     this.disposed = true;
     this.stop();
-    window.removeEventListener('scroll', this._boundScroll);
-    window.removeEventListener('resize', this._boundResize);
-    this.canvas.removeEventListener('webglcontextlost', this._boundContextLost);
-    this.canvas.removeEventListener('webglcontextrestored', this._boundContextRestored);
+    window.removeEventListener("scroll", this._boundScroll);
+    window.removeEventListener("resize", this._boundResize);
+    this.canvas.removeEventListener("webglcontextlost", this._boundContextLost);
+    this.canvas.removeEventListener(
+      "webglcontextrestored",
+      this._boundContextRestored,
+    );
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
 
@@ -571,7 +631,7 @@ export class MediaGL {
     // still loading, _build() never ran and prog/tex/vao/bufs were never
     // created, so there's nothing to free yet. Skipped if the context is
     // already lost — every name below is already invalid GPU-side in that
-    // case, and gl.delete* would just no-op anyway.
+    // case, and gl.delete* would just no-op anyway. cSpell:ignore Turbopack initialisation GLSL snoise xzyw xxyy zzww mediump hdecay webglcontextlost webglcontextrestored bufs
     if (this.ready && this.gl && !this.gl.isContextLost()) {
       this.gl.deleteProgram(this.prog);
       this.gl.deleteTexture(this.tex);
@@ -582,4 +642,3 @@ export class MediaGL {
     }
   }
 }
-

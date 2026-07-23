@@ -26,7 +26,7 @@ export function ScrollCue({ to, label = "Scroll down" }: Props) {
 
   return (
     <Button
-      variant="glass"
+      variant="solid"
       icon="arrow-down"
       iconPos="right"
       onClick={() =>
