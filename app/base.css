@@ -340,7 +340,8 @@ html[data-motion="off"] ::view-transition-new(*) {
 
 /* ─────────────── Visually-hidden utility ───────────────────────────────────
  * Keeps content in the accessibility tree (e.g. a page-level <h1> for screen
- * reader heading navigation) while removing it from the visual layout. */
+ * reader heading navigation, or a live-region status announcement) while
+ * removing it from the visual layout. */
 .sr-only {
   position: absolute;
   width: 1px;
