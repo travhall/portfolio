@@ -1531,6 +1531,9 @@ html[data-theme="light"] .about-portrait__fallback {
   outline: 2px solid var(--focus-ring);
   outline-offset: 4px;
 }
+.menu-overlay__link[aria-current="page"] {
+  color: var(--ink);
+}
 /* Reserved for the case-study filmstrip/preview — empty for now. */
 .menu-overlay__content {
   flex: 1;

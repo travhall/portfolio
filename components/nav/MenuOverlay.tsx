@@ -289,6 +289,7 @@ export function MenuOverlay({ isOpen, onClose, originRef }: Props) {
                 key={label}
                 href={href}
                 className="menu-overlay__link"
+                aria-current={href === pathname ? "page" : undefined}
                 ref={(el) => {
                   if (el) linksRef.current[i] = el;
                 }}
