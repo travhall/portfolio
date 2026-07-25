@@ -14,7 +14,7 @@ function TextBlock({ block }: { block: CaseStudyTextBlock }) {
   return (
     <>
       {block.eyebrow && <p className="type-eyebrow text-ink-muted">{block.eyebrow}</p>}
-      {block.heading && <p className="type-display">{block.heading}</p>}
+      {block.heading && <h2 className="type-display">{block.heading}</h2>}
       <ReactMarkdown components={{ p: (props) => <p className="type-lead" {...props} /> }}>
         {block.body}
       </ReactMarkdown>
