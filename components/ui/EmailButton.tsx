@@ -101,6 +101,9 @@ export function EmailButton({
           </button>
         </div>
       )}
+      <span role="status" aria-live="polite" className="sr-only">
+        {copied ? "Email address copied to clipboard" : ""}
+      </span>
     </div>
   );
 }

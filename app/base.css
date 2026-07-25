@@ -337,3 +337,18 @@ html[data-motion="off"] ::view-transition-old(*),
 html[data-motion="off"] ::view-transition-new(*) {
   animation: none !important;
 }
+
+/* ─────────────── sr-only — visually hidden, still exposed to AT ───────────
+ * For content (e.g. live-region status announcements) that assistive tech
+ * should read but sighted users don't need to see in layout.              */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
