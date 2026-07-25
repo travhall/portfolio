@@ -23,7 +23,7 @@ export function CaseStudyNav({ related }: { related: CaseStudy[] }) {
     <div className="cs-container">
       <nav className="case-nav" aria-label="More case studies">
         <div className="case-nav__header">
-          <p className="type-eyebrow text-ink-muted">More Work</p>
+          <h2 className="type-eyebrow text-ink-muted">More Work</h2>
           <Button variant="link" icon="arrow-up-right" href="/work">
             All Projects
           </Button>

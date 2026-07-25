@@ -14,7 +14,7 @@ export function CaseStudyOverview({ body, sectors, credits, awards }: Props) {
   return (
     <div className="cs-overview">
       <div className="cs-overview__body">
-        <p className="type-eyebrow text-ink-muted cs-overview__label">Overview</p>
+        <h2 className="type-eyebrow text-ink-muted cs-overview__label">Overview</h2>
         <p className="type-lead cs-overview__text">{body}</p>
       </div>
       {hasMeta && (
