@@ -718,6 +718,7 @@ html[data-motion="off"] .cs-hero__meta {
   margin-top: clamp(3rem, 8vh, 5rem);
 }
 .cs-full-image {
+  position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
 }
@@ -737,6 +738,7 @@ html[data-motion="off"] .cs-hero__meta {
   }
 }
 .cs-split__media {
+  position: relative;
   aspect-ratio: 4 / 3;
   overflow: hidden;
 }
