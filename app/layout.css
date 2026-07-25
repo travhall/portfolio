@@ -345,6 +345,7 @@ html[data-motion="off"] .intro-section__cue {
   container-name: fw-section;
 
   background: var(--surface);
+  border-bottom: 1px solid var(--cs-border, var(--line));
   position: relative;
   isolation: isolate;
   /* max-width: var(--maxw);
@@ -1447,7 +1448,6 @@ html[data-theme="light"] .about-portrait__fallback {
    Footer.tsx resolves the current route's case-study theme itself and sets
    --cs-border directly on this element to work around that. */
 .site-footer {
-  border-top: 1px solid var(--cs-border, var(--line));
   padding: 28px var(--gut);
   display: flex;
   flex-direction: row-reverse;
