@@ -12,28 +12,16 @@
 // Button.tsx isn't forwardRef-wrapped and this is the one caller that
 // needs a ref, not a reason to change that shared component.
 
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
+import { useRef } from "react";
 import { Button } from "@/components/ui/Button";
-import { prefersReducedMotion } from "@/components/ui/ripple";
-import { registerExitObserver, tryPageExit } from "@/lib/page-exit";
+import { tryPageExit } from "@/lib/page-exit";
+import { useFadeExit } from "./useFadeExit";
 
 export function CaseStudyBackHome() {
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    return registerExitObserver(() => {
-      if (prefersReducedMotion() || !ref.current) return;
-      // Same treatment as CaseStudyBody/CaseStudyHero's __meta exit —
-      // see those files for why these exact values.
-      gsap.to(ref.current, {
-        opacity: 0,
-        y: 14,
-        ease: "power2.in",
-        duration: 0.35,
-      });
-    });
-  }, []);
+  // Same treatment as CaseStudyBody/CaseStudyHero's __meta exit — see
+  // useFadeExit.ts for why these exact values.
+  useFadeExit(ref);
 
   return (
     <div ref={ref}>
