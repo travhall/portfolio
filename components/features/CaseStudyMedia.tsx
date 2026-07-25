@@ -3,6 +3,7 @@
 // or a text block, in either order). One flexible shape instead of a fixed
 // component per combination — see lib/case-studies.ts for why.
 
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/Button";
 import type { CaseStudySection, CaseStudySectionSlot, CaseStudyTextBlock } from "@/lib/case-studies";
@@ -39,8 +40,13 @@ function Slot({ slot }: { slot: CaseStudySectionSlot }) {
     case "image":
       return (
         <div className="cs-split__media">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={slot.image} alt={slot.alt ?? ""} className="cs-split__img" />
+          <Image
+            src={slot.image}
+            alt={slot.alt ?? ""}
+            fill
+            sizes="(min-width: 900px) 50vw, 100vw"
+            className="cs-split__img"
+          />
         </div>
       );
     case "text":
@@ -56,8 +62,13 @@ export function CaseStudyMedia({ section }: { section: CaseStudySection }) {
   if (section.type === "full-image") {
     return (
       <div className="cs-full-image">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={section.image} alt={section.alt ?? ""} className="cs-full-image__img" />
+        <Image
+          src={section.image}
+          alt={section.alt ?? ""}
+          fill
+          sizes="100vw"
+          className="cs-full-image__img"
+        />
       </div>
     );
   }
