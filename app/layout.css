@@ -95,8 +95,8 @@ html[data-motion="off"] .topbar__brand {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 4px;
+  height: 44px;
+  padding: 0 6px;
   border: none;
   background: none;
   color: var(--ink);
