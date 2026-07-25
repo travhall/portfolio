@@ -176,7 +176,7 @@
     transform 0.22s var(--ease);
 }
 .btn:hover {
-  transform: scaleX(1.02);
+  transform: scaleX(1.08) scaleY(1.04);
 }
 .btn:active {
   transform: translateY(1px);

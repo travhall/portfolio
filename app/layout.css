@@ -250,8 +250,19 @@ html[data-motion="off"] .topbar__toggle {
   /* Hidden by default — same full-page-load flash prevention as
      .topbar__brand (see that rule's comment). Set back to 1 synchronously by
      lib/text-reveal.ts's createTextReveal once characters are hidden.
-     Reduced-motion overrides below. */
+     Reduced-motion overrides below. Only use this class where that JS reveal
+     actually runs (IntroSection.tsx) — a heading with no reveal JS (e.g.
+     not-found.tsx) needs .statement-measure instead, which shares the same
+     sizing without the opacity default. */
   opacity: 0;
+}
+
+/* Same max-width/text-wrap as .intro-section__statement, for headings that
+   share its typographic treatment but have no JS reveal to clear the
+   opacity default above (currently just not-found.tsx). */
+.statement-measure {
+  max-width: 26ch;
+  text-wrap: balance;
 }
 
 @media (prefers-reduced-motion: reduce) {
