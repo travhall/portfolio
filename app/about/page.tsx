@@ -16,32 +16,9 @@ export default function AboutPage() {
       <div className="header-spacer" aria-hidden="true" />
 
       <section className="about-body">
-        {/* Left column — sticky portrait + social actions below */}
+        {/* Left column — sticky portrait */}
         <div className="about-rail">
           <AboutPortrait />
-          {/* <div className="about-rail__actions">
-            <Button
-              variant="ghost"
-              iconOnly="github"
-              aria-label="GitHub"
-              href={siteConfig.links.github}
-            />
-            <Button
-              variant="ghost"
-              iconOnly="linkedin"
-              aria-label="LinkedIn"
-              href={siteConfig.links.linkedin}
-            />
-            <EmailButton variant="ghost" iconOnly="mail" aria-label="Email" />
-            <Button
-              variant="ghost"
-              icon="download"
-              iconPos="right"
-              href={siteConfig.cv}
-            >
-              Download CV
-            </Button>
-          </div> */}
         </div>
 
         {/* Centre column */}
