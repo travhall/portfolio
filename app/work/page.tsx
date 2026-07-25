@@ -17,6 +17,7 @@ export default async function WorkPage() {
   const caseStudies = await getCaseStudies();
   return (
     <main id="main-content">
+      <h1 className="sr-only">Work</h1>
       <div className="header-spacer" aria-hidden="true" />
 
       <div className="cs-container">
