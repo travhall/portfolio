@@ -18,6 +18,7 @@
 
 let patched = false;
 let currentFinished: Promise<void> = Promise.resolve();
+let currentHadTransition = false;
 
 function patch() {
   if (
@@ -34,6 +35,7 @@ function patch() {
     callbackOptions?: Parameters<typeof original>[0],
   ) => {
     const transition = original(callbackOptions);
+    currentHadTransition = true;
     currentFinished = transition.finished.catch(() => undefined);
     return transition;
   }) as typeof document.startViewTransition;
@@ -46,7 +48,18 @@ patch();
  * fully finished animating — the moment the new page is visually settled
  * and interactive. Resolves immediately if no transition is in flight
  * (e.g. a plain full page load never created one).
+ *
+ * Resolves to `true` if a real transition was awaited (a client-side
+ * navigation), `false` if there was never one to wait on (a full page
+ * load) — callers use this to skip a load-only sequencing delay that would
+ * otherwise stack on top of the transition's own crossfade duration on a
+ * client-side arrival. Read synchronously at call time (not inside the
+ * `.then()`), so two consumers reacting to the same transition in the same
+ * render commit (IntroSection and FeatureWipe both call this on every home
+ * arrival) both see the correct value for *this* transition, not whichever
+ * one resolved first.
  */
-export function waitForActiveViewTransition(): Promise<void> {
-  return currentFinished;
+export function waitForActiveViewTransition(): Promise<boolean> {
+  const hadTransition = currentHadTransition;
+  return currentFinished.then(() => hadTransition);
 }

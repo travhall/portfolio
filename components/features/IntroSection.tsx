@@ -40,18 +40,25 @@ export function IntroSection() {
     }
 
     let cancelled = false;
-    Promise.all([reveal.ready, waitForActiveViewTransition()]).then(() => {
-      if (cancelled) return;
-      // Re-append the cue fade after any re-split cleared the timeline.
-      if (cue) {
-        reveal.tl.to(
-          cue,
-          { opacity: 1, y: 0, ease: "power2.out", duration: 0.6 },
-          "-=0.35",
-        );
-      }
-      reveal.tl.play();
-    });
+    Promise.all([reveal.ready, waitForActiveViewTransition()]).then(
+      ([, hadTransition]) => {
+        if (cancelled) return;
+        // A client-side arrival has nothing left to sequence behind —
+        // Topbar's wordmark reveal (what ENTRANCE_DELAY.statement exists to
+        // trail) only ever plays once, on a genuine full page load. Skip the
+        // baked-in timeline delay in that case; a full load leaves it as-is.
+        if (hadTransition) reveal.tl.delay(0);
+        // Re-append the cue fade after any re-split cleared the timeline.
+        if (cue) {
+          reveal.tl.to(
+            cue,
+            { opacity: 1, y: 0, ease: "power2.out", duration: 0.6 },
+            "-=0.35",
+          );
+        }
+        reveal.tl.play();
+      },
+    );
 
     return () => {
       cancelled = true;
