@@ -537,7 +537,6 @@ export function FeatureWipe({ features, id }: Props) {
               ? "inset(0% 0% 0% 100%)"
               : "inset(0% 100% 0% 0%)";
             if (!entrancePlayedRef.current) {
-              entrancePlayedRef.current = true;
               // gsap.set (synchronous, before paint in this useLayoutEffect)
               // hides it through the delay so the un-clipped image never
               // flashes before the reveal starts.
@@ -573,6 +572,15 @@ export function FeatureWipe({ features, id }: Props) {
               // CaseStudyHero.tsx's identical use of this same utility.
               waitForActiveViewTransition().then((hadTransition) => {
                 if (disposed) return;
+                // Only mark the entrance "played" once we're actually
+                // about to play it — not eagerly at the top of this block.
+                // A StrictMode dev double-invoke (mount → cleanup → mount)
+                // cleans up this exact invocation's `disposed` flag before
+                // its own promise resolves, so a superseded invocation
+                // never reaches this line; the surviving invocation is the
+                // only one that ever marks the ref, and it does so right
+                // before it actually animates. See plan 056.
+                entrancePlayedRef.current = true;
                 // Same reasoning as IntroSection.tsx: a client-side arrival
                 // has nothing left to sequence behind (Topbar's reveal
                 // never replays on client navigation), so play immediately
