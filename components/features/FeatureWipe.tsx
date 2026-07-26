@@ -571,11 +571,20 @@ export function FeatureWipe({ features, id }: Props) {
               // is still the only thing controlling timing there,
               // preserving the existing load sequence exactly. Matches
               // CaseStudyHero.tsx's identical use of this same utility.
-              waitForActiveViewTransition().then(() => {
+              waitForActiveViewTransition().then((hadTransition) => {
                 if (disposed) return;
-                gsap.delayedCall(ENTRANCE_DELAY.firstImage, () =>
-                  introTl.play(),
-                );
+                // Same reasoning as IntroSection.tsx: a client-side arrival
+                // has nothing left to sequence behind (Topbar's reveal
+                // never replays on client navigation), so play immediately
+                // once the transition has genuinely settled instead of
+                // stacking ENTRANCE_DELAY.firstImage on top of it too.
+                if (hadTransition) {
+                  introTl.play();
+                } else {
+                  gsap.delayedCall(ENTRANCE_DELAY.firstImage, () =>
+                    introTl.play(),
+                  );
+                }
               });
             } else {
               // A resize re-init after the entrance already played — just show it
