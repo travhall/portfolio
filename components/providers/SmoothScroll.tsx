@@ -25,6 +25,7 @@ import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion } from "@/components/ui/ripple";
+import { waitForActiveViewTransition } from "@/lib/view-transition";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -54,23 +55,53 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   // pathname change, after the new route's content has painted.
   useEffect(() => {
     const instance = lenisRef.current;
-    // Land every new route at the top. Next's own scroll restoration works on
-    // native window scroll, which Lenis has taken over — so without this a
-    // client navigation keeps the previous page's scroll position (e.g. you
-    // click a featured project halfway down the home page and the case study
-    // page opens already scrolled down). immediate: true snaps, no glide.
-    if (instance) instance.scrollTo(0, { immediate: true });
-    else window.scrollTo(0, 0);
+    const toTop = () => {
+      if (instance) instance.scrollTo(0, { immediate: true });
+      else window.scrollTo(0, 0);
+    };
 
-    if (!instance) return;
-    const id = requestAnimationFrame(() => {
-      instance.resize();
-      ScrollTrigger.refresh();
+    // Land every new route at the top. A single call isn't enough for browser
+    // back/forward: Next's own App Router restores the previous scroll offset
+    // on that path as an internal behavior separate from (and not disabled
+    // by) history.scrollRestoration, on a timing that isn't something we can
+    // read or rely on — it can still land after this effect's first paint,
+    // undoing a one-shot scrollTo(0). Re-assert every frame until the actual
+    // view-transition crossfade finishes (not a guessed frame count — Next's
+    // restore can still land after a fixed budget on a slow fetch or a
+    // high-refresh-rate display); whichever fires last wins, so this wins
+    // regardless of Next's exact scheduling. Runs within the ongoing
+    // crossfade, so it isn't visible as a snap-back.
+    toTop();
+    let cancelled = false;
+    let id = requestAnimationFrame(function reassert() {
+      toTop();
+      id = requestAnimationFrame(reassert);
     });
-    return () => cancelAnimationFrame(id);
+    waitForActiveViewTransition().then(() => {
+      if (cancelled) return;
+      cancelAnimationFrame(id);
+      toTop();
+      if (instance) {
+        instance.resize();
+        ScrollTrigger.refresh();
+      }
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(id);
+    };
   }, [pathname]);
 
   useEffect(() => {
+    // Browser back/forward restores each history entry's own scroll offset
+    // by default (scrollRestoration: "auto"), racing the pathname effect
+    // above (which always lands a new route at the top) and often winning —
+    // e.g. hitting back from a case study lands on the previous page's
+    // footer instead of its title. Taking manual control makes this
+    // component the single source of truth for scroll position on every
+    // navigation, forward or back.
+    history.scrollRestoration = "manual";
+
     // Custom inertial scrolling is a motion effect, not just a convenience —
     // skip it entirely for prefers-reduced-motion and fall back to native
     // (instant) scrolling. ScrollTrigger still works without Lenis driving

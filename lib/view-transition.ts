@@ -20,6 +20,19 @@ let patched = false;
 let currentFinished: Promise<void> = Promise.resolve();
 let currentHadTransition = false;
 
+// Hooks run synchronously right before a real startViewTransition() call —
+// i.e. before the browser snapshots the "old" DOM state. This is the only
+// point where shared-element setup (e.g. tagging a FeatureWipe row with
+// view-transition-name) can still land in time for a *popstate*-triggered
+// transition (browser back/forward), since that path never runs the click
+// handlers that do this setup on a normal <Link>/router.push navigation.
+const preTransitionHooks = new Set<() => void>();
+
+export function registerPreTransitionHook(fn: () => void): () => void {
+  preTransitionHooks.add(fn);
+  return () => preTransitionHooks.delete(fn);
+}
+
 function patch() {
   if (
     patched ||
@@ -34,6 +47,13 @@ function patch() {
   document.startViewTransition = ((
     callbackOptions?: Parameters<typeof original>[0],
   ) => {
+    preTransitionHooks.forEach((fn) => {
+      try {
+        fn();
+      } catch (err) {
+        console.error("view-transition pre-transition hook failed:", err);
+      }
+    });
     const transition = original(callbackOptions);
     currentHadTransition = true;
     currentFinished = transition.finished.catch(() => undefined);

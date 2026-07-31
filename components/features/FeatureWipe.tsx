@@ -34,7 +34,10 @@ import { useTheme, resolveTheme } from "@/lib/use-theme";
 import { useMotionPref, readMotionPref } from "@/lib/motion-pref";
 import { DESKTOP_BP } from "@/lib/breakpoints";
 import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
-import { waitForActiveViewTransition } from "@/lib/view-transition";
+import {
+  waitForActiveViewTransition,
+  registerPreTransitionHook,
+} from "@/lib/view-transition";
 import type { CaseStudy } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
 
@@ -774,6 +777,27 @@ export function FeatureWipe({ features, id }: Props) {
       disposeAllMedia();
     };
   }, [features, theme, motionPref]);
+
+  // Browser back/forward re-entering a case study never runs runExit's click
+  // handler below, so the matching row never gets tagged for the fw-brand
+  // shared-element morph — it would otherwise just fall back to the generic
+  // root cross-fade. This mirrors runExit's tag (line ~800) for that path.
+  useLayoutEffect(() => {
+    return registerPreTransitionHook(() => {
+      const match = window.location.pathname.match(/^\/work\/([^/]+)\/?$/);
+      if (!match) return;
+      const i = features.findIndex((f) => f.slug === match[1]);
+      const activeRow = i >= 0 ? bandRefs.current[i] : null;
+      const brandEl = activeRow?.querySelector<HTMLElement>(".fw-row__brand");
+      if (brandEl) brandEl.style.viewTransitionName = "fw-brand";
+      // Also force the brand fill visible, same as runExit's is-exiting class
+      // below — otherwise .fw-row__brand is opacity:0 at rest (no hover/focus
+      // on a popstate) and the old snapshot is transparent, so the color
+      // fades IN during the morph instead of holding. Row unmounts with the
+      // home page once the transition completes, so no cleanup needed.
+      activeRow?.classList.add("is-exiting");
+    });
+  }, [features]);
 
   // ── Page-exit animation ──────────────────────────────────────────────────
   // Plays on "View Case Study" click, then navigates. Three coordinated
