@@ -22,6 +22,7 @@ import { prefersReducedMotion } from "@/components/ui/ripple";
 import { waitForActiveViewTransition } from "@/lib/view-transition";
 import { registerPageExit } from "@/lib/page-exit";
 import { MediaGL } from "@/lib/media-gl";
+import { useMotionPref } from "@/lib/motion-pref";
 
 // Wipe direction for the hero image — always from the right, since a single
 // hero (unlike FeatureWipe's alternating rows) has no per-item "side" to key
@@ -67,15 +68,30 @@ export function CaseStudyHero({
   const isExitingRef = useRef(false);
   const revealTlRef = useRef<gsap.core.Timeline | null>(null);
   const router = useTransitionRouter();
+  const motionPref = useMotionPref();
 
   useLayoutEffect(() => {
-    if (prefersReducedMotion()) return;
-
     const headlineEl = headlineRef.current;
     const eyebrowInner = eyebrowInnerRef.current;
     const meta = metaRef.current;
     const imageCol = imageColRef.current;
     if (!headlineEl) return;
+
+    if (prefersReducedMotion()) {
+      // The CSS !important reduced-motion rules (app/layout.css) only cover
+      // whichever data-motion value is active right now. If this effect
+      // re-runs because the user just toggled motion off (or the page
+      // mounted with it already off), nothing else ever writes these inline
+      // styles — so the moment motion toggles back on, those !important
+      // rules stop applying and the elements fall through to their hidden
+      // CSS defaults. Set the resting visible state explicitly instead of
+      // relying on the stylesheet alone.
+      if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 1, x: 0 });
+      if (meta) gsap.set(meta, { opacity: 1, y: 0 });
+      if (imageCol) gsap.set(imageCol, { clipPath: VISIBLE_CLIP });
+      gsap.set(headlineEl, { opacity: 1 });
+      return;
+    }
 
     if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 0, x: -14 });
     if (meta) gsap.set(meta, { opacity: 0, y: 14 });
@@ -135,7 +151,7 @@ export function CaseStudyHero({
       revealTlRef.current = null;
       reveal.cleanup();
     };
-  }, []);
+  }, [motionPref]);
 
   // WebGL chromatic-aberration layer for the hero image, matching
   // FeatureWipe's row images. Only one image on this page (unlike
@@ -149,6 +165,7 @@ export function CaseStudyHero({
     if (prefersReducedMotion()) return;
 
     const canvas = canvasRef.current;
+    const imageCol = imageColRef.current;
     if (!canvas) return;
 
     const gl = new MediaGL(canvas, {
@@ -161,15 +178,22 @@ export function CaseStudyHero({
       // page's own scroll position and produce an unrequested continuous
       // effect while scrolling the case-study page. cSpell:ignore unrequested
       externalScroll: true,
-      onReady: () => imageColRef.current?.classList.add("is-gl"),
+      onReady: () => imageCol?.classList.add("is-gl"),
     });
     glRef.current = gl;
 
     return () => {
       gl.dispose();
       glRef.current = null;
+      // onReady may never have fired (dispose can land before the GL
+      // context finishes initializing), so this can't assume the class was
+      // added — always attempt removal. Otherwise toggling motion off mid-
+      // session disposes the canvas but leaves is-gl on imageCol, and
+      // .cs-hero-image.is-gl .cs-hero-image__img's opacity: 0 rule keeps the
+      // fallback <img> hidden with no canvas left to show anything.
+      imageCol?.classList.remove("is-gl");
     };
-  }, [image]);
+  }, [image, motionPref]);
 
   const exitHome = (href: string) => {
     // If the entrance is still mid-flight (e.g. the user clicked "back home"

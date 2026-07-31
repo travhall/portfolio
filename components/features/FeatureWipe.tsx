@@ -784,6 +784,15 @@ export function FeatureWipe({ features, id }: Props) {
   // root cross-fade. This mirrors runExit's tag (line ~800) for that path.
   useLayoutEffect(() => {
     return registerPreTransitionHook(() => {
+      // Mirrors runExit's own guard below: under reduced motion the group
+      // morph is already disabled entirely (animation: none !important on
+      // ::view-transition-group(fw-brand), app/base.css), so there's nothing
+      // for this tag to feed. Skipping it also avoids a real side effect —
+      // .fw-row__brand's `transition: opacity var(--btn-dur)` (app/layout.css)
+      // is a plain CSS transition, not gated by reduced motion itself, so
+      // adding .is-exiting below would otherwise animate a visible opacity
+      // wipe on every reduced-motion popstate into a case study.
+      if (prefersReducedMotion()) return;
       const match = window.location.pathname.match(/^\/work\/([^/]+)\/?$/);
       if (!match) return;
       const i = features.findIndex((f) => f.slug === match[1]);

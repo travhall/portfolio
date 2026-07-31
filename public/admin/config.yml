@@ -62,7 +62,7 @@ collections:
 
       - { name: image, label: Home Page Image, widget: image }
       - { name: imageDark, label: Home Page Image (Dark Mode), widget: image, required: false }
-      - { name: imageAlt, label: Home Page Image Alt Text, widget: string, required: false }
+      - { name: imageAlt, label: Home Page Image Alt Text, widget: string }
 
       - { name: eyebrow, label: Eyebrow, widget: string }
       - { name: headline, label: Headline, widget: string }
@@ -124,7 +124,7 @@ collections:
             widget: object
             fields:
               - { name: image, label: Image, widget: image }
-              - { name: alt, label: Alt Text, widget: string, required: false }
+              - { name: alt, label: Alt Text, widget: string }
 
           - name: full-text
             label: Full-width Text
@@ -170,7 +170,7 @@ collections:
                     widget: object
                     fields:
                       - { name: image, label: Image, widget: image }
-                      - { name: alt, label: Alt Text, widget: string, required: false }
+                      - { name: alt, label: Alt Text, widget: string }
                   - name: text
                     label: Text
                     widget: object

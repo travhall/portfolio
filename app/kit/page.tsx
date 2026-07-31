@@ -182,7 +182,7 @@ export default async function KitPage() {
     });
 
   return (
-    <main className="kit-page">
+    <main id="main-content" className="kit-page">
       <header className="kit-header">
         <div className="kit-header__row">
           <div>

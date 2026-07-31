@@ -15,19 +15,29 @@ import { createTextReveal } from "@/lib/text-reveal";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
 import { waitForActiveViewTransition } from "@/lib/view-transition";
+import { useMotionPref } from "@/lib/motion-pref";
 
 export function IntroSection() {
   const statementRef = useRef<HTMLHeadingElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
+  const motionPref = useMotionPref();
 
   useLayoutEffect(() => {
-    // prefersReducedMotion() reads the manual data-motion toggle first, then
-    // the OS setting — under either, skip the reveal and show it as-is.
-    if (prefersReducedMotion()) return;
-
     const statement = statementRef.current;
     const cue = cueRef.current;
     if (!statement) return;
+
+    // prefersReducedMotion() reads the manual data-motion toggle first, then
+    // the OS setting — under either, skip the reveal and show it as-is. The
+    // CSS !important reduced-motion rules only cover the data-motion value
+    // active right now, and nothing else ever sets these inline styles — so
+    // toggling motion back on mid-session drops the override with nothing
+    // left to keep the statement/cue visible.
+    if (prefersReducedMotion()) {
+      gsap.set(statement, { opacity: 1 });
+      if (cue) gsap.set(cue, { opacity: 1, y: 0 });
+      return;
+    }
 
     const reveal = createTextReveal(statement, {
       delay: ENTRANCE_DELAY.statement,
@@ -64,7 +74,7 @@ export function IntroSection() {
       cancelled = true;
       reveal.cleanup();
     };
-  }, []);
+  }, [motionPref]);
 
   return (
     <section className="intro-section">

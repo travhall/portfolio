@@ -29,6 +29,11 @@ import { waitForActiveViewTransition } from "@/lib/view-transition";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Minimum time the pathname-change effect's scroll-reassert loop stays
+// active, regardless of how fast waitForActiveViewTransition() resolves —
+// see the comment at its call site.
+const REASSERT_FLOOR_MS = 300;
+
 const LenisContext = createContext<Lenis | null>(null);
 
 /** Access the Lenis instance from any child component. */
@@ -71,13 +76,26 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     // high-refresh-rate display); whichever fires last wins, so this wins
     // regardless of Next's exact scheduling. Runs within the ongoing
     // crossfade, so it isn't visible as a snap-back.
+    //
+    // Reduced motion (data-motion="off") sets `animation: none !important` on
+    // every view-transition pseudo-element (app/base.css), so the transition
+    // has nothing left to animate and waitForActiveViewTransition() resolves
+    // almost immediately — collapsing this loop's safety window from the
+    // ~560ms crossfade down to near-zero, well before Next's own restore
+    // (unpredictable timing) has fired. Floor the wait at REASSERT_FLOOR_MS
+    // so reduced-motion back/forward still gets a real window instead of
+    // losing that race outright; harmless in the animated case since the
+    // transition's own ~560ms already exceeds this floor.
     toTop();
     let cancelled = false;
     let id = requestAnimationFrame(function reassert() {
       toTop();
       id = requestAnimationFrame(reassert);
     });
-    waitForActiveViewTransition().then(() => {
+    const floor = new Promise<void>((resolve) =>
+      setTimeout(resolve, REASSERT_FLOOR_MS),
+    );
+    Promise.all([waitForActiveViewTransition(), floor]).then(() => {
       if (cancelled) return;
       cancelAnimationFrame(id);
       toTop();

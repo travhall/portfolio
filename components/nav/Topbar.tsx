@@ -31,6 +31,7 @@ import { siteConfig } from "@/lib/site-config";
 import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
 import "@/lib/view-transition";
 import { tryPageExit } from "@/lib/page-exit";
+import { useMotionPref } from "@/lib/motion-pref";
 
 const RIPPLE_BRAND = { strength: 9, size: 90, duration: 600 };
 const RIPPLE_TOGGLE = { strength: 8, size: 80, duration: 550 };
@@ -42,6 +43,7 @@ export function Topbar() {
   const menuOriginRef = useRef({ x: 0, y: 0 });
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const motionPref = useMotionPref();
 
   // ── Entrance reveal — ONCE per site load ────────────────────────────────
   // Topbar is a root-layout singleton, so this mount effect runs exactly once
@@ -51,11 +53,31 @@ export function Topbar() {
   // the hidden start state before the browser paints, so the server-rendered
   // visible chrome never flashes before the reveal begins. cSpell:ignore Topbar Wordmark navigations
   useLayoutEffect(() => {
-    if (prefersReducedMotion()) return;
+    const brand = brandRef.current;
+    const toggle = toggleRef.current;
+
+    if (prefersReducedMotion()) {
+      // Same masking problem as CaseStudyHero's entrance: the CSS
+      // !important reduced-motion rules only cover the data-motion value
+      // active right now. If this effect re-runs because the user just
+      // toggled motion (no navigation needed — Topbar is a persistent
+      // singleton), nothing else ever sets these inline styles, so toggling
+      // motion back on drops the override and .topbar__toggle's default
+      // clip-path: inset(110% 0% 0% 0%) — hidden — is exposed with nothing
+      // left to un-hide it.
+      if (brand) gsap.set(brand, { opacity: 1 });
+      if (toggle) {
+        gsap.set(toggle, { clipPath: "inset(0% 0% 0% 0%)" });
+        // clearProps (not opacity: 1) so the CSS :hover opacity (0.6) rule
+        // still applies — same reasoning as the animated path's onComplete
+        // below.
+        gsap.set(toggle, { clearProps: "opacity" });
+      }
+      return;
+    }
 
     const cleanups: Array<() => void> = [];
 
-    const brand = brandRef.current;
     if (brand) {
       const reveal = createTextReveal(brand, {
         delay: ENTRANCE_DELAY.wordmark,
@@ -72,7 +94,6 @@ export function Topbar() {
       });
     }
 
-    const toggle = toggleRef.current;
     if (toggle) {
       gsap.set(toggle, { clipPath: "inset(110% 0% 0% 0%)", opacity: 0 });
       const tween = gsap.to(toggle, {
@@ -92,7 +113,7 @@ export function Topbar() {
     }
 
     return () => cleanups.forEach((fn) => fn());
-  }, []);
+  }, [motionPref]);
 
   // Wordmark fade on scroll — pinned fully visible while the menu is open
   // so it can act as the overlay's "back to top / home" anchor.

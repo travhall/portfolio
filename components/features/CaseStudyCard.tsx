@@ -28,6 +28,7 @@ import type { CaseStudy } from "@/lib/case-studies";
 import { createTextReveal } from "@/lib/text-reveal";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { MediaGL } from "@/lib/media-gl";
+import { useMotionPref } from "@/lib/motion-pref";
 
 // Matches FeatureWipe.tsx's / CaseStudyHero.tsx's own IMG_INTENSITY exactly,
 // for visual consistency. Not imported/shared — see plans/033's own notes on
@@ -85,16 +86,29 @@ export const CaseStudyCard = forwardRef<CaseStudyCardHandle, Props>(
     const revealTlRef = useRef<gsap.core.Timeline | null>(null);
     const isExitingRef = useRef(false);
     const router = useTransitionRouter();
+    const motionPref = useMotionPref();
 
     // ── Entrance: scroll-triggered, staggered reveal ──────────────────────
     useLayoutEffect(() => {
-      if (study.comingSoon || prefersReducedMotion()) return;
+      if (study.comingSoon) return;
 
       const mediaEl = mediaRef.current;
       const titleEl = titleRef.current;
       const eyebrowInner = eyebrowInnerRef.current;
       const observeTarget = linkRef.current;
       if (!mediaEl || !titleEl || !observeTarget) return;
+
+      if (prefersReducedMotion()) {
+        // Same masking problem as CaseStudyHero's entrance: the CSS
+        // !important reduced-motion rules only cover the data-motion value
+        // active right now, and nothing else ever sets these inline styles
+        // — so toggling motion back on mid-session drops the override with
+        // nothing left to keep the card's media/eyebrow/title visible.
+        if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 1, x: 0 });
+        gsap.set(mediaEl, { clipPath: VISIBLE_CLIP });
+        gsap.set(titleEl, { opacity: 1 });
+        return;
+      }
 
       if (eyebrowInner) gsap.set(eyebrowInner, { opacity: 0, x: -14 });
       gsap.set(mediaEl, { clipPath: HIDDEN_CLIP });
@@ -157,7 +171,7 @@ export const CaseStudyCard = forwardRef<CaseStudyCardHandle, Props>(
         revealTlRef.current = null;
         reveal.cleanup();
       };
-    }, [study.comingSoon, index]);
+    }, [study.comingSoon, index, motionPref]);
 
     // ── Hover: WebGL chromatic-aberration wave ─────────────────────────────
     useEffect(() => {

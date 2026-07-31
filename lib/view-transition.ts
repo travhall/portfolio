@@ -57,6 +57,14 @@ function patch() {
     const transition = original(callbackOptions);
     currentHadTransition = true;
     currentFinished = transition.finished.catch(() => undefined);
+    // A transition can be aborted by the browser if another one starts
+    // before it settles (e.g. two navigations racing) — that rejects
+    // `ready` and `updateCallbackDone` too, with an InvalidStateError. We
+    // don't otherwise consume either promise, so nothing else ever attaches
+    // a handler; catch them here purely to prevent unhandled-rejection
+    // console noise, since a real (non-aborted) transition resolves both.
+    transition.ready.catch(() => undefined);
+    transition.updateCallbackDone.catch(() => undefined);
     return transition;
   }) as typeof document.startViewTransition;
 }
