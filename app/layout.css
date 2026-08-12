@@ -1521,7 +1521,10 @@ html[data-theme="light"] .about-portrait__fallback {
   letter-spacing: var(--track-snug);
   color: var(--ink-muted);
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 4px;
+  margin: -11px -4px;
   opacity: 0;
   transform: translateY(8px);
   transition: color 0.2s var(--ease);

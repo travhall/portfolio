@@ -21,6 +21,7 @@ export default async function WorkPage() {
       <div className="header-spacer" aria-hidden="true" />
 
       <div className="cs-container">
+        <h2 className="sr-only">All Case Studies</h2>
         <CaseStudyCardGrid studies={caseStudies} />
       </div>
     </main>
