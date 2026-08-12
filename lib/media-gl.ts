@@ -67,20 +67,9 @@ float snoise3(vec3 v){
   return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
 }`;
 
-// Explicit layout locations, not gl.getAttribLocation() after link — ANGLE
-// links shaders off the main thread, and querying attribute locations
-// immediately after a synchronous linkProgram() can read reflection data
-// that hasn't finished catching up, silently returning a location whose
-// vertexAttribPointer binding never actually varies per-vertex (every
-// fragment then samples the same fixed UV, rendering as a flat, wrong-
-// looking color instead of the image). Fixed locations sidestep the query
-// entirely.
-const A_POS = 0;
-const A_UV = 1;
-
 const VERT_SRC = `#version 300 es
-layout(location=${A_POS}) in vec2 a_pos;
-layout(location=${A_UV}) in vec2 a_uv;
+in vec2 a_pos;
+in vec2 a_uv;
 out vec2 v_uv;
 void main(){v_uv=a_uv;gl_Position=vec4(a_pos,0.,1.);}`;
 
@@ -365,68 +354,10 @@ export class MediaGL {
   private _build(img: HTMLImageElement | null) {
     if (this.disposed) return;
     if (!this.gl || this.gl.isContextLost()) return;
-
-    this._buildAll(img);
-
-    this.ready = true;
-    this._resize();
-    this._measure();
-    this.start();
-    this.opts.onReady();
-
-    // Defensive rebuild: on a cold full page load, several MediaGL instances
-    // can end up creating WebGL2 contexts and compiling/uploading GL objects
-    // within milliseconds of each other — or, for an instance whose mount
-    // effect depends on a hook value that can lag by one render (e.g.
-    // AboutPortrait's `theme`), even a single instance can end up doing a
-    // rapid dispose-then-recreate on the same canvas/context right after its
-    // first build lands. Either way, the very first program/geometry/texture
-    // build can occasionally end up in a bad GPU-side state that draws as a
-    // flat, wrong-looking color — despite every JS-visible check (buffer
-    // contents, attribute bindings, uniform locations, texture contents)
-    // reporting correct, since the corruption appears to live at the
-    // GPU-driver level, below what JS can introspect. A warm client-side
-    // navigation to the same page (no parse/hydration burst, no lagging
-    // first-render hook values) never hits this.
-    //
-    // requestIdleCallback looked like the right primitive for "wait until
-    // the burst has drained", but instrumentation showed every instance's
-    // callback firing within ~15ms of each other regardless of the browser
-    // reporting "idle" — the driver-side contention this is working around
-    // isn't visible to the main-thread idle heuristic, so simultaneously-
-    // built instances end up recreating their state simultaneously too,
-    // reproducing the exact same contention. A random per-instance jitter
-    // spreads the rebuild across real wall-clock time instead, which is what
-    // actually gives each instance's GPU work room to land cleanly —
-    // confirmed by manually re-running each canvas's build one at a time,
-    // seconds apart, which reliably corrected all of them. Rebuilding the
-    // program and texture too (not just geometry) — a geometry-only rebuild
-    // wasn't enough to reliably correct the dispose/recreate case. This is
-    // all tiny, one-time GPU work, not a per-frame cost. A single attempt at
-    // a fixed delay isn't reliable enough on its own — how long the
-    // contention actually lasts varies with upload size (AboutPortrait's
-    // canvas is roughly twice the area of a CaseStudyCard's) and with how
-    // busy the page still is, so three staggered attempts (each cheap, each
-    // jittered so concurrent instances don't re-collide with each other)
-    // give this many independent chances to land outside the bad window
-    // instead of betting everything on guessing the one right delay.
-    const rebuild = () => {
-      if (this.disposed || !this.gl || this.gl.isContextLost()) return;
-      this._buildAll(this.img);
-      this._renderOnce();
-    };
-    setTimeout(rebuild, 400 + Math.random() * 400);
-    setTimeout(rebuild, 1200 + Math.random() * 800);
-    setTimeout(rebuild, 3000 + Math.random() * 1000);
-  }
-
-  // Compiles the program, uploads the texture, and builds the geometry —
-  // called once from _build(), and again from the deferred rebuild above.
-  private _buildAll(img: HTMLImageElement | null) {
     const gl = this.gl;
     const frag = this.opts.effect === "parallax" ? FRAG_PARALLAX : FRAG_GOOEY;
 
-    if (this.prog) gl.deleteProgram(this.prog);
+    // Compile program
     this.prog = createProgram(gl, VERT_SRC, frag);
 
     // Cache uniform locations. u_hover/u_origin are null on programs that
@@ -441,10 +372,37 @@ export class MediaGL {
     this.uHover = gl.getUniformLocation(this.prog, "u_hover")!;
     this.uOrigin = gl.getUniformLocation(this.prog, "u_origin")!;
 
-    this._buildGeometry(gl);
+    // Fullscreen quad VAO
+    // prettier-ignore
+    const pos = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+    // prettier-ignore
+    const uvs = new Float32Array([0,0, 1,0, 0,1, 1,1]);
+    const idx = new Uint16Array([0, 1, 2, 1, 3, 2]);
+
+    this.vao = gl.createVertexArray()!;
+    gl.bindVertexArray(this.vao);
+
+    this.posBuf = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(this.prog, "a_pos");
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    this.uvBuf = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
+    const aUv = gl.getAttribLocation(this.prog, "a_uv");
+    gl.enableVertexAttribArray(aUv);
+    gl.vertexAttribPointer(aUv, 2, gl.FLOAT, false, 0, 0);
+
+    this.idxBuf = gl.createBuffer()!;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.idxBuf);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
+
+    gl.bindVertexArray(null);
 
     // Texture
-    if (this.tex) gl.deleteTexture(this.tex);
     this.tex = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, this.tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -471,41 +429,12 @@ export class MediaGL {
       );
     }
     gl.bindTexture(gl.TEXTURE_2D, null);
-  }
 
-  private _buildGeometry(gl: WebGL2RenderingContext) {
-    if (this.vao) gl.deleteVertexArray(this.vao);
-    if (this.posBuf) gl.deleteBuffer(this.posBuf);
-    if (this.uvBuf) gl.deleteBuffer(this.uvBuf);
-    if (this.idxBuf) gl.deleteBuffer(this.idxBuf);
-
-    // Fullscreen quad VAO
-    // prettier-ignore
-    const pos = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
-    // prettier-ignore
-    const uvs = new Float32Array([0,0, 1,0, 0,1, 1,1]);
-    const idx = new Uint16Array([0, 1, 2, 1, 3, 2]);
-
-    this.vao = gl.createVertexArray()!;
-    gl.bindVertexArray(this.vao);
-
-    this.posBuf = gl.createBuffer()!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuf);
-    gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(A_POS);
-    gl.vertexAttribPointer(A_POS, 2, gl.FLOAT, false, 0, 0);
-
-    this.uvBuf = gl.createBuffer()!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuf);
-    gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(A_UV);
-    gl.vertexAttribPointer(A_UV, 2, gl.FLOAT, false, 0, 0);
-
-    this.idxBuf = gl.createBuffer()!;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.idxBuf);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
-
-    gl.bindVertexArray(null);
+    this.ready = true;
+    this._resize();
+    this._measure();
+    this.start();
+    this.opts.onReady();
   }
 
   private _measure() {
@@ -605,35 +534,6 @@ export class MediaGL {
   // radiates from. Set once after construction based on the row's side.
   setOrigin(x: number, y: number) {
     this.origin = [x, y];
-  }
-
-  // Swaps the image (e.g. light/dark theme toggle) by re-uploading just the
-  // texture — the program, geometry, and GL context all stay put. Prefer
-  // this over disposing and reconstructing a whole new MediaGL instance for
-  // a src change on an already-live canvas: a dispose-then-immediately-
-  // reconstruct cycle on the same canvas/context (which is what naively
-  // keying a src prop into a mount effect's deps produces) is a known
-  // trigger for the GPU-driver-level texture corruption described in
-  // _build's own comment — see AboutPortrait.tsx for the caller that used
-  // to hit this via `theme` sitting in that effect's deps.
-  setSrc(src: string) {
-    if (this.opts.src === src || this.disposed || !this.ready) return;
-    this.opts.src = src;
-    const img = new Image();
-    img.onload = () => {
-      if (this.disposed || this.opts.src !== src) return;
-      this.img = img;
-      this.imgW = img.naturalWidth;
-      this.imgH = img.naturalHeight;
-      const gl = this.gl;
-      gl.bindTexture(gl.TEXTURE_2D, this.tex);
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
-      gl.bindTexture(gl.TEXTURE_2D, null);
-      this._renderOnce();
-    };
-    img.src = src;
   }
 
   setEffect(name: MediaEffect) {

@@ -305,7 +305,7 @@
 
 /* —— sizes —— */
 .btn--sm {
-  --btn-h: 44px;
+  --btn-h: 34px;
   --btn-px: 16px;
   --btn-font: 12px;
   --btn-gap: 7px;
