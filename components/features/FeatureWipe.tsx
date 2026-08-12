@@ -588,7 +588,7 @@ export function FeatureWipe({ features, id }: Props) {
                 // has nothing left to sequence behind (Topbar's reveal
                 // never replays on client navigation), so play immediately
                 // once the transition has genuinely settled instead of
-                // stacking ENTRANCE_DELAY.firstImage on top of it too.
+                // stacking ENTRANCE_DELAY.firstImage on top of it too. cSpell:ignore Topbar
                 if (hadTransition) {
                   introTl.play();
                 } else {
