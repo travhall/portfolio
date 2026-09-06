@@ -1050,13 +1050,15 @@ export function FeatureWipe({ features, id }: Props) {
                   src={f.image}
                   alt={f.imageAlt ?? ""}
                   className="fw-img--light"
+                  loading={i === 0 ? "eager" : "lazy"}
                 />
-                {f.imageDark && (
+                {f.imageDark && theme === "dark" && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={f.imageDark}
                     alt={f.imageAlt ?? ""}
                     className="fw-img--dark"
+                    loading={i === 0 ? "eager" : "lazy"}
                   />
                 )}
                 <canvas

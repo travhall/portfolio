@@ -34,6 +34,7 @@ type CommonProps = {
   nudge?: Nudge;
   /** water-ripple on click — off automatically for the link variant */
   ripple?: boolean;
+  onClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
 };
 
 type ButtonProps = CommonProps &
@@ -103,7 +104,7 @@ export function Button({
   const rippleOn = ripple && variant !== "link";
   const handleClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (rippleOn) triggerRipple(e.currentTarget, e, RIPPLE_SUBTLE);
-    (onClick as Parameters<typeof handleClick>[0] extends infer E ? (e: E) => void : never)?.(e);
+    onClick?.(e);
   };
 
   const content = iconOnly ? (

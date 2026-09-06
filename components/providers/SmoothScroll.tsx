@@ -134,7 +134,6 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
     lenisRef.current = instance;
     // Update state so the context value propagates to children.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLenis(instance);
 
     instance.on("scroll", ScrollTrigger.update);
