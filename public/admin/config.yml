@@ -133,6 +133,24 @@ collections:
             # (see lib/case-studies.ts) — the anchor is reused below so
             # both places stay identical without duplicating the field list.
             fields: &text_block_fields
+              - name: layout
+                label: Layout (Full-width Text Only)
+                widget: select
+                options:
+                  - { label: "Statement — short, centered", value: statement }
+                  - { label: "Story — left-aligned long-form", value: story }
+                default: statement
+                required: false
+                hint: "Ignored in a split column. Use Story for anything longer than two or three lines — centered text is hard to read at length."
+              - name: align
+                label: Heading Side (Story Only)
+                widget: select
+                options:
+                  - { label: Left, value: start }
+                  - { label: Right, value: end }
+                default: start
+                required: false
+                hint: "Which side the eyebrow and heading sit on. Alternate it on consecutive Story blocks to stagger them."
               - { name: eyebrow, label: Eyebrow, widget: string, required: false }
               - { name: heading, label: Heading, widget: string, required: false }
               - name: body

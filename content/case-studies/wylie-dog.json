@@ -7,25 +7,168 @@
   "eyebrow": "Featured Project",
   "headline": "Wylie Dog Design System",
   "buttonText": "View Case Study",
-  "tagline": "A typed component library and OKLCH token system built to close the gap between design and code.",
-  "services": ["Design Systems", "Component Architecture", "Design Tokens", "Documentation"],
+  "tagline": "A free, open-source design system you can start from. Built for designers, developers, and small businesses, and named for our dog of almost thirteen years.",
+  "services": [
+    "Design Systems",
+    "Design Tokens",
+    "Front-end Development",
+    "Tooling",
+    "Documentation"
+  ],
   "overview": {
-    "body": "Wylie Dog is a production design system built for a growing product team shipping across web and native surfaces. The work spans a three-tier token architecture, a Figma-synced pipeline, and a component library built on accessible primitives — replacing a patchwork of one-off styles with a single source of truth every team can build from.",
-    "sectors": ["Software", "Design Tooling"],
-    "credits": [{ "role": "Design & Development", "names": ["Travis Hall"] }]
+    "body": "Wylie Dog started as a proof of concept at work and became a tribute. Wylie was our dog for almost thirteen years, and this is what I wanted to leave in his name: a complete design system foundation that a designer or a developer can pick up and make their own, for free.\n\nIt has three tiers of OKLCH design tokens, a library of more than forty accessible React components, a Storybook that fails the build on accessibility violations, a Next.js showcase app that shows how to build with it, and a Figma plugin that keeps design variables and code tokens in sync.\n\nIt isn't released or adopted yet. This is the story of what it is, why I built it, what was hard, and where it's going.",
+    "sectors": [
+      "Software",
+      "Design Tooling"
+    ],
+    "credits": [
+      {
+        "role": "Design & Development",
+        "names": [
+          "Travis Hall"
+        ]
+      }
+    ]
   },
   "sections": [
     {
+      "type": "full-text",
+      "eyebrow": "The idea",
+      "heading": "Built for my comrades.",
+      "body": "I love design systems. At work I wanted to prove that one could pay for itself, and that design and code could share a single source of truth without a heroic process. I also wanted to learn Storybook properly. Both pointed at the same thing: build the whole system, end to end, and find out where it breaks.\n\nAlong the way the goal got bigger than the proof of concept. A design system starter shouldn't be something only well-funded teams can afford. I want designers, developers, small businesses, friends, and family to have a real foundation to build on, one that's free and stays free.",
+      "layout": "story",
+      "align": "start"
+    },
+    {
       "type": "split",
-      "left": { "kind": "image", "image": "/images/work-img-wyliedog-light.jpg", "alt": "The design system's overview page in light mode" },
-      "right": { "kind": "image", "image": "/images/work-img-wyliedog-dark.jpg", "alt": "The same overview page in dark mode" }
+      "left": {
+        "kind": "text",
+        "eyebrow": "The audience",
+        "heading": "Two ways in",
+        "body": "Anyone who wants a full UI kit, a token system, and documentation to start from can pick up Wylie Dog and turn the dials: swap the palette, change the type, and watch it flow through every component.\n\nI built it around two kinds of people. A designer should be able to land in Figma variables, or in Storybook's foundations pages, and understand the system. A developer should be able to land in the repo, the components, or the showcase app and do the same. Neither should need the other to get started."
+      },
+      "right": {
+        "kind": "image",
+        "image": "/images/wylie-dog-storybook-welcome.jpg",
+        "alt": "The Storybook welcome page, with separate learning paths for designers and developers"
+      }
+    },
+    {
+      "type": "full-image",
+      "image": "/images/wylie-dog-diagram-system.jpg",
+      "alt": "A diagram showing Figma variables syncing through Token Bridge and GitHub into a token pipeline, which feeds the UI components, Storybook, and the showcase app"
     },
     {
       "type": "full-text",
-      "eyebrow": "Outcome",
-      "heading": "One system, every surface.",
-      "body": "Every button, input, and layout primitive now traces back to the same token set — in Figma and in code. New features ship faster because the underlying pieces no longer need to be re-invented per screen.",
-      "cta": { "label": "View the live showcase", "href": "https://wylie-dog-ds-showcase.vercel.app", "icon": "arrow-up-right" }
+      "eyebrow": "Process",
+      "heading": "Finding the floor",
+      "body": "Before this repo there was a pile of throwaway Storybook experiments, and I hit a wall on every one of them. The biggest was tokens: I had a clear idea of a three-tier system and a specific architecture, but no free, open way to sync it with Figma. The popular route had a paywall, and I didn't want the project to depend on one.\n\nThe turn came when I found Turborepo. Tailwind 4 had just been released, so a reliable way to run it in a monorepo barely existed yet, and getting the two to cooperate took real digging. Once it worked, the project took off. The repo's first commit is July 12, 2025; by the end of that month the tokens, nearly the full component set with stories, and a first prototype of the Figma plugin were in place.\n\nI built in this order: the monorepo, then components (shadcn to scaffold quickly, then reworked around the tokens), then tokens, Storybook, the showcase app, and last of all Figma. I set the project down more than once when the walls got tall.",
+      "layout": "story",
+      "align": "end"
+    },
+    {
+      "type": "full-text",
+      "eyebrow": "The system",
+      "heading": "Three tiers deep",
+      "body": "Everything visual comes from tokens, in three tiers. **Primitives** are raw values: color scales with names like polar-night and sandcastle, spacing, type. **Semantic** tokens give those values roles, like interactive-primary or text-inverse, and carry the light and dark values. **Component** tokens bind a role to one specific part, such as a button's background.\n\nColors are written in OKLCH, so lightness steps are perceptually even and the palette can use wide-gamut displays. Components consume tokens and nothing else, which is what turns \"change the brand\" into a one-line edit instead of a redesign.",
+      "layout": "story",
+      "align": "start"
+    },
+    {
+      "type": "full-image",
+      "image": "/images/wylie-dog-diagram-tiers.jpg",
+      "alt": "A diagram of the three token tiers: primitive, semantic, and component, with example token names at each level"
+    },
+    {
+      "type": "split",
+      "left": {
+        "kind": "image",
+        "image": "/images/wylie-dog-storybook-button.jpg",
+        "alt": "The Button page in Storybook, showing controls and a list of variants"
+      },
+      "right": {
+        "kind": "text",
+        "eyebrow": "Documentation",
+        "heading": "Docs and a demo",
+        "body": "Storybook documents every component with controls, states, interaction tests, and code, organized into foundations, components, and patterns. The showcase app is the other half: a real site built only from the library, so a developer can see how the pieces compose into pages, not just how a button behaves.\n\nThe Storybook went through several rounds of refinement and reorganization, with Claude helping on the restructuring, and the showcase was redesigned the same way as my sense of how people should enter the system sharpened.",
+        "cta": {
+          "label": "Open the showcase",
+          "href": "https://www.wyliedog.com/",
+          "variant": "ghost",
+          "icon": "arrow-up-right",
+          "newTab": true
+        }
+      }
+    },
+    {
+      "type": "full-text",
+      "eyebrow": "Challenge",
+      "heading": "Figma, the hard part",
+      "body": "Syncing tokens with Figma was the most frustrating part of the project, and the part I'm least willing to call finished. I built a plugin, Token Bridge, that pulls Figma variables into the repo and back through GitHub, with conflict detection when both sides change. It works, and it is not production-ready. I'm still deciding whether it's ready to share.\n\nSome mismatches have no clean answer. Line-height is the clearest: design tokens store it as a percentage of the font size, but Figma variables only hold absolute numbers, so \"100%\" arrives in Figma as 100 pixels. It's a well-known platform limit with a long paper trail. For now line-height stays out of the sync and gets set by hand, and I wrote up a build-step workaround and parked it.\n\nI also removed OAuth from the plugin and committed to personal access tokens. OAuth in a Figma plugin means hosting a backend, and the point is that none of this costs anyone money. The plugin grew over time, with Claude helping evolve it through the sync, conflict-resolution, and interface rounds.",
+      "layout": "story",
+      "align": "end"
+    },
+    {
+      "type": "split",
+      "left": {
+        "kind": "image",
+        "image": "/images/wylie-dog-token-bridge-sync.jpg",
+        "alt": "The Token Bridge plugin's Sync tab in Figma, showing the connected repository, three token collections, and Push and Pull buttons"
+      },
+      "right": {
+        "kind": "image",
+        "image": "/images/wylie-dog-figma-semantic.jpg",
+        "alt": "Figma's variables panel showing the semantic collection with Light and Dark modes, each value aliasing a primitive"
+      }
+    },
+    {
+      "type": "split",
+      "left": {
+        "kind": "text",
+        "eyebrow": "Quality",
+        "heading": "A build gate",
+        "body": "Every Storybook story runs an accessibility check, and a failure fails the build. The system targets WCAG 2.2 AA, tested in both light and dark. Behind it are well over a thousand passing tests at about 95% line coverage, size and performance budgets in CI, and a generator that scaffolds a new component with its tests, story, and exports.\n\nDark mode had its own story: when I finally tested it, 264 contrast failures surfaced at once.",
+        "cta": {
+          "label": "Read the dark-mode story",
+          "href": "/work/wylie-dog-dark-mode-accessibility",
+          "variant": "link",
+          "icon": "arrow-right"
+        }
+      },
+      "right": {
+        "kind": "image",
+        "image": "/images/wylie-dog-storybook-accessibility.jpg",
+        "alt": "The Accessibility page in Storybook, showing live color-contrast checks for semantic token pairs"
+      }
+    },
+    {
+      "type": "split",
+      "left": {
+        "kind": "image",
+        "image": "/images/wylie-dog-showcase-overview-dark.jpg",
+        "alt": "The Wylie Dog showcase site's overview page in dark mode"
+      },
+      "right": {
+        "kind": "text",
+        "eyebrow": "Results",
+        "heading": "Working, not yet used",
+        "body": "What exists today: a documented token pipeline, a gated Storybook, a live showcase app, and a Figma sync that works in the cases I care about. What doesn't: a public release, outside users, or finished visual design.\n\nThe strongest evidence so far is the loop itself, which I'm writing up as follow-up stories: a change made in code that flows into Figma, a design change that flows back into code, and the dark-mode accessibility investigation.\n\nWhat I'd do differently: the look and feel took a back seat to the framework, so design is the next phase. And I'd start with an agent from day one. It took a great deal of research and trial and error to get here."
+      }
+    },
+    {
+      "type": "full-text",
+      "eyebrow": "Next steps",
+      "heading": "A life of its own.",
+      "body": "1. Finish the companion stories: code to Figma, design to code.\n2. Design the visual language the framework never got.\n3. Find the first adopters, then contributors.\n4. Decide whether Token Bridge is ready for the community.\n\nAll I want is to build free things that actually help designers, developers, small businesses, friends, and family, and for Wylie's name to keep going on something useful.",
+      "cta": {
+        "label": "View the showcase",
+        "href": "https://www.wyliedog.com/",
+        "variant": "solid",
+        "icon": "arrow-up-right",
+        "newTab": true
+      },
+      "layout": "story",
+      "align": "start"
     }
   ],
   "theme": {
@@ -34,7 +177,10 @@
       "fg": "#16181d",
       "border": "#b8b9bc",
       "accent": "#2563eb",
-      "button": { "bg": "#2563eb", "fg": "#fbfcfe" }
+      "button": {
+        "bg": "#2563eb",
+        "fg": "#fbfcfe"
+      }
     },
     "dark": {
       "bg": "oklch(0.149 0.012 259.72)",
@@ -42,7 +188,10 @@
       "border": "#4c4e52",
       "accent": "#2563eb",
       "accentText": "color-mix(in oklab, #2563eb 80%, white 20%)",
-      "button": { "bg": "#2563eb", "fg": "#fbfcfe" }
+      "button": {
+        "bg": "#2563eb",
+        "fg": "#fbfcfe"
+      }
     }
   }
 }

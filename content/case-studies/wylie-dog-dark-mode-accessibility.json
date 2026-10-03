@@ -1,0 +1,128 @@
+{
+  "side": "right",
+  "image": "/images/photo-wyliedog.jpg",
+  "imageAlt": "A German shepherd wearing an orange bandana, mouth open and panting, in a grassy park.",
+  "theme": {
+    "light": {
+      "bg": "oklch(0.991 0.003 264.45)",
+      "fg": "#16181d",
+      "border": "#b8b9bc",
+      "accent": "#2563eb",
+      "button": {
+        "bg": "#2563eb",
+        "fg": "#fbfcfe"
+      }
+    },
+    "dark": {
+      "bg": "oklch(0.149 0.012 259.72)",
+      "fg": "#eeeff1",
+      "border": "#4c4e52",
+      "accent": "#2563eb",
+      "accentText": "color-mix(in oklab, #2563eb 80%, white 20%)",
+      "button": {
+        "bg": "#2563eb",
+        "fg": "#fbfcfe"
+      }
+    }
+  },
+  "featured": false,
+  "eyebrow": "Wylie Dog · Accessibility",
+  "headline": "264 Failures, a Handful of Tokens",
+  "buttonText": "Read the Story",
+  "tagline": "When I finally ran Wylie Dog's accessibility tests in dark mode, 264 checks failed. The fixes were small. Finding them was the story.",
+  "services": [
+    "Accessibility",
+    "Design Tokens",
+    "Testing",
+    "Storybook"
+  ],
+  "overview": {
+    "body": "Wylie Dog's Storybook fails the build on accessibility violations. For a while it was green, until I realized it had only ever been checking light mode. This is the story of adding the dark-mode pass, what it uncovered, and what it taught me about where accessibility bugs actually live in a token-based system.",
+    "sectors": [
+      "Software",
+      "Accessibility"
+    ],
+    "credits": [
+      {
+        "role": "Design & Development",
+        "names": [
+          "Travis Hall"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "type": "split",
+      "left": {
+        "kind": "text",
+        "eyebrow": "Starting small",
+        "heading": "One gray, 3.65",
+        "body": "It started with a single gray. The muted \"tertiary\" text color, used for captions and helper text, measured 3.65:1 against its background in light mode. WCAG AA asks for 4.5:1 for normal-size text, and Storybook's accessibility panel flagged it as a serious violation on a page that otherwise passed.\n\nThe fix was to make that token aware of the theme: a darker gray in light mode (5.37:1) and the existing lighter value in dark (5.26:1). One token, one commit."
+      },
+      "right": {
+        "kind": "image",
+        "image": "/images/wylie-dog-a11y-tertiary-light.jpg",
+        "alt": "Storybook's Accessibility panel flagging a serious color-contrast violation of 3.65 to 1 on tertiary text in light mode"
+      }
+    },
+    {
+      "type": "full-text",
+      "eyebrow": "The gate",
+      "heading": "Green, but only in light.",
+      "body": "With that fixed I flipped the accessibility check from a warning to a hard failure: any violation fails the build. The suite went green, 61 files and 411 tests.\n\nThen a question I should have asked sooner: which theme were those tests running in? Storybook's test runner launches a browser, and browsers default to light. The dark theme, half of what Wylie Dog ships, had never been tested once.",
+      "layout": "story",
+      "align": "start"
+    },
+    {
+      "type": "split",
+      "left": {
+        "kind": "image",
+        "image": "/images/wylie-dog-a11y-link-dark.jpg",
+        "alt": "Storybook in dark mode, where the accessibility panel reports link text at a contrast of 3.81 to 1"
+      },
+      "right": {
+        "kind": "text",
+        "eyebrow": "The dark pass",
+        "heading": "264",
+        "body": "I added a second test project that forces dark mode and ran everything again. 264 failures.\n\nIt looked like a mountain, but hundreds of failures from a small set of tokens usually means a few tokens are wrong, not hundreds of components. That's exactly what it was. Over the next rounds I worked through it with Claude, fixing causes rather than symptoms and re-running the whole suite after every change."
+      }
+    },
+    {
+      "type": "full-text",
+      "eyebrow": "The rounds",
+      "heading": "264 to 0",
+      "body": "**264 → 205: a token used in the wrong place.** The \"inverse\" text token is meant to pair with the inverse background, which flips against the page. Twelve component tokens (button text, badge text, toasts, checkbox, radio, toggle, pagination, calendar) were using it on backgrounds that never flip. I added a fixed \"on-solid\" text token and repointed all twelve.\n\n**205 → 35: the test setup, not the system.** In the test browser the themed page background never painted, so dark-mode text was being measured against nothing. A fallback background cleared most of what had looked like bugs.\n\n**35 → 28: a regression and a blind spot.** One of my own fixes broke a story, and an earlier automated find-and-replace had missed hard-coded white and black because of how its pattern was written. The tests caught both.\n\n**28 → 1: two tokens.** Link text in buttons and breadcrumbs pointed at a fixed blue that measured 3.81:1 on dark. Repointing those two tokens cleared 22 failures at once. The toasts had the same kind of mistake, and one warning toast had near-white text on pale yellow at 1.52:1, the worst ratio in the whole backlog.\n\n**1 → 0: a deliberate exception.** The last failure was a demo that intentionally shows a light surface beside a dark one. I documented it as a scoped exception rather than bend the demo.",
+      "layout": "story",
+      "align": "end"
+    },
+    {
+      "type": "split",
+      "left": {
+        "kind": "text",
+        "eyebrow": "A white lie",
+        "heading": "The demo lied",
+        "body": "Wylie Dog's accessibility page includes a live contrast check, with an \"AA\" badge beside every token pair. Those badges were written by hand to say what the design intended. Beside the link color on a dark background it said AA, while the browser measured 3.81:1.\n\nThe demo was making a promise the system didn't keep. I relabeled it, and the lesson stuck: a claim of compliance isn't evidence of it."
+      },
+      "right": {
+        "kind": "image",
+        "image": "/images/wylie-dog-a11y-contrast-demo.jpg",
+        "alt": "The contrast check demo on Storybook's Accessibility page in dark mode, with an AA badge beside each token pair"
+      }
+    },
+    {
+      "type": "full-text",
+      "eyebrow": "Takeaways",
+      "heading": "Fix the layer",
+      "body": "In a token system, a mistake at the token layer is copied into every component that uses it, and so is the fix. A small set of token changes cleared most of 264 failures.\n\nThree habits came out of it: test every theme the product ships, check the test setup before blaming the system, and measure contrast rather than asserting it. The check now runs in both modes on every change: 126 test files, 830 tests, zero failures.",
+      "cta": {
+        "label": "Back to the Wylie Dog story",
+        "href": "/work/wylie-dog",
+        "variant": "ghost",
+        "icon": "arrow-right"
+      },
+      "layout": "story",
+      "align": "start"
+    }
+  ]
+}

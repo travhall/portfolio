@@ -752,37 +752,142 @@ html[data-motion="off"] .cs-hero__meta {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 1.75rem;
   aspect-ratio: 4 / 3;
   padding: clamp(2rem, 5vw, 4rem);
   background: var(--cs-bg, var(--surface));
   color: var(--cs-fg, var(--ink));
 }
-/* A CaseStudyTextBlock's markdown body can be several paragraphs — .type-lead
-   is applied per-<p> (see CaseStudyMedia.tsx), so they need their own gap
-   distinct from the flex column's gap around eyebrow/heading/cta. */
-.cs-split__text p + p,
-.cs-full-text p + p {
-  margin-top: 1rem;
+
+/* ── Shared text-block anatomy ───────────────────────────────────────────────
+   Every CaseStudyTextBlock renders the same two parts (see CaseStudyMedia.tsx):
+   .cs-text__head (eyebrow + heading) and .cs-text__body (markdown paragraphs +
+   optional CTA). The three containers (.cs-split__text, .cs-full-text,
+   .cs-story) decide where those parts sit; the rhythm *inside* each part is
+   defined once here — tight within a part (eyebrow hugs its heading), open
+   between parts (heading to body is a real pause), so the hierarchy reads at
+   a glance. Paragraphs are separated by a flex gap (not a margin-top on
+   p + p) so the same spacing applies whatever the markdown produces. */
+.cs-text__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+/* Descender room — the heading styles run at 1.1 line-height or tighter, which
+   clips the tail of g/y/p against whatever sits below it. */
+.cs-text__head h2 {
+  padding-bottom: 0.08em;
+}
+.cs-text__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 62ch;
+}
+.cs-text__body > .btn {
+  align-self: flex-start;
+  margin-top: 0.75rem;
+}
+/* Markdown lists — base.css's reset strips list markers, which turned
+   authored bullets/numbers into bare lines. Restored here, scoped to text
+   blocks only. */
+.cs-text__body ul,
+.cs-text__body ol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-left: 1.5em;
+}
+.cs-text__body ul {
+  list-style: disc;
+}
+.cs-text__body ol {
+  list-style: decimal;
+}
+.cs-text__body li::marker {
+  color: var(--cs-accent-text, var(--ink-muted));
 }
 
-/* Full-width text block — same CaseStudyTextBlock as a split slot's "text"
-   kind (see lib/case-studies.ts), just centered at full bleed instead of
-   boxed in a grid column. */
+/* Full-width text block, "statement" layout — a short, centered declaration.
+   Centered text is hard to read past two or three lines (no consistent left
+   edge for the eye to return to), so this layout is for brief statements
+   only; anything longer should use the "story" layout below. */
 .cs-full-text {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 2rem;
   text-align: center;
   padding: clamp(3rem, 10vw, 7rem) clamp(1.5rem, 6vw, 4rem);
   background: var(--cs-bg, var(--surface));
   color: var(--cs-fg, var(--ink));
 }
-.cs-full-text .type-eyebrow,
-.cs-full-text .type-display,
-.cs-full-text p {
+.cs-full-text .cs-text__head {
+  align-items: center;
   max-width: 40rem;
+}
+.cs-full-text .cs-text__body {
+  align-items: center;
+  max-width: 40rem;
+}
+.cs-full-text .cs-text__body > .btn {
+  align-self: center;
+  margin-top: 1rem;
+}
+
+/* Full-width text block, "story" layout — long-form copy, left-aligned, on the
+   same 1fr / 2fr / 1fr column grid as .intro-section and .fw-section so the
+   hairlines read as one continuous system. The head (eyebrow + title) sits in
+   a side column like a margin label; the body sits in the middle column at a
+   ~62ch measure (see .cs-text__body) — the readable line length. align="end"
+   moves the head to the right-hand column so consecutive story blocks can
+   stagger instead of stacking identically. Single column below 900px, head
+   first. Desktop threshold kept in sync with lib/breakpoints.ts DESKTOP_BP. */
+.cs-story {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding: clamp(3rem, 10vw, 7rem) var(--gut);
+  background: var(--cs-bg, var(--surface));
+  color: var(--cs-fg, var(--ink));
+  position: relative;
+}
+@media (min-width: 900px) {
+  .cs-story {
+    grid-template-columns: 1fr 2fr 1fr;
+    column-gap: 0;
+    padding-inline: 0;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      width: 0;
+      pointer-events: none;
+    }
+    &::before {
+      left: 25%;
+      border-right: 1px solid var(--cs-border, var(--line));
+    }
+    &::after {
+      right: 25%;
+      border-left: 1px solid var(--cs-border, var(--line));
+    }
+  }
+  .cs-story__head {
+    grid-column: 1;
+    grid-row: 1;
+    padding-inline: var(--gut);
+  }
+  .cs-story__body {
+    grid-column: 2;
+    grid-row: 1;
+    padding-inline: clamp(24px, 4vw, 48px);
+  }
+  .cs-story--end .cs-story__head {
+    grid-column: 3;
+  }
 }
 
 /* .btn--link's and .btn--ghost's own colors (components.css) are the

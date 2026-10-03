@@ -82,11 +82,18 @@ export interface CaseStudyTextBlockCta {
  *  the CMS config, not two similar-but-different ones. */
 export interface CaseStudyTextBlock {
   eyebrow?: string;
-  /** A short display-style title, more prominent than `eyebrow`. */
+  /** A short title, more prominent than `eyebrow`. */
   heading?: string;
-  /** Markdown — multiple paragraphs, bold/italic, inline links. */
+  /** Markdown — multiple paragraphs, bold/italic, inline links, lists. */
   body: string;
   cta?: CaseStudyTextBlockCta;
+  /** Full-width text only (ignored in a split slot). "statement" is a short,
+   *  centered declaration — the default, so existing content is unchanged;
+   *  "story" is left-aligned long-form copy on the 1fr/2fr/1fr grid. */
+  layout?: "statement" | "story";
+  /** "story" layout only: which side the eyebrow/heading column sits on, so
+   *  consecutive blocks can stagger. Defaults to "start" (left). */
+  align?: "start" | "end";
 }
 
 /** One half of a `split` section. */
