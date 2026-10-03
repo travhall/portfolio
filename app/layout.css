@@ -851,6 +851,11 @@ html[data-motion="off"] .cs-hero__meta {
   background: var(--cs-bg, var(--surface));
   color: var(--cs-fg, var(--ink));
   position: relative;
+  /* Horizontal rules close the block, the same row borders .fw-row and
+     .intro-section use — the column hairlines below meet them instead of
+     floating. Borders sit outside the padding box the ::before/::after lines
+     are positioned in, so the verticals run flush into them. */
+  border-block: 1px solid var(--cs-border, var(--line));
 }
 @media (min-width: 900px) {
   .cs-story {
