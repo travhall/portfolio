@@ -10,5 +10,6 @@
  *   - app/layout.css   .intro-section  @media (max-width: 899px)
  *   - app/layout.css   .fw-section     @container fw-section (max-width: 899px)
  *   - app/layout.css   .about-body / .about-cta  @media (max-width: 899px)
+ *   - app/layout.css   .menu-film      @media (max-width: 899px)
  */
 export const DESKTOP_BP = 900;

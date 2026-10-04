@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
       { source: "/admin/", destination: "/admin/index.html" },
     ];
   },
+  // /work was the old archive grid — the menu's filmstrip replaced it.
+  // Individual /work/<slug> pages are unaffected.
+  async redirects() {
+    return [{ source: "/work", destination: "/", permanent: true }];
+  },
   async headers() {
     return [
       {

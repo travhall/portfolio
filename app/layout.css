@@ -727,14 +727,19 @@ html[data-motion="off"] .cs-hero__meta {
   height: 100%;
   object-fit: cover;
 }
+/* minmax(0, 1fr), not 1fr — a bare 1fr is minmax(auto, 1fr), so a slot's
+   min-content can widen the track past the viewport. A text slot with a 4:3
+   aspect-ratio and more copy than fits turns its overflowing height into a
+   min *width* (height x 4/3), which is what pushed these pages sideways on
+   narrow screens and made stacked images overlap the text. */
 .cs-split {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.5rem;
 }
 @media (min-width: 900px) {
   .cs-split {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 .cs-split__media {
@@ -753,10 +758,17 @@ html[data-motion="off"] .cs-hero__meta {
   justify-content: center;
   align-items: flex-start;
   gap: 1.75rem;
-  aspect-ratio: 4 / 3;
   padding: clamp(2rem, 5vw, 4rem);
   background: var(--cs-bg, var(--surface));
   color: var(--cs-fg, var(--ink));
+}
+/* The 4:3 box only makes sense once the slots sit side by side next to a 4:3
+   image. Stacked (below 900px) the text slot just sizes to its copy — an
+   aspect-ratio there is what let long copy balloon the box's width. */
+@media (min-width: 900px) {
+  .cs-split__text {
+    aspect-ratio: 4 / 3;
+  }
 }
 
 /* ── Shared text-block anatomy ───────────────────────────────────────────────
@@ -1614,76 +1626,383 @@ html[data-theme="light"] .about-portrait__fallback {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
-  padding: 0 var(--gut) clamp(40px, 6vh, 72px);
+  /* Top padding clears the fixed Topbar (wordmark/close) above; no bottom
+     padding — the rail sits flush on the bottom edge. */
+  padding: var(--topbar-h) var(--gut) 0;
   will-change: filter;
 }
-/* Header band — sits at the same height as the fixed Topbar above it (which
-   owns the wordmark + close control), so the nav links read as part of one
-   continuous header row even though they're two different fixed layers. */
-.menu-overlay__header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--topbar-h);
-  flex-shrink: 0;
-}
-.menu-overlay__nav {
-  display: flex;
-  align-items: center;
-  gap: clamp(24px, 4vw, 56px);
-}
-.menu-overlay__link {
-  font-size: 15px;
-  font-weight: var(--fw-medium);
-  letter-spacing: var(--track-snug);
-  color: var(--ink-muted);
-  text-decoration: none;
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: color 0.2s var(--ease);
-}
-.menu-overlay__link:hover {
-  color: var(--ink);
-}
-.menu-overlay__link:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 4px;
-}
-.menu-overlay__link[aria-current="page"] {
-  color: var(--ink);
-}
-/* Reserved for the case-study filmstrip/preview — empty for now. */
+/* Case-study filmstrip (components/nav/MenuFilmstrip.tsx). */
 .menu-overlay__content {
   flex: 1;
-}
-.menu-overlay__bottom {
+  min-height: 0;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  padding-block: 0 clamp(20px, 4vh, 40px);
+  /* Strip bleeds off the right edge, past the surface's gutter. */
+  margin-right: calc(var(--gut) * -1);
+}
+
+/* ── MENU RAIL ───────────────────────────────────────────────────────────── */
+/* Full-bleed row of hairline cells along the bottom edge — the same line
+   language as the case-study page's section grid. The top hairline is a
+   pseudo-element scaled by --rail-line (0→1) so MenuOverlay's open
+   timeline can draw it across. Labels collapse to icons below 600px. */
+.menu-rail {
+  --rail-line: 1;
+  --rail-h: 64px;
+  /* Not --line: that's the same step as the overlay's --surface-dim fill in
+     both themes, so it vanishes here. */
+  --rail-rule: color-mix(in oklch, var(--ink) 14%, transparent);
+  position: relative;
+  display: flex;
   flex-shrink: 0;
+  height: var(--rail-h);
+  margin-inline: calc(var(--gut) * -1);
+}
+.menu-rail::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--rail-rule);
+  transform: scaleX(var(--rail-line));
+  transform-origin: left;
+}
+.menu-rail__item {
+  position: relative;
+  display: flex;
   opacity: 0;
 }
-.menu-overlay__settings {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
+/* Cell dividers — between neighbours, plus one closing off the left group
+   so the two groups read as bookends with open space between. */
+.menu-rail__item + .menu-rail__item {
+  border-left: 1px solid var(--rail-rule);
 }
-.menu-overlay__settings-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--ink-faint);
-  font-size: var(--text-eyebrow);
-  font-weight: var(--fw-medium);
-  letter-spacing: var(--track-wide);
+.menu-rail__item:nth-child(2) {
+  border-right: 1px solid var(--rail-rule);
 }
-.menu-overlay__actions {
+.menu-rail__item--push {
+  margin-left: auto;
+}
+/* The cell is the whole hit area; .btn--link's hover underline still
+   draws under the label. Layout layer outranks components, so these win
+   over .btn/.btn--link's own sizing. */
+.menu-rail__cell,
+.menu-rail .email-action {
+  height: 100%;
+}
+.menu-rail__cell {
+  padding-inline: clamp(20px, 3vw, 48px);
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 14px;
+  transition: color 0.2s var(--ease);
+}
+.menu-rail__cell:hover,
+.menu-rail__cell[aria-expanded="true"],
+.menu-rail__cell[aria-current="page"] {
+  color: var(--ink);
+}
+.menu-rail__cell:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -4px;
+}
+/* Ends align to the page gutter. */
+.menu-rail__item:first-child .menu-rail__cell {
+  padding-left: var(--gut);
+}
+.menu-rail__item:last-child .menu-rail__cell {
+  padding-right: var(--gut);
+}
+/* Icons only on small screens (see the @media below). */
+.menu-rail__cell .btn__icon {
+  display: none;
+}
+.menu-rail .email-action__panel--top {
+  bottom: calc(100% + 8px);
+  right: var(--gut);
+}
+
+/* Settings popover — EmailButton's panel surface, anchored to the
+   trigger's left edge (the rail's left end) and opening upward. */
+.menu-settings {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
+}
+.menu-settings__panel {
+  position: absolute;
+  left: var(--gut);
+  bottom: calc(100% + 8px);
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  /* Absolutely positioned inside a narrow cell — without this it shrink-
+     wraps to the cell's width and stacks the toggles. */
+  width: max-content;
+  padding: 8px;
+  border-radius: var(--edge);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklch, white 40%, transparent),
+    inset 0 -1px 1px 0 color-mix(in oklch, black 40%, transparent),
+    var(--glass-drop);
+  transform-origin: bottom left;
+  animation: email-panel-in 0.18s var(--ease);
+}
+.menu-settings__panel[hidden] {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-settings__panel {
+    animation: none;
+  }
+}
+html[data-motion="off"] .menu-settings__panel {
+  animation: none;
+}
+
+@media (max-width: 599px) {
+  .menu-rail {
+    --rail-h: 56px;
+  }
+  .menu-rail__cell {
+    padding-inline: 18px;
+  }
+  .menu-rail__cell .btn__icon {
+    display: inline-flex;
+  }
+  /* Label stays in the accessible name, just not on screen. About has no
+     icon, so it keeps its visible label. */
+  .menu-rail__cell:has(.btn__icon) .btn__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ── MENU FILMSTRIP ──────────────────────────────────────────────────────── */
+/* Only the active card is wide, and it always sits at the strip's left edge,
+   so card i's left edge is always i × --film-step. Snap markers sit at those
+   fixed offsets — see MenuFilmstrip.tsx's header for why. */
+.menu-film {
+  --film-narrow: clamp(56px, 7vw, 108px);
+  --film-wide: clamp(240px, 26vw, 400px);
+  --film-gap: 8px;
+  --film-step: calc(var(--film-narrow) + var(--film-gap));
+  --film-dur: 0.6s;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(240px, 24vw) minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 48px);
+}
+.menu-film__panel {
+  align-self: center;
+  max-width: 360px;
+  /* Every study's info stacked in one cell — the panel is always as tall as
+     the tallest entry, so switching cards never shifts the layout. */
+  display: grid;
+}
+.menu-film__info {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  visibility: hidden;
+  opacity: 0;
+}
+.menu-film__info.is-active {
+  visibility: visible;
+  opacity: 1;
+  animation: menu-film-info 0.45s var(--ease) both;
+}
+@keyframes menu-film-info {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+/* Typography — a lighter, tighter headline in the site's heading voice
+   (closer to h1/h2's weight than h3's medium) over a full body-size
+   tagline at reading leading. Spacing groups eyebrow+title as one lockup,
+   then opens up before the tagline and again before the action. */
+.menu-film__eyebrow {
+  margin: 0 0 10px;
+}
+.menu-film__title {
+  margin: 0;
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--track-snug);
+  text-wrap: balance;
+}
+.menu-film__tagline {
+  margin: 16px 0 0;
+  max-width: 34ch;
+  text-wrap: pretty;
+}
+.menu-film__cta {
+  margin-top: 28px;
+}
+
+.menu-film__scroller {
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  cursor: grab;
+  container-type: inline-size;
+}
+.menu-film__scroller::-webkit-scrollbar {
+  display: none;
+}
+.menu-film__scroller.is-dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+}
+.menu-film__scroller.is-dragging .menu-film__card {
+  pointer-events: none;
+}
+.menu-film__track {
+  position: relative;
+  display: flex;
+  gap: var(--film-gap);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.menu-film__item {
+  display: flex;
+  flex-shrink: 0;
+}
+.menu-film__snap {
+  position: absolute;
+  top: 0;
+  left: calc(var(--i) * var(--film-step));
+  width: 1px;
+  height: 1px;
+  scroll-snap-align: start;
+  pointer-events: none;
+}
+/* Room for the last card to reach the strip's left edge — the scroller's
+   own width (100cqw, see container-type above) minus the wide card. */
+.menu-film__tail {
+  flex-shrink: 0;
+  width: max(0px, calc(100cqw - var(--film-wide) - var(--film-gap)));
+}
+
+.menu-film__card {
+  display: block;
+  width: var(--film-narrow);
+  height: 100%;
+  overflow: hidden;
+  transition: width var(--film-dur) var(--ease);
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.menu-film__card.is-active {
+  width: var(--film-wide);
+}
+.menu-film__card:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.menu-film__media {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* On the media box (not the <img>) so the greyscale also covers the
+     MediaGL canvas that replaces the <img> while the menu is open. */
+  filter: grayscale(1) contrast(1.05);
+  opacity: 0.85;
+  transition:
+    filter var(--film-dur) var(--ease),
+    opacity var(--film-dur) var(--ease);
+}
+.menu-film__media--empty {
+  background: color-mix(in oklab, var(--ink) 12%, transparent);
+  filter: none;
+}
+.menu-film__card:hover .menu-film__media {
+  filter: grayscale(0.6);
+  opacity: 1;
+}
+.menu-film__card.is-active .menu-film__media {
+  filter: none;
+  opacity: 1;
+}
+/* <img> is the fallback until MediaGL's onReady adds .is-gl — same
+   hand-off as .case-card__img / .case-card__canvas. */
+.menu-film__img,
+.menu-film__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.menu-film__img {
+  transition: opacity 0.4s var(--ease);
+}
+.menu-film__media.is-gl .menu-film__img {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-film__info.is-active {
+    animation: none;
+  }
+  .menu-film {
+    --film-dur: 0s;
+  }
+}
+html[data-motion="off"] .menu-film__info.is-active {
+  animation: none;
+}
+html[data-motion="off"] .menu-film {
+  --film-dur: 0s;
+}
+
+/* Mobile — info panel stacks above the strip; cards get wider so they
+   read as swipeable cards rather than slivers. 899px = DESKTOP_BP - 1
+   (lib/breakpoints.ts). */
+@media (max-width: 899px) {
+  .menu-film {
+    --film-narrow: 48px;
+    --film-wide: min(70vw, 320px);
+    /* Flipped: strip on top takes the remaining height, info below at its
+       (constant, tallest-entry) height. */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 20px;
+  }
+  .menu-film__scroller {
+    grid-row: 1;
+  }
+  .menu-film__panel {
+    grid-row: 2;
+    align-self: start;
+    max-width: none;
+    padding-right: var(--gut);
+  }
+  .menu-film__eyebrow {
+    margin-bottom: 6px;
+  }
+  .menu-film__cta {
+    margin-top: 18px;
+  }
+  /* Image does the talking on phones — eyebrow + title + action is
+     enough, and the dropped lines go to the image instead. */
+  .menu-film__tagline {
+    display: none;
+  }
 }

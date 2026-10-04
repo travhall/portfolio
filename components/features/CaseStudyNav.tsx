@@ -14,13 +14,14 @@
 
 import type { CaseStudy } from "@/lib/case-studies";
 import { CaseStudyCardGrid } from "./CaseStudyCardGrid";
-import { Button } from "@/components/ui/Button";
+import { OpenMenuButton } from "@/components/nav/OpenMenuButton";
 
 // `heading` / `showAllLink` let the same nav serve two jobs: the default
-// "More Work" row of other top-level projects (with a link out to /work), and
-// a project's own companion stories — "Companion Stories" on a parent page,
+// "More Work" row of other top-level projects (with an "All Projects" control
+// that opens the menu's filmstrip — the site's only full work index), and a
+// project's own companion stories — "Companion Stories" on a parent page,
 // "More from <project>" on a sub-story — which stay inside the project and so
-// omit the /work link.
+// omit it.
 export function CaseStudyNav({
   related,
   heading = "More Work",
@@ -41,9 +42,9 @@ export function CaseStudyNav({
         <div className="case-nav__header">
           <h2 className="type-eyebrow text-ink-muted">{heading}</h2>
           {showAllLink && (
-            <Button variant="link" icon="arrow-up-right" href="/work">
+            <OpenMenuButton variant="link" icon="arrow-up-right">
               All Projects
-            </Button>
+            </OpenMenuButton>
           )}
         </div>
         <CaseStudyCardGrid studies={related} />

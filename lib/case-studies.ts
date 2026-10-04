@@ -144,18 +144,19 @@ export interface CaseStudyContent {
   image: string;
   imageDark?: string;
   imageAlt?: string;
-  /** Shown on the home page's FeatureWipe section. Every case study —
-   *  featured or not — appears in the /work archive and the Menu list. */
+  /** Shown on the home page's FeatureWipe section. Every top-level case
+   *  study — featured or not — appears in the Menu's filmstrip (there is no
+   *  separate /work index page). */
   featured: boolean;
   /** No case-study page or assets yet — listed as "Coming soon" instead
-   *  of a link in /work and the Menu, and excluded from generateStaticParams. */
+   *  of a link in the Menu, and excluded from generateStaticParams. */
   comingSoon?: boolean;
   /** Home page row / related-nav sort position, lower first. Omit to sort
    *  after every explicitly ordered entry. */
   order?: number;
   /** Slug of the case study this one is a companion story to. A study with a
    *  parent keeps its own page (/work/<slug>) but is a sub-story, not a
-   *  top-level project: it is left out of /work and the related-projects
+   *  top-level project: it is left out of the Menu and the related-projects
    *  pool, and is surfaced instead on its parent's page ("Companion
    *  stories") and alongside its siblings. */
   parent?: string;
@@ -230,8 +231,8 @@ export function getRelatedCaseStudies(
   return related;
 }
 
-/** Top-level projects only — what /work lists. A study with a `parent` is a
- *  sub-story and is reached from its parent's page instead. */
+/** Top-level projects only — what the Menu's filmstrip lists. A study with a
+ *  `parent` is a sub-story and is reached from its parent's page instead. */
 export function getTopLevelCaseStudies(allStudies: CaseStudy[]): CaseStudy[] {
   return allStudies.filter((s) => !s.parent);
 }

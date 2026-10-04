@@ -40,7 +40,7 @@ collections:
         label: Show on Home Page
         widget: boolean
         default: false
-        hint: "Every top-level case study appears in /work regardless — this only controls the home page's feature list. (Sub-stories, set below, never appear in /work.)"
+        hint: "Every top-level case study appears in the menu regardless — this only controls the home page's feature list. (Sub-stories, set below, never appear in the menu.)"
 
       - name: parent
         label: Part of (Sub-story of)
@@ -50,7 +50,7 @@ collections:
         value_field: "{{slug}}"
         display_fields: [headline]
         required: false
-        hint: "Leave blank for a normal, top-level case study. Pick a case study to make this a companion story to it: it keeps its own page, but is left out of /work and the related-projects row, and is listed on the parent's page (\"Companion Stories\") instead."
+        hint: "Leave blank for a normal, top-level case study. Pick a case study to make this a companion story to it: it keeps its own page, but is left out of the menu and the related-projects row, and is listed on the parent's page (\"Companion Stories\") instead."
 
       - name: comingSoon
         label: Coming Soon (no live page yet)

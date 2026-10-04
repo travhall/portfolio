@@ -5,7 +5,7 @@ import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Topbar } from "@/components/nav/Topbar"; //cSpell:ignore Topbar
 import { SiteFooter } from "@/components/nav/SiteFooter";
 import { siteConfig } from "@/lib/site-config";
-import { getCaseStudies } from "@/lib/case-studies";
+import { getCaseStudies, getTopLevelCaseStudies } from "@/lib/case-studies";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -98,7 +98,7 @@ export default async function RootLayout({
             Skip to content
           </a>
           <SmoothScroll>
-            <Topbar />
+            <Topbar studies={getTopLevelCaseStudies(caseStudies)} />
             {children}
             <SiteFooter caseStudies={caseStudies} />
           </SmoothScroll>

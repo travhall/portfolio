@@ -11,7 +11,9 @@
  * overlay.
  *
  * Owns the isOpen state for the MenuOverlay — keeps both co-located so the
- * button and overlay share a single source of truth.
+ * button and overlay share a single source of truth. Anything else that
+ * needs to open the menu (e.g. OpenMenuButton) dispatches MENU_OPEN_EVENT
+ * on window rather than reaching for this state.
  */
 
 import {
@@ -32,11 +34,13 @@ import { ENTRANCE_DELAY } from "@/lib/entrance-timing";
 import "@/lib/view-transition";
 import { tryPageExit } from "@/lib/page-exit";
 import { useMotionPref } from "@/lib/motion-pref";
+import type { CaseStudy } from "@/lib/case-studies";
+import { MENU_OPEN_EVENT, type MenuOpenDetail } from "@/lib/menu-events";
 
 const RIPPLE_BRAND = { strength: 9, size: 90, duration: 600 };
 const RIPPLE_TOGGLE = { strength: 8, size: 80, duration: 550 };
 
-export function Topbar() {
+export function Topbar({ studies }: { studies: CaseStudy[] }) {
   const headerRef = useRef<HTMLElement>(null);
   const brandRef = useRef<HTMLAnchorElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -158,6 +162,18 @@ export function Topbar() {
       ?.focus();
   };
 
+  // Open on request from elsewhere on the page (OpenMenuButton). The ripple
+  // radiates from the requesting control's click point.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const { x, y } = (e as CustomEvent<MenuOpenDetail>).detail;
+      menuOriginRef.current = { x, y };
+      setIsOpen(true);
+    };
+    window.addEventListener(MENU_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(MENU_OPEN_EVENT, onOpen);
+  }, []);
+
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -250,7 +266,12 @@ export function Topbar() {
         </button>
       </header>
 
-      <MenuOverlay isOpen={isOpen} onClose={close} originRef={menuOriginRef} />
+      <MenuOverlay
+        isOpen={isOpen}
+        onClose={close}
+        originRef={menuOriginRef}
+        studies={studies}
+      />
     </>
   );
 }
