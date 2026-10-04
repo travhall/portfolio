@@ -253,10 +253,14 @@ export function MenuOverlay({ isOpen, onClose, originRef, studies }: Props) {
 
   // ── Focus management ────────────────────────────────────────────────────
   //
-  // On open: move focus to the first visible control (the active study's
-  // "View Case Study") and trap Tab/Shift+Tab within the overlay's visible
-  // focusable elements — the filmstrip panel keeps every study's info in
-  // the DOM, visibility:hidden, so those are filtered out. The Topbar's
+  // On open: move focus to the filmstrip card the strip opens parked on —
+  // the current page's study, else the first card. Not "first focusable":
+  // the panel's button is still hidden here (its reveal starts after a
+  // delay), so that would land on card 0, and a card's focus scrolls the
+  // strip to it — un-parking it from the current study. Then trap
+  // Tab/Shift+Tab within the overlay's visible focusable elements — the
+  // filmstrip panel keeps every study's info in the DOM, visibility:hidden,
+  // so those are filtered out. The Topbar's
   // toggle button handles closing (click or Escape) and isn't part of this
   // trap, keeping a single, predictable close path.
 
@@ -274,7 +278,11 @@ export function MenuOverlay({ isOpen, onClose, originRef, studies }: Props) {
         el.checkVisibility({ visibilityProperty: true, opacityProperty: false }),
       );
 
-    getFocusable()[0]?.focus({ preventScroll: true });
+    const startCard =
+      overlay.querySelector<HTMLElement>(
+        '.menu-film__card[aria-current="page"]',
+      ) ?? overlay.querySelector<HTMLElement>(".menu-film__card");
+    (startCard ?? getFocusable()[0])?.focus({ preventScroll: true });
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Tab") return;

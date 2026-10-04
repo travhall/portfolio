@@ -100,6 +100,12 @@ const isModified = (e: MouseEvent) =>
 
 gsap.registerPlugin(SplitText);
 
+// Focus stands in for hover only when it's keyboard focus. The menu itself
+// focuses the active study's button on open (MenuOverlay's focus
+// management) — without this check that programmatic focus would switch on
+// the image's hover wave every time the menu opened, for every input type.
+const isKeyboardFocus = (el: Element) => el.matches(":focus-visible");
+
 // ── Panel text transitions (FeatureWipe's reveal language) ──────────────────
 // Everything is queried at call time — the headline's .char-inner spans are
 // rebuilt whenever the split is redone (fonts ready, panel resize).
@@ -658,7 +664,11 @@ export function MenuFilmstrip({
                     onClick={(e) => exit(i, e)}
                     onMouseEnter={() => glsRef.current[i]?.setHover(true)}
                     onMouseLeave={() => glsRef.current[i]?.setHover(false)}
-                    onFocus={() => glsRef.current[i]?.setHover(true)}
+                    onFocus={(e) => {
+                      if (isKeyboardFocus(e.currentTarget)) {
+                        glsRef.current[i]?.setHover(true);
+                      }
+                    }}
                     onBlur={() => glsRef.current[i]?.setHover(false)}
                   >
                     {buttonText}
@@ -726,9 +736,11 @@ export function MenuFilmstrip({
                     aria-label={s.headline}
                     aria-current={s.slug === currentSlug ? "page" : undefined}
                     draggable={false}
-                    onFocus={() => {
+                    onFocus={(e) => {
                       scrollToIndex(i);
-                      glsRef.current[i]?.setHover(true);
+                      if (isKeyboardFocus(e.currentTarget)) {
+                        glsRef.current[i]?.setHover(true);
+                      }
                     }}
                     onBlur={() => glsRef.current[i]?.setHover(false)}
                     onMouseEnter={() => glsRef.current[i]?.setHover(true)}
