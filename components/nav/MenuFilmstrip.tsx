@@ -26,8 +26,19 @@
  * in, the hover wave, and the wipe + burst exit on click — all mirroring
  * CaseStudyCard.tsx / FeatureWipe.tsx.
  *
- * Click — the shared exit: the panel's text slides/fades out, every card
- * clip-wipes closed with an aberration burst, then navigates.
+ * Panel text — FeatureWipe's text language, end to end: the eyebrow slides
+ * in from the left, the headline's characters cascade up out of per-line
+ * clip masks (SplitText, same .line-mask/.char-inner as everywhere else),
+ * and the tagline + button rise in. Changing the active card plays the
+ * outgoing study's reveal in reverse while the incoming one plays forward;
+ * opening the menu plays the active study's reveal once. The button also
+ * borrows FeatureWipe's per-project label (buttonText) and colors
+ * (--cs-button-*), and hovering/focusing it runs the image's hover wave
+ * from the edge nearest the text.
+ *
+ * Click — FeatureWipe's page exit: the text reveal reversed at its exit
+ * timings, every card clip-wiping closed with an aberration burst, then
+ * navigation.
  *
  * Steady height — the info panel renders every study's details stacked in
  * one grid cell, only the active one visible, so the panel is always as tall
@@ -48,7 +59,9 @@ import {
   type MouseEvent,
 } from "react";
 import { gsap } from "gsap";
+import { SplitText } from "gsap/SplitText";
 import type { CaseStudy } from "@/lib/case-studies";
+import { resolveThemeVars } from "@/lib/case-study-theme";
 import { Button } from "@/components/ui/Button";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { MediaGL } from "@/lib/media-gl";
@@ -83,6 +96,107 @@ const GL_DISPOSE_DELAY_MS = 800;
 const isModified = (e: MouseEvent) =>
   e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
 
+gsap.registerPlugin(SplitText);
+
+// ── Panel text transitions (FeatureWipe's reveal language) ──────────────────
+// Everything is queried at call time — the headline's .char-inner spans are
+// rebuilt whenever the split is redone (fonts ready, panel resize).
+
+const infoParts = (info: HTMLElement) => ({
+  eyebrow: info.querySelector<HTMLElement>(".eyebrow-inner"),
+  title: info.querySelector<HTMLElement>(".menu-film__title"),
+  chars: info.querySelectorAll<HTMLElement>(".char-inner"),
+  rise: info.querySelectorAll<HTMLElement>(
+    ".menu-film__tagline, .menu-film__cta",
+  ),
+});
+
+/** Jump an info block straight to shown/hidden — no animation. */
+function setInfoShown(info: HTMLElement, shown: boolean) {
+  const { eyebrow, title, chars, rise } = infoParts(info);
+  gsap.set(info, { visibility: shown ? "visible" : "hidden" });
+  if (eyebrow)
+    gsap.set(eyebrow, { opacity: shown ? 1 : 0, x: shown ? 0 : -14 });
+  if (chars.length) gsap.set(chars, { yPercent: shown ? 0 : 105 });
+  else if (title) gsap.set(title, { opacity: shown ? 1 : 0 });
+  if (rise.length)
+    gsap.set(rise, { opacity: shown ? 1 : 0, y: shown ? 0 : 20 });
+}
+
+/** FeatureWipe's entrance: eyebrow slides in from the left, headline chars
+ *  cascade up from their clip masks, tagline + button rise. */
+function revealInfoIn(info: HTMLElement, delay = 0) {
+  const { eyebrow, title, chars, rise } = infoParts(info);
+  const tl = gsap.timeline({ delay, defaults: { ease: "power2.out" } });
+  tl.set(info, { visibility: "visible" }, 0);
+  if (eyebrow) {
+    tl.fromTo(
+      eyebrow,
+      { opacity: 0, x: -14 },
+      { opacity: 1, x: 0, duration: 0.5 },
+      0,
+    );
+  }
+  if (chars.length) {
+    tl.fromTo(
+      chars,
+      { yPercent: 105 },
+      {
+        yPercent: 0,
+        ease: "power3.out",
+        duration: 0.75,
+        stagger: { amount: 0.35 },
+      },
+      0,
+    );
+  } else if (title) {
+    tl.fromTo(title, { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0);
+  }
+  if (rise.length) {
+    tl.fromTo(
+      rise,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
+      0.15,
+    );
+  }
+  return tl;
+}
+
+/** FeatureWipe's exit — the entrance reversed: chars fall back into the
+ *  mask from the end, eyebrow slides back out left, the rest drops away.
+ *  `pace` scales it: 1 for the page exit (FeatureWipe's runExit timings),
+ *  quicker for a card-to-card swap. */
+function revealInfoOut(info: HTMLElement, pace = 1) {
+  const { eyebrow, title, chars, rise } = infoParts(info);
+  const tl = gsap.timeline({ defaults: { ease: "power2.in" } });
+  if (chars.length) {
+    tl.to(
+      chars,
+      {
+        yPercent: 105,
+        duration: 0.45 * pace,
+        stagger: { amount: 0.2 * pace, from: "end" },
+      },
+      0,
+    );
+  } else if (title) {
+    tl.to(title, { opacity: 0, duration: 0.35 * pace }, 0);
+  }
+  if (eyebrow) tl.to(eyebrow, { opacity: 0, x: -14, duration: 0.35 * pace }, 0);
+  if (rise.length) tl.to(rise, { opacity: 0, y: 20, duration: 0.4 * pace }, 0);
+  tl.set(info, { visibility: "hidden" });
+  return tl;
+}
+
+// Card-to-card swaps run the exit quicker than a page exit, so the incoming
+// study isn't waiting on the outgoing one while the strip is moving.
+const SWAP_OUT_PACE = 0.6;
+const SWAP_IN_DELAY = 0.12;
+// Open: the active study's reveal lands as the overlay settles and the
+// cards wipe in (MenuOverlay's open timeline).
+const OPEN_IN_DELAY = 0.35;
+
 export function MenuFilmstrip({
   studies,
   isOpen,
@@ -96,6 +210,11 @@ export function MenuFilmstrip({
   const canvasesRef = useRef<(HTMLCanvasElement | null)[]>([]);
   const glsRef = useRef<(MediaGL | null)[]>([]);
   const exitTlRef = useRef<gsap.core.Timeline | null>(null);
+  const infoRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const infoTlsRef = useRef<(gsap.core.Timeline | null)[]>([]);
+  // Index of the study whose info is currently shown (or animating in).
+  const shownRef = useRef<number | null>(null);
+  const isOpenRef = useRef(isOpen);
   // The previous open's deferred MediaGL teardown, if it hasn't run yet.
   const pendingDisposeRef = useRef<(() => void) | null>(null);
   const markersRef = useRef<HTMLSpanElement[]>([]);
@@ -164,23 +283,114 @@ export function MenuFilmstrip({
   // in; the panel text is reset here), and cancels one still in flight if
   // the menu closes mid-exit (e.g. Escape) — so that click never navigates.
   useLayoutEffect(() => {
+    isOpenRef.current = isOpen;
     exitTlRef.current?.kill();
     exitTlRef.current = null;
     if (!isOpen) return;
-    const infoChildren = panelRef.current?.querySelectorAll(
-      ".menu-film__info > *",
+    const idx = Math.max(
+      0,
+      studies.findIndex((s) => s.slug === currentSlug),
     );
-    if (infoChildren?.length) {
-      gsap.set(infoChildren, { clearProps: "opacity,transform" });
+
+    // MenuOverlay's close timeline leaves the panel faded out — reset it,
+    // then show only this study's info, playing its reveal.
+    gsap.set(panelRef.current, { clearProps: "opacity,transform" });
+    infoTlsRef.current.forEach((tl) => tl?.kill());
+    infoRefs.current.forEach((info, i) => {
+      if (info) setInfoShown(info, false);
+      infoTlsRef.current[i] = null;
+    });
+    shownRef.current = idx;
+    const info = infoRefs.current[idx];
+    if (info) {
+      if (prefersReducedMotion()) setInfoShown(info, true);
+      else infoTlsRef.current[idx] = revealInfoIn(info, OPEN_IN_DELAY);
     }
-    scrollToIndex(
-      Math.max(
-        0,
-        studies.findIndex((s) => s.slug === currentSlug),
-      ),
-      true,
-    );
+
+    scrollToIndex(idx, true);
   }, [isOpen, currentSlug, studies, scrollToIndex]);
+
+  // ── Panel text: swap reveals as the active card changes ────────────────
+  useEffect(() => {
+    const prev = shownRef.current;
+    if (prev === active) return;
+    shownRef.current = active;
+    const animate =
+      isOpenRef.current && !prefersReducedMotion() && !exitTlRef.current;
+
+    const swap = (i: number, show: boolean) => {
+      const info = infoRefs.current[i];
+      if (!info) return;
+      infoTlsRef.current[i]?.kill();
+      infoTlsRef.current[i] = null;
+      if (!animate) {
+        setInfoShown(info, show);
+        return;
+      }
+      infoTlsRef.current[i] = show
+        ? revealInfoIn(info, SWAP_IN_DELAY)
+        : revealInfoOut(info, SWAP_OUT_PACE);
+    };
+    if (prev !== null) swap(prev, false);
+    swap(active, true);
+  }, [active]);
+
+  // ── Headline splits (lines + chars) for the reveal ─────────────────────
+  // Split once fonts are ready (so line breaks match final metrics), and
+  // again whenever the panel's width changes (line masks don't re-wrap on
+  // their own). Each re-split snaps every block to its resting state.
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    let splits: SplitText[] = [];
+    let cancelled = false;
+    let lastWidth = panel.offsetWidth;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const split = () => {
+      splits.forEach((sp) => sp.revert());
+      splits = [];
+      infoRefs.current.forEach((info, i) => {
+        if (!info) return;
+        const title = info.querySelector<HTMLElement>(".menu-film__title");
+        if (title) {
+          splits.push(
+            new SplitText(title, {
+              type: "lines,chars",
+              linesClass: "line-mask",
+              charsClass: "char-inner",
+            }),
+          );
+        }
+        // Only touch blocks the menu has already taken over (inline
+        // visibility) — before the first open, CSS owns the initial state.
+        if (info.style.visibility) {
+          infoTlsRef.current[i]?.kill();
+          infoTlsRef.current[i] = null;
+          setInfoShown(info, i === shownRef.current);
+        }
+      });
+    };
+
+    document.fonts.ready.then(() => {
+      if (!cancelled) split();
+    });
+    const ro = new ResizeObserver(() => {
+      const w = panel.offsetWidth;
+      if (w === lastWidth) return;
+      lastWidth = w;
+      clearTimeout(timer);
+      timer = setTimeout(split, 150);
+    });
+    ro.observe(panel);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      ro.disconnect();
+      splits.forEach((sp) => sp.revert());
+    };
+  }, []);
 
   // ── MediaGL: upgrade card images while the menu is open ────────────────
   useEffect(() => {
@@ -213,8 +423,11 @@ export function MenuFilmstrip({
           });
         },
       });
-      // Hover wave radiates from the bottom edge, same as CaseStudyCard.
-      gl.setOrigin(0.5, 1);
+      // Hover wave radiates from the image edge nearest the panel text, as
+      // in FeatureWipe — left edge on desktop (panel beside the strip),
+      // bottom edge on mobile (panel below it).
+      if (window.matchMedia("(max-width: 899px)").matches) gl.setOrigin(0.5, 1);
+      else gl.setOrigin(0, 0.5);
       return gl;
     });
     glsRef.current = gls;
@@ -322,8 +535,8 @@ export function MenuFilmstrip({
   }, [scrollToIndex]);
 
   // ── Click: the shared card exit, then navigate ─────────────────────────
-  // Mirrors CaseStudyCard.tsx's buildExitTimeline: text out, image
-  // clip-wipes closed while its aberration ramps from crisp to max.
+  // Mirrors FeatureWipe.tsx's runExit: the text reveal reversed, every
+  // image clip-wiping closed while its aberration ramps from crisp to max.
   const exit = (i: number, e: MouseEvent<HTMLElement>) => {
     if (isModified(e)) return;
     e.preventDefault();
@@ -345,22 +558,16 @@ export function MenuFilmstrip({
     });
     exitTlRef.current = tl;
 
-    const info = panelRef.current?.querySelector(".menu-film__info.is-active");
+    const shown = shownRef.current;
+    const info = shown !== null ? infoRefs.current[shown] : null;
     if (info) {
-      tl.to(
-        info.children,
-        { opacity: 0, x: -14, duration: 0.35, stagger: 0.03 },
-        0,
-      );
+      infoTlsRef.current[shown!]?.kill();
+      tl.add(revealInfoOut(info), 0);
     }
-    // Clicked card first, the rest following outward from it.
+    // Every image wipes away together, as in FeatureWipe's runExit.
     tl.to(
       cardsRef.current,
-      {
-        clipPath: HIDDEN_CLIP,
-        duration: 0.6,
-        stagger: { each: 0.04, from: i },
-      },
+      { clipPath: HIDDEN_CLIP, duration: 0.6, ease: "power2.inOut" },
       0,
     );
     const burst = { vel: 0 };
@@ -386,41 +593,63 @@ export function MenuFilmstrip({
           the tab order and a11y tree; polite live region announces the
           change as the strip scrolls. */}
       <div ref={panelRef} className="menu-film__panel" aria-live="polite">
-        {studies.map((study, i) => (
-          <div
-            key={study.slug}
-            className={`menu-film__info${i === active ? " is-active" : ""}`}
-            aria-hidden={i !== active}
-          >
-            <p className="type-eyebrow text-ink-muted menu-film__eyebrow">
-              {study.eyebrow}
-            </p>
-            <h2 className="type-h3 text-ink menu-film__title">
-              {study.headline}
-            </h2>
-            {study.tagline && (
-              <p className="type-body text-ink-muted menu-film__tagline">
-                {study.tagline}
+        {studies.map((study, i) => {
+          const themeVars = resolveThemeVars(study.theme);
+          const buttonText = study.buttonText ?? "View Case Study";
+          return (
+            <div
+              key={study.slug}
+              ref={(el) => {
+                infoRefs.current[i] = el;
+              }}
+              className={`menu-film__info${i === active ? " is-active" : ""}${themeVars ? " menu-film__info--themed" : ""}`}
+              aria-hidden={i !== active}
+              style={
+                themeVars
+                  ? ({
+                      "--cs-button-bg": themeVars["--cs-button-bg"],
+                      "--cs-button-fg": themeVars["--cs-button-fg"],
+                      "--cs-button-border": themeVars["--cs-button-border"],
+                    } as CSSProperties)
+                  : undefined
+              }
+            >
+              <p className="type-eyebrow text-ink-muted menu-film__eyebrow">
+                <span className="eyebrow-inner">{study.eyebrow}</span>
               </p>
-            )}
-            {study.comingSoon ? (
-              <p className="type-small text-ink-faint menu-film__cta">
-                Coming soon
-              </p>
-            ) : (
-              <Button
-                size="sm"
-                className="menu-film__cta"
-                href={`/work/${study.slug}`}
-                icon="arrow-right"
-                iconPos="right"
-                onClick={(e) => exit(i, e)}
-              >
-                View Case Study
-              </Button>
-            )}
-          </div>
-        ))}
+              <h2 className="type-h3 text-ink menu-film__title">
+                {study.headline}
+              </h2>
+              {study.tagline && (
+                <p className="type-body text-ink-muted menu-film__tagline">
+                  {study.tagline}
+                </p>
+              )}
+              {study.comingSoon ? (
+                <p className="type-small text-ink-faint menu-film__cta">
+                  Coming soon
+                </p>
+              ) : (
+                <div className="menu-film__cta">
+                  <Button
+                    size="sm"
+                    href={`/work/${study.slug}`}
+                    icon="arrow-right"
+                    iconPos="right"
+                    aria-label={`${buttonText} — ${study.headline}`}
+                    onClick={(e) => exit(i, e)}
+                    onMouseEnter={() => glsRef.current[i]?.setHover(true)}
+                    onMouseLeave={() => glsRef.current[i]?.setHover(false)}
+                    onFocus={() => glsRef.current[i]?.setHover(true)}
+                    onBlur={() => glsRef.current[i]?.setHover(false)}
+                  >
+                    {buttonText}
+                  </Button>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div

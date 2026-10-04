@@ -1815,16 +1815,12 @@ html[data-motion="off"] .menu-settings__panel {
   visibility: hidden;
   opacity: 0;
 }
+/* Initial state only — once the menu first opens, MenuFilmstrip drives
+   each block's visibility inline (so an outgoing study can finish its
+   reverse reveal before hiding). */
 .menu-film__info.is-active {
   visibility: visible;
   opacity: 1;
-  animation: menu-film-info 0.45s var(--ease) both;
-}
-@keyframes menu-film-info {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
 }
 /* Typography — a lighter, tighter headline in the site's heading voice
    (closer to h1/h2's weight than h3's medium) over a full body-size
@@ -1832,6 +1828,11 @@ html[data-motion="off"] .menu-settings__panel {
    then opens up before the tagline and again before the action. */
 .menu-film__eyebrow {
   margin: 0 0 10px;
+  /* Clips the eyebrow's slide-in, as FeatureWipe's eyebrow does. */
+  overflow: hidden;
+}
+.menu-film__eyebrow .eyebrow-inner {
+  display: inline-block;
 }
 .menu-film__title {
   margin: 0;
@@ -1846,6 +1847,14 @@ html[data-motion="off"] .menu-settings__panel {
 }
 .menu-film__cta {
   margin-top: 28px;
+}
+/* Project's own button colors — same mechanism and reasoning as
+   .fw-row--themed .fw-button .btn--solid (FeatureWipe). */
+.menu-film__info--themed .menu-film__cta .btn--solid,
+.menu-film__info--themed .menu-film__cta .btn--solid:hover {
+  background: var(--cs-button-bg);
+  color: var(--cs-button-fg);
+  border-color: var(--cs-button-border);
 }
 
 .menu-film__scroller {
@@ -1958,15 +1967,9 @@ html[data-motion="off"] .menu-settings__panel {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .menu-film__info.is-active {
-    animation: none;
-  }
   .menu-film {
     --film-dur: 0s;
   }
-}
-html[data-motion="off"] .menu-film__info.is-active {
-  animation: none;
 }
 html[data-motion="off"] .menu-film {
   --film-dur: 0s;

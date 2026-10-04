@@ -123,9 +123,7 @@ export function MenuOverlay({ isOpen, onClose, originRef, studies }: Props) {
       // Rail's top hairline draws in left→right; its cells fade up after.
       gsap.set(railRef.current, { "--rail-line": 0 });
       if (railCells?.length) gsap.set(railCells, { opacity: 0, y: 8 });
-      const panel = filmRef.current?.querySelector(".menu-film__panel");
       const cards = filmRef.current?.querySelectorAll(".menu-film__card");
-      if (panel) gsap.set(panel, { opacity: 0, y: 8 });
       if (cards?.length) {
         gsap.set(cards, { clipPath: "inset(0% 0% 0% 100%)" });
       }
@@ -147,8 +145,9 @@ export function MenuOverlay({ isOpen, onClose, originRef, studies }: Props) {
         "<",
       );
 
-      // Filmstrip cards wipe in left→right (the same clip-path reveal the
-      // case-study cards use), the info panel fading up alongside.
+      // Filmstrip cards wipe in (the same clip-path reveal the case-study
+      // cards use). The info panel's text plays its own reveal — see
+      // MenuFilmstrip's open effect.
       if (cards?.length) {
         tl.to(
           cards,
@@ -159,13 +158,6 @@ export function MenuOverlay({ isOpen, onClose, originRef, studies }: Props) {
             stagger: reduced ? 0 : 0.06,
           },
           reduced ? "<" : "-=0.45",
-        );
-      }
-      if (panel) {
-        tl.to(
-          panel,
-          { opacity: 1, y: 0, duration: d(0.5), ease: "power3.out" },
-          "<",
         );
       }
 
