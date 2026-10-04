@@ -1,4 +1,5 @@
 {
+  "parent": "wylie-dog",
   "side": "right",
   "image": "/images/photo-wyliedog.jpg",
   "imageAlt": "A German shepherd wearing an orange bandana, mouth open and panting, in a grassy park.",

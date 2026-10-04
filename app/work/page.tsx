@@ -1,8 +1,9 @@
-import { getCaseStudies } from "@/lib/case-studies";
+import { getCaseStudies, getTopLevelCaseStudies } from "@/lib/case-studies";
 import { createMetadata } from "@/lib/metadata";
 import { CaseStudyCardGrid } from "@/components/features/CaseStudyCardGrid";
 
-// Every case study (featured and not), using the same CaseStudyCardGrid
+// Every top-level case study (featured and not — sub-stories live on their
+// parent's page, not here), using the same CaseStudyCardGrid
 // as the case-study page's "Related Projects" nav (CaseStudyNav.tsx) —
 // the full archive's layout beyond this grid isn't settled yet, so this
 // is still a scaffold in that sense, but the grid itself is the real,
@@ -14,7 +15,7 @@ export const metadata = createMetadata({
 });
 
 export default async function WorkPage() {
-  const caseStudies = await getCaseStudies();
+  const caseStudies = getTopLevelCaseStudies(await getCaseStudies());
   return (
     <main id="main-content">
       <h1 className="sr-only">Work</h1>

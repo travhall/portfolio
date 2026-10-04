@@ -931,6 +931,13 @@ html[data-motion="off"] .cs-hero__meta {
   padding-top: clamp(3rem, 8vh, 5rem);
   border-top: 1px solid var(--cs-border, var(--line));
 }
+/* A project's companion stories are often just one or two cards. .case-grid's
+   auto-fit would stretch a lone card across the whole row; auto-fill keeps
+   every card at the same column width the full "More Work" row uses, with the
+   unused columns left empty. */
+.case-nav--companions .case-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
 .case-nav__header {
   display: flex;
   align-items: center;

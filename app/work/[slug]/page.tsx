@@ -6,7 +6,11 @@ import { CaseStudyMedia } from "@/components/features/CaseStudyMedia";
 import { CaseStudyNav } from "@/components/features/CaseStudyNav";
 import { CaseStudyBody } from "@/components/features/CaseStudyBody";
 import { CaseStudyBackHome } from "@/components/features/CaseStudyBackHome";
-import { getCaseStudies, getRelatedCaseStudies } from "@/lib/case-studies";
+import {
+  getCaseStudies,
+  getCompanionStudies,
+  getRelatedCaseStudies,
+} from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
 import { createMetadata } from "@/lib/metadata";
 
@@ -39,6 +43,17 @@ export default async function CaseStudyPage({ params }: Props) {
   const study = caseStudies.find((s) => s.slug === slug && !s.comingSoon);
   if (!study) notFound();
   const related = getRelatedCaseStudies(caseStudies, study.slug);
+  // A project's own companion stories stay inside the project: on a parent
+  // page they're listed below it; on a sub-story page it's the parent plus
+  // sibling stories. (A sub-story isn't in the top-level pool, so `related`
+  // is already empty for it.)
+  const companions = getCompanionStudies(caseStudies, study.slug);
+  const parent = study.parent
+    ? caseStudies.find((s) => s.slug === study.parent)
+    : undefined;
+  const companionHeading = parent
+    ? `More from ${parent.headline}`
+    : "Companion Stories";
 
   const themeVars = resolveThemeVars(study.theme);
 
@@ -85,6 +100,11 @@ export default async function CaseStudyPage({ params }: Props) {
         ))}
       </CaseStudyBody>
 
+      <CaseStudyNav
+        related={companions}
+        heading={companionHeading}
+        showAllLink={false}
+      />
       <CaseStudyNav related={related} />
 
       <div className="cs-container cs-back-home">

@@ -153,6 +153,12 @@ export interface CaseStudyContent {
   /** Home page row / related-nav sort position, lower first. Omit to sort
    *  after every explicitly ordered entry. */
   order?: number;
+  /** Slug of the case study this one is a companion story to. A study with a
+   *  parent keeps its own page (/work/<slug>) but is a sub-story, not a
+   *  top-level project: it is left out of /work and the related-projects
+   *  pool, and is surfaced instead on its parent's page ("Companion
+   *  stories") and alongside its siblings. */
+  parent?: string;
 }
 
 /** The merged public shape every consumer (FeatureWipe, CaseStudyCard,
@@ -196,7 +202,9 @@ export function getRelatedCaseStudies(
   currentSlug: string,
   count = 2,
 ): CaseStudy[] {
-  const linkable = allStudies.filter((s) => !s.comingSoon);
+  // Sub-stories (anything with a parent) are not top-level projects, so they
+  // are never offered as a "related project" — see getCompanionStudies.
+  const linkable = allStudies.filter((s) => !s.comingSoon && !s.parent);
   const index = linkable.findIndex((s) => s.slug === currentSlug);
   if (index === -1) return [];
 
@@ -220,4 +228,33 @@ export function getRelatedCaseStudies(
   }
 
   return related;
+}
+
+/** Top-level projects only — what /work lists. A study with a `parent` is a
+ *  sub-story and is reached from its parent's page instead. */
+export function getTopLevelCaseStudies(allStudies: CaseStudy[]): CaseStudy[] {
+  return allStudies.filter((s) => !s.parent);
+}
+
+/** The published sub-stories that belong with `slug`: if `slug` is a
+ *  top-level project, its children ("Companion stories"); if `slug` is
+ *  itself a sub-story, its parent followed by its siblings, so a reader
+ *  can climb back up or move across. comingSoon entries are excluded (no
+ *  page to link to). Empty when `slug` has no relatives. */
+export function getCompanionStudies(
+  allStudies: CaseStudy[],
+  slug: string,
+): CaseStudy[] {
+  const published = allStudies.filter((s) => !s.comingSoon);
+  const current = allStudies.find((s) => s.slug === slug);
+  if (!current) return [];
+
+  if (current.parent) {
+    const parent = published.find((s) => s.slug === current.parent);
+    const siblings = published.filter(
+      (s) => s.parent === current.parent && s.slug !== slug,
+    );
+    return parent ? [parent, ...siblings] : siblings;
+  }
+  return published.filter((s) => s.parent === slug);
 }

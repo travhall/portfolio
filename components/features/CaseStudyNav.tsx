@@ -16,17 +16,35 @@ import type { CaseStudy } from "@/lib/case-studies";
 import { CaseStudyCardGrid } from "./CaseStudyCardGrid";
 import { Button } from "@/components/ui/Button";
 
-export function CaseStudyNav({ related }: { related: CaseStudy[] }) {
+// `heading` / `showAllLink` let the same nav serve two jobs: the default
+// "More Work" row of other top-level projects (with a link out to /work), and
+// a project's own companion stories — "Companion Stories" on a parent page,
+// "More from <project>" on a sub-story — which stay inside the project and so
+// omit the /work link.
+export function CaseStudyNav({
+  related,
+  heading = "More Work",
+  showAllLink = true,
+}: {
+  related: CaseStudy[];
+  heading?: string;
+  showAllLink?: boolean;
+}) {
   if (related.length === 0) return null;
 
   return (
     <div className="cs-container">
-      <nav className="case-nav" aria-label="More case studies">
+      <nav
+        className={`case-nav${showAllLink ? "" : " case-nav--companions"}`}
+        aria-label={heading}
+      >
         <div className="case-nav__header">
-          <h2 className="type-eyebrow text-ink-muted">More Work</h2>
-          <Button variant="link" icon="arrow-up-right" href="/work">
-            All Projects
-          </Button>
+          <h2 className="type-eyebrow text-ink-muted">{heading}</h2>
+          {showAllLink && (
+            <Button variant="link" icon="arrow-up-right" href="/work">
+              All Projects
+            </Button>
+          )}
         </div>
         <CaseStudyCardGrid studies={related} />
       </nav>

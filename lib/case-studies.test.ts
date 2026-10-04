@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getRelatedCaseStudies, type CaseStudy } from "./case-studies";
+import {
+  getCompanionStudies,
+  getRelatedCaseStudies,
+  getTopLevelCaseStudies,
+  type CaseStudy,
+} from "./case-studies";
 
-function makeStudy(slug: string, comingSoon = false): CaseStudy {
+function makeStudy(slug: string, comingSoon = false, parent?: string): CaseStudy {
   return {
     slug,
     eyebrow: "",
@@ -10,6 +15,7 @@ function makeStudy(slug: string, comingSoon = false): CaseStudy {
     image: "",
     featured: false,
     comingSoon,
+    parent,
   };
 }
 
@@ -70,5 +76,39 @@ describe("getRelatedCaseStudies", () => {
     const five = [...studies, makeStudy("e")];
     const result = getRelatedCaseStudies(five, "a", 1);
     expect(result.length).toBe(2); // 1 preceding + 1 subsequent
+  });
+
+  it("never offers a sub-story as a related project", () => {
+    const withSub = [...studies, makeStudy("a-sub", false, "a")];
+    for (const slug of ["a", "b", "c", "d"]) {
+      expect(getRelatedCaseStudies(withSub, slug, 2).map((s) => s.slug)).not.toContain("a-sub");
+    }
+  });
+});
+
+describe("sub-stories (parent)", () => {
+  const all = [
+    makeStudy("a"),
+    makeStudy("b"),
+    makeStudy("a-one", false, "a"),
+    makeStudy("a-two", false, "a"),
+    makeStudy("a-soon", true, "a"),
+  ];
+
+  it("getTopLevelCaseStudies drops anything with a parent", () => {
+    expect(getTopLevelCaseStudies(all).map((s) => s.slug)).toEqual(["a", "b"]);
+  });
+
+  it("getCompanionStudies returns a top-level study's published children", () => {
+    expect(getCompanionStudies(all, "a").map((s) => s.slug)).toEqual(["a-one", "a-two"]);
+  });
+
+  it("getCompanionStudies returns the parent then siblings for a sub-story", () => {
+    expect(getCompanionStudies(all, "a-one").map((s) => s.slug)).toEqual(["a", "a-two"]);
+  });
+
+  it("getCompanionStudies is empty for a study with no relatives or an unknown slug", () => {
+    expect(getCompanionStudies(all, "b")).toEqual([]);
+    expect(getCompanionStudies(all, "nope")).toEqual([]);
   });
 });
