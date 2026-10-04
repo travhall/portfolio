@@ -40,6 +40,7 @@ import {
 } from "@/lib/view-transition";
 import type { CaseStudy } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
+import { imageFor } from "@/lib/case-study-image";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -49,9 +50,6 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 // at rest.
 const IMG_INTENSITY = 1.8;
 
-function imageFor(f: CaseStudy, theme: "light" | "dark") {
-  return theme === "dark" && f.imageDark ? f.imageDark : f.image;
-}
 
 interface Props {
   features: CaseStudy[];

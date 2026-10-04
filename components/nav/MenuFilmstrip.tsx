@@ -62,6 +62,8 @@ import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import type { CaseStudy } from "@/lib/case-studies";
 import { resolveThemeVars } from "@/lib/case-study-theme";
+import { imageFor } from "@/lib/case-study-image";
+import { resolveTheme, useTheme } from "@/lib/use-theme";
 import { Button } from "@/components/ui/Button";
 import { prefersReducedMotion } from "@/components/ui/ripple";
 import { MediaGL } from "@/lib/media-gl";
@@ -215,6 +217,13 @@ export function MenuFilmstrip({
   // Index of the study whose info is currently shown (or animating in).
   const shownRef = useRef<number | null>(null);
   const isOpenRef = useRef(isOpen);
+  // False until the GL effect's first run of each open — later runs (a
+  // theme change swapping a texture) skip the entrance burst.
+  const glOpenedRef = useRef(false);
+  const theme = useTheme();
+  // Changes only when a texture actually differs between themes, so toggling
+  // theme in the menu never rebuilds GL for studies without a dark photo.
+  const srcKey = studies.map((s) => imageFor(s, theme)).join("|");
   // The previous open's deferred MediaGL teardown, if it hasn't run yet.
   const pendingDisposeRef = useRef<(() => void) | null>(null);
   const markersRef = useRef<HTMLSpanElement[]>([]);
@@ -394,7 +403,12 @@ export function MenuFilmstrip({
 
   // ── MediaGL: upgrade card images while the menu is open ────────────────
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      glOpenedRef.current = false;
+      return;
+    }
+    const burstOnReady = !glOpenedRef.current;
+    glOpenedRef.current = true;
     // Reopened before the last close's teardown ran — run it now, before
     // new instances claim the same canvases (dispose releases the context).
     pendingDisposeRef.current?.();
@@ -404,7 +418,9 @@ export function MenuFilmstrip({
       const canvas = canvases[i];
       if (study.comingSoon || !canvas) return null;
       const gl: MediaGL = new MediaGL(canvas, {
-        src: study.image,
+        // DOM read, not the `theme` closure — see resolveTheme() in
+        // lib/use-theme.ts (srcKey below re-runs this when it changes).
+        src: imageFor(study, resolveTheme()),
         effect: "parallax",
         intensity: IMG_INTENSITY,
         // Only the entrance/exit bursts below drive the aberration — not
@@ -412,6 +428,7 @@ export function MenuFilmstrip({
         externalScroll: true,
         onReady: () => {
           canvas.parentElement?.classList.add("is-gl");
+          if (!burstOnReady) return;
           // Entrance burst — starts at max aberration, eases to crisp,
           // landing alongside MenuOverlay's clip-path wipe-in.
           const burst = { vel: 1 };
@@ -446,7 +463,8 @@ export function MenuFilmstrip({
       const timer = setTimeout(dispose, GL_DISPOSE_DELAY_MS);
       pendingDisposeRef.current = dispose;
     };
-  }, [isOpen, studies]);
+    // srcKey: rebuild when a study's theme-correct photo changes.
+  }, [isOpen, studies, srcKey]);
 
   // ── Vertical wheel anywhere in the menu → one card per gesture ─────────
   useEffect(() => {
@@ -729,9 +747,21 @@ export function MenuFilmstrip({
                       <img
                         src={s.image}
                         alt=""
-                        className="menu-film__img"
+                        className="menu-film__img menu-film__img--light"
                         draggable={false}
                       />
+                      {/* Dark variant swapped in by CSS (not React state),
+                          so the right photo is on the very first paint —
+                          same approach as FeatureWipe's .fw-img--dark. */}
+                      {s.imageDark && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={s.imageDark}
+                          alt=""
+                          className="menu-film__img menu-film__img--dark"
+                          draggable={false}
+                        />
+                      )}
                       <canvas
                         ref={(el) => {
                           canvasesRef.current[i] = el;

@@ -1965,6 +1965,31 @@ html[data-motion="off"] .menu-settings__panel {
 .menu-film__media.is-gl .menu-film__img {
   opacity: 0;
 }
+/* Theme-correct photo — mirrors .fw-img--light/--dark (FeatureWipe). The
+   dark <img> only exists when the study has a dark variant. */
+.menu-film__img--dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  .menu-film__img--light:has(~ .menu-film__img--dark) {
+    display: none;
+  }
+  .menu-film__img--dark {
+    display: block;
+  }
+}
+html[data-theme="dark"] .menu-film__img--light:has(~ .menu-film__img--dark) {
+  display: none;
+}
+html[data-theme="dark"] .menu-film__img--dark {
+  display: block;
+}
+html[data-theme="light"] .menu-film__img--light {
+  display: block;
+}
+html[data-theme="light"] .menu-film__img--dark {
+  display: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .menu-film {
